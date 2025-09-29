@@ -120,8 +120,8 @@ def render_planner():
     if "planner_step" not in st.session_state:
         st.session_state.planner_step = 1
 
-    # QA Drawer at the bottom, out of the way (hidden during Audiencing Step 2)
-    if st.session_state.get("step") == "planner" or st.session_state.get("audiencing_step", 1) != 2:
+    # QA Drawer (hidden unless enabled via sidebar toggle)
+    if st.session_state.get("step") == "planner" and st.session_state.get("show_qa", True):
         with st.expander("View Answers & Flags", expanded=False):
             st.write("**Audience Type:**", care_context.get("audience_type", "Not set"))
             st.write("**People:**", ", ".join(care_context.get("people", [])))
@@ -370,7 +370,6 @@ def render_planner():
                 recent_fall = care_context["derived_flags"].get("recent_fall", False)
                 living_goal = care_context["care_flags"].get("living_goal", "Not important—I’m open to other options")
                 chronic_conditions = care_context["care_flags"].get("chronic_conditions", [])
-                accessibility = care_context["care_flags"].get("accessibility", "I can walk to most of them easily")
 
                 # Initialize mobility_issue with a default
                 mobility_issue = "getting around okay" if not mobility else "struggling with movement"
@@ -411,16 +410,15 @@ def render_planner():
                         st.write(f"{blurb} With your cognitive needs and no regular help, memory care is the safest choice—let’s enhance support with a specialist.")
 
                 # In-Home Care (only if no cognitive/memory risk and viable support)
-                elif (independence in ["I need help with some of these tasks regularly", "I rely on someone else for most daily tasks"] and
-                      caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
+                elif (independence in ["I’m fully independent and handle all tasks on my own", "I occasionally need reminders or light assistance"] and
+                      caregiver in ["Yes, I have someone with me most of the time", "Yes, I have support a few days a week"] and
                       living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"] and
                       cognitive not in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and
-                      "Dementia" not in chronic_conditions and
-                      accessibility in ["I can walk to most of them easily", "I can drive or get a ride with little trouble"]):
+                      "Dementia" not in chronic_conditions):
                     recommendation = "In-Home Care"
                     blurb = random.choice(in_home_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} With {mobility_issue} and limited help, in-home support can work, especially with nearby services.")
+                    st.write(f"{blurb} With {mobility_issue}, in-home support can maintain your independence with existing help.")
 
                 # Assisted Living (only if no cognitive/memory risk and safety concerns)
                 elif (mobility and falls_risk and
