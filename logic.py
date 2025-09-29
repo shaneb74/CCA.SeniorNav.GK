@@ -285,7 +285,28 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 9:
-            st.subheader("Step 9: Home Preference")
+            st.subheader("Step 9: Accessibility")
+            st.write("How accessible are services from your home?")
+            accessibility_options = {
+                "1": "I can walk to most of them easily",
+                "2": "I can drive or get a ride with little trouble",
+                "3": "It’s difficult to get to these places without help",
+                "4": "I have no easy access and need assistance to get anywhere"
+            }
+            accessibility = st.radio("How accessible are services like pharmacies, grocery stores, and doctor’s offices from your home?", [accessibility_options["1"], accessibility_options["2"], accessibility_options["3"], accessibility_options["4"]], key="accessibility_select", index=0)
+            if accessibility:
+                care_context["care_flags"]["accessibility"] = accessibility
+                st.session_state.care_context = care_context
+                st.write(f"Accessibility: {care_context['care_flags']['accessibility']}.")
+            if st.button("Proceed", key="planner_proceed_9"):
+                st.session_state.planner_step = 10
+                st.rerun()
+            if st.button("Go Back", key="planner_back_9"):
+                st.session_state.planner_step = 8
+                st.rerun()
+
+        elif st.session_state.planner_step == 10:
+            st.subheader("Step 10: Home Preference")
             st.write("How important is it for you to stay in your current home?")
             goal_options = {
                 "1": "Not important—I’m open to other options",
@@ -301,8 +322,8 @@ def render_planner():
                 st.session_state.step = "calculator"
                 st.session_state.planner_step = 1
                 st.rerun()
-            if st.button("Go Back", key="planner_back_9"):
-                st.session_state.planner_step = 8
+            if st.button("Go Back", key="planner_back_10"):
+                st.session_state.planner_step = 9
                 st.rerun()
 
 # Dispatcher
