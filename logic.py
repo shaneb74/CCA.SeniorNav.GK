@@ -84,8 +84,8 @@ def render_planner():
         elif st.session_state.planner_step == 3:
             st.subheader("Your Caregiver Support")
             cog = care_context["care_flags"].get("cognitive_function", "")
+            funding = care_context["care_flags"].get("funding_confidence", "")
             if "Occasional lapses" in cog or "Noticeable problems" in cog or "Serious confusion" in cog:
-                funding = care_context["care_flags"].get("funding_confidence", "")
                 if "Not worried—I can afford any care I need" in funding:
                     st.write(f"Great, you’re financially secure. With {cog.lower()}, would 24/7 caregivers at home work?")
                 else:
@@ -335,7 +335,8 @@ def render_planner():
 
             # Cognition
             cog = care_context["care_flags"].get("cognitive_function", "")
-            if "Serious confusion" in cog or "Dementia" in care_context["care_flags"].get("chronic_conditions", []) or "Parkinson's" in care_context["care_flags"].get("chronic_conditions", []):
+            conditions = care_context["care_flags"].get("chronic_conditions", [])
+            if "Serious confusion" in cog or "Dementia" in conditions or "Parkinson's" in conditions:
                 flags.append("severe_cognitive_risk")
             elif "Noticeable problems" in cog:
                 flags.append("moderate_cognitive_decline")
@@ -399,7 +400,9 @@ def render_planner():
 
             # Score Calculation
             score = 0
-            if "severe_cognitive_risk" in flags:
+            if "severe_cognitive_risk" in flags and "adequate_support" in flags:
+                score += 10  # Reduced from 15 with support
+            elif "severe_cognitive_risk" in flags:
                 score += 15
             if "moderate_cognitive_decline" in flags:
                 score += 5
@@ -414,7 +417,7 @@ def render_planner():
             if "limited_support" in flags:
                 score += 4
             if "adequate_support" in flags and "severe_cognitive_risk" in flags:
-                score -= 5  # 24/7 care adjustment
+                score -= 5  # 24/7 care adjustment, applied before threshold
             if "high_risk" in flags:
                 score += 6
             if "moderate_risk" in flags:
