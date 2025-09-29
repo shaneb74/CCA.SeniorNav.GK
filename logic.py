@@ -325,7 +325,6 @@ def render_planner():
         elif st.session_state.planner_step == 9:
             st.subheader("Care Recommendation")
             st.write("Based on your answers, here’s our suggestion.")
-            st.write(f"**Care Recommendation: {recommendation}**")  # Bolded recommendation
             flags = []
             # Financial
             funding = care_context["care_flags"].get("funding_confidence", "")
@@ -417,7 +416,7 @@ def render_planner():
                 score += 7
             if "limited_support" in flags:
                 score += 4
-            if "adequate_support" in flags:  # Apply deduction for any support level
+            if "adequate_support" in flags:  # Apply deduction for any support level, before threshold
                 score -= 5
             if "high_risk" in flags:
                 score += 6
@@ -435,14 +434,13 @@ def render_planner():
                 score += 7
 
             # Recommendation
-            recommendation = "No Care Needed at This Time"
-            message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, it looks like you\'re managing well for now."
             if ("severe_cognitive_risk" in flags and "no_support" in flags) or score >= 25:
                 recommendation = "Memory Care"
                 issues = [f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns', 'dealing with severe memory issues']) if 'severe_cognitive_risk' in flags else ''}",
                           f"{random.choice(['needing daily help with tasks', 'relying on assistance for daily activities']) if 'high_dependence' in flags else ''}",
                           f"{random.choice(['needing a lot of help to get around', 'relying on assistance for mobility']) if 'high_mobility_dependence' in flags else ''}"]
                 issues = [i for i in issues if i]
+                st.write(f"**Care Recommendation: Memory Care**")
                 message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, with {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'significant challenges'}, Memory Care is the safest choice. If you have 24/7 skilled care at home, aging in place could work—let’s explore that."
             elif score >= 15:
                 recommendation = "Assisted Living"
@@ -452,6 +450,7 @@ def render_planner():
                           f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns']) if 'severe_cognitive_risk' in flags else random.choice(['occasional lapses', 'noticeable problems']) if 'moderate_cognitive_decline' in flags else ''}",
                           f"{random.choice(['facing safety risks at home', 'having major safety concerns']) if 'high_safety_concern' in flags else random.choice(['having some safety concerns', 'feeling somewhat unsafe']) if 'moderate_safety_concern' in flags else ''}"]
                 issues = [i for i in issues if i][:3]  # Top 3 issues
+                st.write(f"**Care Recommendation: Assisted Living**")
                 preference = {
                     "Very important—I strongly want to stay home": "Since staying home is important to you, let’s see how we can make that work with extra support.",
                     "Somewhat important—I’d prefer to stay but could move": "You’d prefer to stay home, so let’s explore ways to make that possible.",
@@ -466,12 +465,17 @@ def render_planner():
                           f"{random.choice(['occasional lapses', 'noticeable problems']) if 'moderate_cognitive_decline' in flags else ''}",
                           f"{random.choice(['having some safety concerns', 'feeling somewhat unsafe']) if 'moderate_safety_concern' in flags else ''}"]
                 issues = [i for i in issues if i][:3]  # Top 3 issues
+                st.write(f"**Care Recommendation: In-Home Care with Support**")
                 preference = {
                     "Very important—I strongly want to stay home": "Since staying home is important to you, let’s see how we can make that work with extra support.",
                     "Somewhat important—I’d prefer to stay but could move": "You’d prefer to stay home, so let’s explore ways to make that possible.",
                     "Not important—I’m open to other options": "You’re open to options, so let’s look at assisted living communities that feel like home."
                 }.get(care_context["care_flags"].get("living_goal", ""), "If you’re unsure, let’s talk through the options together.")
                 message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, we see you’re navigating challenges like {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'mild needs'}. In-Home Care with Support would offer the help you need. {preference}"
+            else:
+                recommendation = "No Care Needed at This Time"
+                st.write(f"**Care Recommendation: No Care Needed at This Time**")
+                message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, it looks like you\'re managing well for now."
             st.write(message)
 
             if st.button("Restart", key="planner_restart"):
