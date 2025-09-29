@@ -1,0 +1,12 @@
+{
+  "risk_factors": {
+    "Diabetes": 0.3,
+    "Hypertension": 0.2,
+    "NoFollowUp": 0.5
+  },
+  "services": {
+    "Home Health": {"contact": "homehealth@example.com", "cost": 100},
+    "Transportation": {"contact": "transport@example.com", "cost": 50},
+    "Meal Delivery": {"contact": "meals@example.com", "cost": 75}
+  }
+}
