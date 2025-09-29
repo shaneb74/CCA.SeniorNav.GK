@@ -383,6 +383,9 @@ def render_planner():
                     f"You’re not alone, {care_context['people'][0]}. Memory care fits your cognitive needs—let’s find ways to boost that support.",
                 ]
 
+                # Set default recommendation
+                recommendation = "Memory Care" if cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or "Dementia" in chronic_conditions else "Assisted Living"
+
                 # Memory Care (highest priority if cognitive issues or dementia with no support)
                 if ((cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or
                      "Dementia" in chronic_conditions) and
@@ -422,15 +425,3 @@ def render_planner():
                         st.write(f"{blurb} Since you’re {mobility_issue} and help is sparse, especially in a remote area, this keeps you secure.")
 
                 st.write(f"**Details:** Based on your answers, we suggest {recommendation}.")
-
-# Dispatcher
-STEP_MAP = {
-    "intro": lambda: st.header("Welcome to Senior Navigator"),
-    "audiencing": render_audiencing,
-    "planner": render_planner
-}
-
-def render_step(step: str):
-    """Dispatch to the appropriate step function."""
-    func = STEP_MAP.get(step, lambda: st.error(f"Unknown step: {step}"))
-    func()
