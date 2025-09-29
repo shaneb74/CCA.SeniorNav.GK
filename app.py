@@ -9,9 +9,7 @@ except ImportError as e:
 st.set_page_config(layout="wide")
 
 st.sidebar.title("Navigation")
-if st.sidebar.button("QA View"):
-    st.session_state.step = "qa"
-    st.rerun()
+st.sidebar.checkbox("QA View", value=False, key="show_qa")
 if st.sidebar.button("Guided Care Plan"):
     st.session_state.step = "planner"
     st.rerun()
