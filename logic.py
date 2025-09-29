@@ -5,7 +5,6 @@ if "care_context" not in st.session_state:
     st.session_state.care_context = {
         "audience_type": None,
         "people": [],
-        "funding_confidence": None,
         "care_flags": {},
         "derived_flags": {}
     }
@@ -29,9 +28,13 @@ def render_audiencing():
         audience_type = st.radio("Select planning type:", [audience_options["1"], audience_options["2"], audience_options["3"]], key="audience_type_select", index=0)
         if audience_type:
             care_context["audience_type"] = audience_type
+            care_context["professional_role"] = None  # Reset unless professional
             if audience_type == "Professional planning":
-                professional_sub_options = ["Discharge planner", "Making a referral"]
-                sub_type = st.radio("Professional role:", professional_sub_options, key="professional_sub_type", index=0)
+                professional_sub_options = {
+                    "1": "Discharge planner",
+                    "2": "Making a referral"
+                }
+                sub_type = st.radio("Professional role:", [professional_sub_options["1"], professional_sub_options["2"]], key="professional_sub_type", index=0)
                 care_context["professional_role"] = sub_type
             elif audience_type == "Planning for one person":
                 care_context["people"] = ["Person A"]
@@ -59,29 +62,7 @@ def render_planner():
         st.session_state.planner_step = 1
 
     if st.session_state.planner_step == 1:
-        st.subheader("Step 1: Funding Confidence")
-        funding_options = {
-            "1": "Very confident (self-fund for years)",
-            "2": "Somewhat confident (assets/insurance, but worried)",
-            "3": "Unsure - might need help",
-            "4": "Already on Medicaid"
-        }
-        funding_confidence = st.radio("Can your savings and income cover long-term care for five-plus years?", [funding_options["1"], funding_options["2"], funding_options["3"], funding_options["4"]], key="funding_confidence_select", index=0)
-        if funding_confidence:
-            care_context["funding_confidence"] = funding_confidence
-            st.session_state.care_context = care_context
-            if funding_confidence == "Already on Medicaid":
-                st.write("We can connect you to Medicaid-friendly care options-just tap here.", unsafe_allow_html=True)
-                if st.button("Get Options", key="medicaid_options"):
-                    st.session_state.step = "tools"
-                    st.rerun()
-            st.write(f"Funding confidence: {care_context['funding_confidence']}")
-        if st.button("Next", key="planner_next_1"):
-            st.session_state.planner_step = 2
-            st.rerun()
-
-    elif st.session_state.planner_step == 2:
-        st.subheader("Step 2: Living & Support")
+        st.subheader("Step 1: Living & Support")
         living_options = {"1": "Alone", "2": "With spouse", "3": "With family", "4": "In a facility"}
         living_sit = st.radio("Where do you currently live?", [living_options["1"], living_options["2"], living_options["3"], living_options["4"]], key="living_sit")
         if living_sit:
@@ -95,18 +76,18 @@ def render_planner():
         if support:
             care_context["care_flags"]["support_network_weak"] = support in ["Rarely", "None"]
             st.session_state.care_context = care_context
-        if st.button("Next", key="planner_next_2"):
-            st.session_state.planner_step = 3
+        if st.button("Next", key="planner_next_1"):
+            st.session_state.planner_step = 2
             st.rerun()
 
-    elif st.session_state.planner_step == 3:
-        st.subheader("Step 3: Health & Mobility")
-        conditions = st.multiselect("Which chronic conditions do you have? (Select all that apply)", ["Diabetes", "Hypertension", "Dementia"], key="chronic_conditions")
+    elif st.session_state.planner_step == 2:
+        st.subheader("Step 2: Health & Mobility")
+        conditions = st.multiselect("Which chronic conditions do you have?", ["Diabetes", "Hypertension", "Dementia"], key="chronic_conditions")
         if conditions:
             care_context["care_flags"]["chronic_conditions"] = conditions
             st.session_state.care_context = care_context
         adl_options = ["Bathing", "Dressing", "Eating", "Toileting"]
-        adls = st.multiselect("Which daily activities require assistance? (Select all that apply)", adl_options, key="adls")
+        adls = st.multiselect("Which daily activities require assistance?", adl_options, key="adls")
         if adls:
             care_context["care_flags"]["adl_support_needed"] = len(adls) > 0
             if len(adls) >= 2:
@@ -122,30 +103,19 @@ def render_planner():
             if fall_history == "Yes":
                 care_context["derived_flags"]["recent_fall"] = True
             st.session_state.care_context = care_context
-        if st.button("Next", key="planner_next_3"):
-            st.session_state.planner_step = 4
+        if st.button("Next", key="planner_next_2"):
+            st.session_state.planner_step = 3
             st.rerun()
 
-    elif st.session_state.planner_step == 4:
-        st.subheader("Step 4: Safety, Goals & Tech")
+    elif st.session_state.planner_step == 3:
+        st.subheader("Step 3: Safety")
         safety_options = {"1": "Safe", "2": "Some concerns", "3": "Unsafe"}
-        safety = st.radio("How safe do you feel at home (stairs, hazards)?", [safety_options["1"], safety_options["2"], safety_options["3"]], key="safety_select")
+        safety = st.radio("How safe do you feel at home?", [safety_options["1"], safety_options["2"], safety_options["3"]], key="safety_select")
         if safety:
             care_context["care_flags"]["falls_risk"] = safety in ["Some concerns", "Unsafe"]
             st.session_state.care_context = care_context
-        goal_options = {"1": "Stay home", "2": "Assisted living", "3": "Memory care", "4": "Unsure"}
-        goal = st.radio("What is your preferred living arrangement?", [goal_options["1"], goal_options["2"], goal_options["3"], goal_options["4"]], key="goal_select")
-        if goal:
-            care_context["care_flags"]["living_goal"] = goal
-            st.session_state.care_context = care_context
-        tech_options = {"1": "Comfortable", "2": "Basic", "3": "Uncomfortable"}
-        tech = st.radio("How comfortable are you with technology (phone, video)?", [tech_options["1"], tech_options["2"], tech_options["3"]], key="tech_select")
-        if tech:
-            care_context["care_flags"]["tech_comfort"] = tech
-            st.session_state.care_context = care_context
-        if st.button("Finish", key="planner_finish"):
-            st.session_state.step = "calculator"  # Move to next step
-            st.session_state.planner_step = 1  # Reset for next use
+        if st.button("Next", key="planner_next_3"):
+            st.session_state.planner_step = 4
             st.rerun()
 
 # Dispatcher
