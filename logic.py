@@ -259,7 +259,7 @@ def render_planner():
                 "2": "Mostly safe, but a few things concern me",
                 "3": "Sometimes I feel unsafe or unsure"
             }
-            safety = st.radio("How safe do you feel in your home in terms of fall risk, emergencies, or managing on your own?", [safety_options["1"], safety_options["2"], safety_options["3"]], key="safety_select", index=0)
+            safety = st.radio("How safe do you feel in your home in terms of fall risk, emergencies, or managing on my own?", [safety_options["1"], safety_options["2"], safety_options["3"]], key="safety_select", index=0)
             if safety:
                 care_context["care_flags"]["falls_risk"] = safety in [safety_options["2"], safety_options["3"]]
                 st.session_state.care_context = care_context
@@ -354,7 +354,7 @@ def render_planner():
                     f"It’s tough to manage alone, {care_context['people'][0]}. Assisted living brings support where you need it most—let’s make the move smooth.",
                     f"Your safety matters, {care_context['people'][0]}. With falls and limited help, assisted living could be your next step—let’s explore it.",
                     f"We’ve got your back, {care_context['people'][0]}. Assisted living fits with your needs—let’s find a place that feels right.",
-                    f"You deserve peace of mind, {care_context['people'][0]}. Assisted living can handle the risks—let’s get you settled with care.",
+                    f"You deserve peace, {care_context['people'][0]}. Assisted living can handle the risks—let’s get you settled with care.",
                 ]
                 memory_blurbs = [
                     f"We’re here, {care_context['people'][0]}. Memory care can support those memory moments—let’s keep you safe and engaged.",
@@ -371,29 +371,18 @@ def render_planner():
                     f"No rush, {care_context['people'][0]}. An expert can guide us—let’s set up that support.",
                 ]
 
-                # In-Home Care
+                # In-Home Care (only if memory/cognitive risk is absent)
                 if (independence in ["I need help with some of these tasks regularly", "I rely on someone else for most daily tasks"] and
                     caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
-                    living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"]):
+                    living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"] and
+                    cognitive not in ["Noticeable problems, and support’s always there", "Noticeable problems, and I’m mostly on my own"] and
+                    "Dementia" not in chronic_conditions):
                     recommendation = "In-Home Care"
                     blurb = random.choice(in_home_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
                     st.write(f"{blurb} With {mobility_issue} and limited help, in-home support can keep you where you love.")
 
-                # Assisted Living
-                elif (mobility and falls_risk and
-                      caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
-                      living_goal in ["Not important—I’m open to other options", "Unsure"]):
-                    recommendation = "Assisted Living"
-                    blurb = random.choice(assisted_blurbs)
-                    if living_goal == "Very important—I strongly want to stay home":
-                        st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Your safety’s our focus with falls and {mobility_issue}—this is the safest path right now.")
-                    else:
-                        st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Since you’re {mobility_issue} and help is sparse, especially in a remote spot, this keeps you secure.")
-
-                # Memory Care
+                # Memory Care (prioritized over other options if cognitive risk is high)
                 elif (cognitive in ["Noticeable problems, and support’s always there", "Noticeable problems, and I’m mostly on my own"] and
                       caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
                       "Dementia" in chronic_conditions):
@@ -406,7 +395,22 @@ def render_planner():
                         st.write(f"**Recommendation:** {recommendation}")
                         st.write(f"{blurb} With memory challenges and little help, this ensures you’re cared for daily.")
 
-                # Consult Needed (fallback for mixed or unsure cases)
+                # Assisted Living (only if memory risk is absent)
+                elif (mobility and falls_risk and
+                      caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
+                      living_goal in ["Not important—I’m open to other options", "Unsure"] and
+                      cognitive not in ["Noticeable problems, and support’s always there", "Noticeable problems, and I’m mostly on my own"] and
+                      "Dementia" not in chronic_conditions):
+                    recommendation = "Assisted Living"
+                    blurb = random.choice(assisted_blurbs)
+                    if living_goal == "Very important—I strongly want to stay home":
+                        st.write(f"**Recommendation:** {recommendation}")
+                        st.write(f"{blurb} Your safety’s our focus with falls and {mobility_issue}—this is the safest path right now.")
+                    else:
+                        st.write(f"**Recommendation:** {recommendation}")
+                        st.write(f"{blurb} Since you’re {mobility_issue} and help is sparse, especially in a remote spot, this keeps you secure.")
+
+                # Consult Needed (fallback for mixed or unsure cases without clear memory risk)
                 else:
                     recommendation = "Consult Needed"
                     blurb = random.choice(consult_blurbs)
