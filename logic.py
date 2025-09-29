@@ -351,7 +351,6 @@ def render_planner():
                     f"We care about you, {care_context['people'][0]}. Your cognitive state points to memory care—additional support could be tailored.",
                     f"You’re not alone, {care_context['people'][0]}. Memory care fits your cognitive needs—let’s find ways to boost that support."
                 ]
-                recommendation = "Memory Care" if cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or "Dementia" in chronic_conditions else "Assisted Living"
                 if (cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or "Dementia" in chronic_conditions) and caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"]:
                     recommendation = "Memory Care"
                     blurb = random.choice(memory_blurbs)
@@ -374,6 +373,11 @@ def render_planner():
                     else:
                         st.write(f"**Recommendation:** {recommendation}")
                         st.write(f"{blurb} Since you’re {mobility_issue} and help is sparse, especially in a remote area, this keeps you secure.")
+                else:
+                    recommendation = "Memory Care"
+                    blurb = random.choice(memory_blurbs)
+                    st.write(f"**Recommendation:** {recommendation}")
+                    st.write(f"{blurb} Based on your cognitive needs, memory care is recommended—please consult a specialist.")
                 st.write(f"**Details:** Based on your answers, we suggest {recommendation}")
 def render_step(step):
     if step == "intro":
