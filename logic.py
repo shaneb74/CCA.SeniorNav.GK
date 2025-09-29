@@ -413,8 +413,8 @@ def render_planner():
     st.write("Let’s walk through a few questions to understand your care needs.")
     if "planner_step" not in st.session_state:
         st.session_state.planner_step = 1
-    if st.session_state.get("step") == "planner" and st.session_state.get("show_qa", True):
-        with st.expander("View Answers & Flags", expanded=False):
+    if st.session_state.get("step") == "planner" and st.session_state.get("show_qa", False):
+        with st.expander("Answers & Flags", expanded=True):
             st.write("**Audience Type:**", care_context.get("audience_type", "Not set"))
             st.write("**People:**", ", ".join(care_context.get("people", [])))
             st.write("**Relation:**", care_context.get("relation", "Not set"))
@@ -674,7 +674,7 @@ def render_planner():
                 support = care_context["care_flags"].get("caregiver_support")
                 if support in ["No regular caregiver or support available"]:
                     flags.append("no_support")
-                elif support in ["Infrequently—someone checks in occasionally", "Yes, I have support a few days a week"]:
+                elif support in ["Infrequently—someone checks in occasionally"]:
                     flags.append("limited_support")
                 cog = care_context["care_flags"].get("cognitive_function")
                 if cog in ["Noticeable problems, and I'm mostly on my own"]:
