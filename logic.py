@@ -74,17 +74,17 @@ RECOMMENDATION_LOGIC = {
     },
     "message_templates": {
         "greeting": [
-            "We're here for you",
+            "We’re here for you",
             "We understand this is a big step",
-            "It's good you're looking into this",
-            "We're glad you're taking this step",
-            "Let's find the best fit for you"
+            "It’s good you’re looking into this",
+            "We’re glad you’re taking this step",
+            "Let’s find the best fit for you"
         ],
         "preference_clause": {
-            "strong_home": "Since staying home is important to you, let's see how we can make that work with extra support.",
-            "pref_home": "You'd prefer to stay home, so let's explore ways to make that possible.",
-            "open": "You're open to options, so let's look at assisted living communities that feel like home.",
-            "unsure": "If you're unsure, let's talk through the options together."
+            "strong_home": "Since staying home is important to you, let’s see how we can make that work with extra support.",
+            "pref_home": "You’d prefer to stay home, so let’s explore ways to make that possible.",
+            "open": "You’re open to options, so let’s look at assisted living communities that feel like home.",
+            "unsure": "If you’re unsure, let’s talk through the options together."
         },
         "key_issues": {
             "high_dependence": [
@@ -258,7 +258,7 @@ def get_recommendation(name, flags, living_goal):
     }.get(living_goal, "unsure")
     preference_clause = RECOMMENDATION_LOGIC["message_templates"]["preference_clause"].get(
         preference_key,
-        "If you're unsure, let's talk through the options together."
+        "If you’re unsure, let’s talk through the options together."
     )
     key_issues = ", ".join(
         random.choice(RECOMMENDATION_LOGIC["message_templates"]["key_issues"].get(flag, ["various challenges"]))
@@ -302,7 +302,7 @@ def get_recommendation(name, flags, living_goal):
             message += " " + get_warning_message("cognitive_decline_warning", name, recommendation, preference_clause)
     elif scores["in_home"] < 3 and scores["assisted_living"] < 3 and not dependence_triggered:
         recommendation = "No Care Needed at This Time"
-        message = f"{random.choice(RECOMMENDATION_LOGIC['message_templates']['greeting'])} {name}, it looks like you're managing well for now. {preference_clause}"
+        message = f"{random.choice(RECOMMENDATION_LOGIC['message_templates']['greeting'])} {name}, it looks like you’re managing well for now. {preference_clause}"
     else:
         recommendation = "Assisted Living"
         message = RECOMMENDATION_LOGIC["dependence_flag_logic"]["message_template"].format(
@@ -676,10 +676,12 @@ def render_planner():
                     flags.append("no_support")
                 elif support in ["Infrequently—someone checks in occasionally"]:
                     flags.append("limited_support")
+                elif support in ["Yes, I have someone with me most of the time", "Yes, I have support a few days a week"]:
+                    flags.append("adequate_support")
                 cog = care_context["care_flags"].get("cognitive_function")
-                if cog in ["Noticeable problems, and I'm mostly on my own"]:
+                if cog in ["Noticeable problems, and I’m mostly on my own"]:
                     flags.append("severe_cognitive_risk")
-                elif cog in ["Noticeable problems, and support's always there"]:
+                elif cog in ["Noticeable problems, and support’s always there"]:
                     flags.append("moderate_cognitive_decline")
                 elif cog in ["Slight forgetfulness, but someone helps daily"]:
                     flags.append("mild_cognitive_decline")
