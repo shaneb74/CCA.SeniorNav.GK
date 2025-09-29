@@ -16,7 +16,7 @@ care_context = st.session_state.care_context
 # ### Audiencing Functions
 def render_audiencing():
     st.header("Who Are We Planning For?")
-    st.write("Let's start by understanding your planning needs.")
+    st.write("Let’s start by understanding your planning needs.")
     if "audiencing_step" not in st.session_state:
         st.session_state.audiencing_step = 1
 
@@ -37,7 +37,7 @@ def render_audiencing():
                     "1": "Discharge planner",
                     "2": "Making a referral"
                 }
-                sub_type = st.radio("What's your role?", [professional_sub_options["1"], professional_sub_options["2"]], key="professional_sub_type", index=0)
+                sub_type = st.radio("What’s your role?", [professional_sub_options["1"], professional_sub_options["2"]], key="professional_sub_type", index=0)
                 care_context["professional_role"] = sub_type
             st.session_state.care_context = care_context
             st.write(f"Planning for: {care_context.get('audience_type', 'not specified yet')} as {care_context.get('professional_role', 'self')}")
@@ -320,15 +320,19 @@ def render_planner():
                 care_context["care_flags"]["living_goal"] = goal
                 st.session_state.care_context = care_context
                 st.write(f"Home preference: {care_context['care_flags']['living_goal']}.")
-            if st.button("Finish", key="planner_finish"):
-                st.session_state.step = "calculator"
-                st.session_state.planner_step = 1
+            if st.button("Proceed", key="planner_proceed_10"):
+                st.session_state.planner_step = 11
+                st.rerun()
+            if st.button("Go Back", key="planner_back_10"):
+                st.session_state.planner_step = 9
                 st.rerun()
 
-            # Recommendation Logic
-            if st.session_state.planner_step == 10 and "living_goal" in care_context["care_flags"]:
+        elif st.session_state.planner_step == 11:
+            st.subheader("Get Your Recommendation")
+            if st.button("Get My Care Recommendation"):
+                # Recommendation Logic
                 st.subheader("Care Recommendation")
-                # Default values for robustness
+                recommendation = "Consult Needed"  # Default fallback
                 independence = care_context["care_flags"].get("independence_level", "")
                 caregiver = care_context["care_flags"].get("caregiver_support", "Yes, I have someone with me most of the time")
                 mobility = care_context["care_flags"].get("mobility_issue", False)
@@ -337,6 +341,7 @@ def render_planner():
                 recent_fall = care_context["derived_flags"].get("recent_fall", False)
                 living_goal = care_context["care_flags"].get("living_goal", "Not important—I’m open to other options")
                 chronic_conditions = care_context["care_flags"].get("chronic_conditions", [])
+                accessibility = care_context["care_flags"].get("accessibility", "I can walk to most of them easily")
 
                 # Initialize mobility_issue with a default
                 mobility_issue = "getting around okay" if not mobility else "struggling with movement"
@@ -371,31 +376,32 @@ def render_planner():
                     f"No rush, {care_context['people'][0]}. An expert can guide us—let’s set up that support.",
                 ]
 
-                # Memory Care (highest priority with cognitive risk)
-                if (cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and
-                    caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
-                    "Dementia" in chronic_conditions):
+                # Memory Care (prioritized if cognitive issues or dementia with no support)
+                if ((cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or
+                     "Dementia" in chronic_conditions) and
+                    caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"]):
                     recommendation = "Memory Care"
                     blurb = random.choice(memory_blurbs)
-                    if living_goal == "Very important—I strongly want to stay home":
+                    if living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"]:
                         st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Your memory needs steady support, which home can’t provide safely right now.")
+                        st.write(f"{blurb} Your memory needs steady support, and with no one around, home isn’t safe right now. Let’s schedule a specialist.")
                     else:
                         st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} With memory challenges and little help, this ensures you’re cared for daily.")
+                        st.write(f"{blurb} With memory challenges and little help, this ensures you’re cared for daily. Let’s get a specialist involved.")
 
-                # In-Home Care (only if no cognitive/memory risk)
+                # In-Home Care (only if no cognitive/memory risk and viable with support)
                 elif (independence in ["I need help with some of these tasks regularly", "I rely on someone else for most daily tasks"] and
                       caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
                       living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"] and
                       cognitive not in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and
-                      "Dementia" not in chronic_conditions):
+                      "Dementia" not in chronic_conditions and
+                      accessibility in ["I can walk to most of them easily", "I can drive or get a ride with little trouble"]):
                     recommendation = "In-Home Care"
                     blurb = random.choice(in_home_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} With {mobility_issue} and limited help, in-home support can keep you where you love.")
+                    st.write(f"{blurb} With {mobility_issue} and limited help, in-home support can keep you where you love, especially with nearby services.")
 
-                # Assisted Living (only if no cognitive/memory risk)
+                # Assisted Living (only if no cognitive/memory risk and safety concerns)
                 elif (mobility and falls_risk and
                       caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
                       living_goal in ["Not important—I’m open to other options", "Unsure"] and
@@ -410,12 +416,14 @@ def render_planner():
                         st.write(f"**Recommendation:** {recommendation}")
                         st.write(f"{blurb} Since you’re {mobility_issue} and help is sparse, especially in a remote spot, this keeps you secure.")
 
-                # Consult Needed (fallback for mixed or unsure cases)
+                # Consult Needed (fallback for mixed or unclear cases)
                 else:
                     recommendation = "Consult Needed"
                     blurb = random.choice(consult_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} Your needs are a bit mixed—let’s get a pro to nail down the best plan.")
+                    st.write(f"{blurb} Your needs need a closer look—let’s get a specialist to guide us.")
+                    if cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or "Dementia" in chronic_conditions:
+                        st.write(f"We’ve noted memory concerns—please prioritize this with the expert.")
 
                 st.write(f"**Details:** Based on your answers, we suggest {recommendation}.")
 
