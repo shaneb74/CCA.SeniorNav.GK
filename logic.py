@@ -31,78 +31,75 @@ def _m(n):
         except Exception:
             return str(n)
 
-# Shared Context
+# Shared Context (central data for all components)
 care_context = st.session_state.get("care_context", {
+    "audience_type": None,  # e.g., "Senior", "Caregiver", "Planner"
     "chronic_conditions": [],
     "care_needs": {},
-    "discharge_date": None,
-    "follow_up_schedule": {},
-    "follow_up_services": []
+    "cost_estimates": {},
+    "pfma_details": {},
+    "tools_exports": []
 })
+
+# ### Audiencing Functions (Onboarding/Audience Selection)
+def render_audiencing():
+    st.header("Audience Selection")
+    st.write("Tell us who you are to tailor the experience.")
+    audience_type = st.selectbox("I am a:", ["Senior", "Caregiver", "Discharge Planner", "Other"], key="audience_type")
+    if audience_type:
+        care_context["audience_type"] = audience_type
+        st.session_state.care_context = care_context
+        st.write(f"Selected: {audience_type}. The app will personalize based on this.")
 
 # ### Guided Care Plan Functions
 def render_planner():
     st.header("Guided Care Plan")
     st.write("Assess care needs and conditions.")
-    # Placeholder - will use question_answer_logic.json
     conditions = st.multiselect("Chronic Conditions", ["Diabetes", "Hypertension"], key="planner_conditions")
     care_context["chronic_conditions"] = conditions
     st.session_state.care_context = care_context
 
-# ### Cost Estimator Functions
+# ### Cost Planner Functions
 def render_calculator():
-    st.header("Cost Estimator")
+    st.header("Cost Planner")
     st.write("Estimate care costs based on needs.")
-    # Placeholder - will integrate cost_controls.py
+    # Integrate cost logic (e.g., from pricing_config.json)
+    # Example placeholder
+    location = st.selectbox("Location", ["National", "Washington"], key="cost_location")
+    base_cost = 5500  # From config
+    st.write(f"Estimated Cost: {_m(base_cost)}")
 
 # ### PFMA Functions
 def render_pfma():
     st.header("Plan for My Advisor")
     st.write("Prepare data for advisor consultation.")
-    # Placeholder - will integrate pfma_controls.py
-
-# ### Tools Functions
-def render_tools():
-    st.subheader("Tools & Export Options")
-    s = st.session_state
-    income_total = _to_int(_g(s, "income_total")) or (_to_int(_g(s, "inc_A")) + _to_int(_g(s, "inc_B")) + _to_int(_g(s, "inc_house")))
-    care_total = _to_int(_g(s, "care_total", "care_monthly_total"))
-    gap = care_total - income_total
-    st.write(f"Income: {_m(income_total)}, Costs: {_m(care_total)}, Gap: {_m(gap)}")
-    # Add exports and AI mock later
-
-# ### Recidivism Tool Functions
-def render_recidivism():
-    st.header("Recidivism Support Tool")
-    st.write("Coordinate post-discharge care to reduce readmissions.")
-    # Access shared data
-    conditions = care_context.get("chronic_conditions", [])
-    st.write(f"Chronic Conditions: {conditions}")
-    # Discharge and follow-up inputs
-    discharge_date = st.date_input("Discharge Date", value=None, key="recidivism_discharge")
-    follow_up_date = st.date_input("Next Follow-Up Date", value=None, key="recidivism_followup")
-    care_context["discharge_date"] = discharge_date
-    care_context["follow_up_schedule"]["next"] = follow_up_date
-    st.session_state.care_context = care_context
-    # Risk assessment
-    if conditions and not follow_up_date:
-        st.warning("No follow-up scheduled—risk of recidivism may increase.")
-    # Service coordination
-    services = st.session_state.get("recidivism_services", ["Home Health", "Transportation", "Meal Delivery"])
-    selected_services = st.multiselect("Select Follow-Up Services", services, key="recidivism_services_select")
-    if selected_services:
-        care_context["follow_up_services"] = selected_services
+    # Example placeholder
+    advisor_notes = st.text_area("Notes for Advisor", key="pfma_notes")
+    if advisor_notes:
+        care_context["pfma_details"]["notes"] = advisor_notes
         st.session_state.care_context = care_context
-        st.write(f"Selected Services: {selected_services}")
+
+# ### AI Agent & Tools Functions
+def render_tools():
+    st.subheader("AI Agent & Tools")
+    st.write("Export data and interact with AI agent.")
+    # Tools (exports)
+    if st.button("Export CSV"):
+        # Placeholder export logic
+        st.download_button("Download CSV", "example data", "export.csv")
+    # AI Agent Mock
+    preset = st.selectbox("AI Preset", ["Close Funding Gap", "Maximize Benefits"], key="ai_preset")
+    if st.button("Send to AI Agent"):
+        st.success("Mock handoff: " + preset + " processed with care data.")
 
 # Dispatcher
 STEP_MAP = {
     "intro": lambda: st.header("Welcome to Senior Navigator"),
+    "audiencing": render_audiencing,
     "planner": render_planner,
     "calculator": render_calculator,
     "pfma": render_pfma,
-    "tools": render_tools,
-    "recidivism": render_recidivism
+    "tools": render_tools
 }
 
 def render_step(step: str):
