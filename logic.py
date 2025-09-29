@@ -80,9 +80,9 @@ def render_audiencing():
         care_context["funding_confidence"] = funding_options[funding_confidence]
         st.session_state.care_context = care_context
         if funding_confidence == "4":  # Medicaid
-            st.sidebar.write("We can connect you to Medicaid-friendly care options-just tap here.", unsafe_allow_html=True)
-            if st.sidebar.button("Get Options", key="medicaid_options"):
-                st.session_state.step = "tools"  # Redirect to tools with resource focus
+            st.write("We can connect you to Medicaid-friendly care options-just tap here.", unsafe_allow_html=True)
+            if st.button("Get Options", key="medicaid_options"):
+                st.session_state.step = "tools"
                 st.rerun()
         st.write(f"Funding confidence: {care_context['funding_confidence']}")
     # Proceed
@@ -167,7 +167,7 @@ def render_planner():
         care_context["care_flags"]["tech_comfort"] = tech_options[tech]
         st.session_state.care_context = care_context
 
-    # Question 9: Finances Confidence (from audiencing, re-asked here for context)
+    # Question 9: Finances Confidence (re-asked for context)
     funding_options = {
         "1": "Very confident (self-fund for years)",
         "2": "Somewhat confident (assets/insurance, but worried)",
@@ -177,9 +177,9 @@ def render_planner():
     funding_confidence = radio_from_answer_map("How confident are you that your savings and income can cover long-term care?", funding_options, key="funding_confidence_plan")
     if funding_confidence:
         care_context["care_flags"]["funding_confidence"] = funding_options[funding_confidence]
-        if funding_confidence == "4":
-            st.sidebar.write("We can connect you to Medicaid-friendly care options-just tap here.", unsafe_allow_html=True)
-            if st.sidebar.button("Get Options", key="medicaid_options_plan"):
+        if funding_confidence == "4":  # Medicaid
+            st.write("We can connect you to Medicaid-friendly care options-just tap here.", unsafe_allow_html=True)
+            if st.button("Get Options", key="medicaid_options_plan"):
                 st.session_state.step = "tools"
                 st.rerun()
         st.session_state.care_context = care_context
