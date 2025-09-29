@@ -1,5 +1,9 @@
 import streamlit as st
-from logic import render_step
+try:
+    from logic import render_step
+except ImportError as e:
+    st.error(f"Failed to import logic module: {e}")
+    st.stop()
 
 # Set wide layout by default
 st.set_page_config(layout="wide")
