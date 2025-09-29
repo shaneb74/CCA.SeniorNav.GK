@@ -25,5 +25,5 @@ def radio_from_answer_map(label, amap, *, key, help_text=None, default_key=None)
         idx = keys.index(str(default_key))
     else:
         idx = 0
-    sel_label = st.radio(label, labels, index=idx, key=key, help_text=help_text)
+    sel_label = st.radio(label, labels, index=idx, key=key, help=help_text)
     return keys[labels.index(sel_label)]
