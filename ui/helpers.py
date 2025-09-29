@@ -47,7 +47,7 @@ def radio_from_answer_map(label, amap, *, key, help_text=None, default_key=None)
         idx = 0
     try:
         st.write(f"Attempting st.radio with label={label}, labels={labels}, idx={idx}, key={key}")
-        sel_label = st.radio(label, labels, index=idx, key=key, help_text=help_text)
+        sel_label = st.radio(label, labels, index=idx, key=key)  # Removed help_text
         st.write(f"st.radio returned: {sel_label}")
         return keys[labels.index(sel_label)] if sel_label in labels else default_key
     except (ValueError, TypeError) as e:
