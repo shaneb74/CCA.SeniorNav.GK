@@ -20,9 +20,7 @@ if st.session_state.step == "intro":
     st.write("This tool helps you plan care based on your needs. Click below to begin.")
     if st.button("Get Started", key="start_planning"):
         st.session_state.step = "audiencing"
+        st.session_state.audiencing_step = 1
         st.rerun()
-elif show_qa or st.session_state.step == "intro":
-    render_step(st.session_state.step)
 else:
-    if st.session_state.step != "intro":
-        render_step(st.session_state.step)
+    render_step(st.session_state.step)
