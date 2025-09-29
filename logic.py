@@ -406,7 +406,7 @@ def render_planner():
                     blurb = random.choice(memory_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
                     if living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"]:
-                        st.write(f"{blurb} Given your cognitive state and lack of support, memory care is essential—let’s explore enhanced care options with a specialist.")
+                        st.write(f"{blurb} Given your cognitive state and lack of support, memory care is essential—let’s work with a specialist to enhance care options.")
                     else:
                         st.write(f"{blurb} With your cognitive needs and no regular help, memory care is the safest choice—let’s enhance support with a specialist.")
 
