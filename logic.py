@@ -46,7 +46,7 @@ def render_audiencing():
                     care_context["professional_role"] = sub_type
             st.session_state.care_context = care_context
             st.write(f"Planning for: {care_context.get('audience_type', 'not specified yet')} as {care_context.get('professional_role', 'self')}")
-        if st.button("Next", key="audiencing_next_1"):
+        if st.button("Next", key="audiencing_next_1", disabled=audience_type_idx is None):
             st.session_state.audiencing_step = 2
             st.rerun()
 
@@ -105,7 +105,7 @@ def render_audiencing():
                 care_context["people"] = ["Client"]
             st.session_state.care_context = care_context
             st.write(f"Okay—we’re building this for {', '.join(care_context['people'])} as {care_context.get('professional_role')}.")
-        if st.button("Proceed to Guided Care Plan", key="audiencing_proceed"):
+        if st.button("Proceed to Guided Care Plan", key="audiencing_proceed", disabled=not (care_context.get("audience_type") and care_context.get("people") and care_context.get("relation"))):
             if (care_context["audience_type"] == "Planning for one person" and care_context["people"] and care_context["relation"]) or \
                (care_context["audience_type"] == "Planning for two people" and len(care_context["people"]) == 2 and care_context["relation"]) or \
                (care_context["audience_type"] == "Planning as a professional"):
@@ -152,7 +152,7 @@ def render_planner():
                         st.session_state.step = "tools"
                         st.rerun()
                 st.write(f"You feel: {care_context['care_flags']['funding_confidence']}.")
-            if st.button("Proceed", key="planner_proceed_1"):
+            if st.button("Proceed", key="planner_proceed_1", disabled=funding_confidence_idx is None):
                 st.session_state.planner_step = 2
                 st.rerun()
             if st.button("Go Back", key="planner_back_1", disabled=True):
@@ -174,7 +174,7 @@ def render_planner():
                 care_context["care_flags"]["independence_level"] = independence
                 st.session_state.care_context = care_context
                 st.write(f"Independence level: {care_context['care_flags']['independence_level']}.")
-            if st.button("Proceed", key="planner_proceed_2"):
+            if st.button("Proceed", key="planner_proceed_2", disabled=independence_idx is None):
                 st.session_state.planner_step = 3
                 st.rerun()
             if st.button("Go Back", key="planner_back_2"):
@@ -199,7 +199,7 @@ def render_planner():
                     care_context["derived_flags"]["inferred_mobility_aid"] = mobility
                 st.session_state.care_context = care_context
                 st.write(f"Mobility: {care_context['care_flags']['mobility_issue']}.")
-            if st.button("Proceed", key="planner_proceed_3"):
+            if st.button("Proceed", key="planner_proceed_3", disabled=mobility_idx is None):
                 st.session_state.planner_step = 4
                 st.rerun()
             if st.button("Go Back", key="planner_back_3"):
@@ -221,7 +221,7 @@ def render_planner():
                 care_context["care_flags"]["social_disconnection"] = social
                 st.session_state.care_context = care_context
                 st.write(f"Social connection: {care_context['care_flags']['social_disconnection']}.")
-            if st.button("Proceed", key="planner_proceed_4"):
+            if st.button("Proceed", key="planner_proceed_4", disabled=social_idx is None):
                 st.session_state.planner_step = 5
                 st.rerun()
             if st.button("Go Back", key="planner_back_4"):
@@ -244,7 +244,7 @@ def render_planner():
                 care_context["care_flags"]["caregiver_support"] = caregiver
                 st.session_state.care_context = care_context
                 st.write(f"Caregiver support: {care_context['care_flags']['caregiver_support']}.")
-            if st.button("Proceed", key="planner_proceed_5"):
+            if st.button("Proceed", key="planner_proceed_5", disabled=caregiver_idx is None):
                 st.session_state.planner_step = 6
                 st.rerun()
             if st.button("Go Back", key="planner_back_5"):
@@ -267,7 +267,7 @@ def render_planner():
                 care_context["care_flags"]["cognitive_function"] = cognition
                 st.session_state.care_context = care_context
                 st.write(f"Cognitive function: {care_context['care_flags']['cognitive_function']}.")
-            if st.button("Proceed", key="planner_proceed_6"):
+            if st.button("Proceed", key="planner_proceed_6", disabled=cognition_idx is None):
                 st.session_state.planner_step = 7
                 st.rerun()
             if st.button("Go Back", key="planner_back_6"):
@@ -289,7 +289,7 @@ def render_planner():
                 care_context["care_flags"]["falls_risk"] = safety in [safety_options_list[1], safety_options_list[2]]
                 st.session_state.care_context = care_context
                 st.write(f"Safety: {care_context['care_flags']['falls_risk']}.")
-            if st.button("Proceed", key="planner_proceed_7"):
+            if st.button("Proceed", key="planner_proceed_7", disabled=safety_idx is None):
                 st.session_state.planner_step = 8
                 st.rerun()
             if st.button("Go Back", key="planner_back_7"):
@@ -311,7 +311,7 @@ def render_planner():
                 care_context["derived_flags"]["recent_fall"] = fall_history == "Yes"
                 st.session_state.care_context = care_context
                 st.write(f"Fall history: {care_context['derived_flags'].get('recent_fall', 'Not set')}.")
-            if st.button("Proceed", key="planner_proceed_8"):
+            if st.button("Proceed", key="planner_proceed_8", disabled=fall_history_idx is None):
                 st.session_state.planner_step = 9
                 st.rerun()
             if st.button("Go Back", key="planner_back_8"):
@@ -327,7 +327,7 @@ def render_planner():
                 care_context["care_flags"]["chronic_conditions"] = conditions
                 st.session_state.care_context = care_context
                 st.write(f"Chronic conditions: {', '.join(care_context['care_flags']['chronic_conditions'])}.")
-            if st.button("Proceed", key="planner_proceed_9"):
+            if st.button("Proceed", key="planner_proceed_9", disabled=not conditions):
                 st.session_state.planner_step = 10
                 st.rerun()
             if st.button("Go Back", key="planner_back_9"):
@@ -349,7 +349,7 @@ def render_planner():
                 care_context["care_flags"]["living_goal"] = goal
                 st.session_state.care_context = care_context
                 st.write(f"Home preference: {care_context['care_flags']['living_goal']}.")
-            if st.button("Proceed", key="planner_proceed_10"):
+            if st.button("Proceed", key="planner_proceed_10", disabled=goal_idx is None):
                 st.session_state.planner_step = 11
                 st.rerun()
             if st.button("Go Back", key="planner_back_10"):
@@ -397,13 +397,6 @@ def render_planner():
                     f"We care about you, {care_context['people'][0]}. Your cognitive state points to memory care—additional support could be tailored.",
                     f"You’re not alone, {care_context['people'][0]}. Memory care fits your cognitive needs—let’s find ways to boost that support.",
                 ]
-                consult_blurbs = [
-                    f"We’re with you, {care_context['people'][0]}. Your needs are unique—a specialist will confirm the best path forward.",
-                    f"It’s a big choice, {care_context['people'][0]}. A consult will pinpoint the right care—let’s connect you with an expert.",
-                    f"You’re doing great, {care_context['people'][0]}. A professional can refine your care plan—let’s get that started.",
-                    f"We see the balance, {care_context['people'][0]}. A consult will clarify your options—let’s make it happen together.",
-                    f"No rush, {care_context['people'][0]}. An expert will guide us—let’s set up that next step.",
-                ]
 
                 # Memory Care (highest priority if cognitive issues or dementia with no support)
                 if ((cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or
@@ -413,9 +406,9 @@ def render_planner():
                     blurb = random.choice(memory_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
                     if living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"]:
-                        st.write(f"{blurb} Given your cognitive state and lack of support, memory care is essential—let’s explore enhanced care options.")
+                        st.write(f"{blurb} Given your cognitive state and lack of support, memory care is essential—let’s explore enhanced care options with a specialist.")
                     else:
-                        st.write(f"{blurb} With your cognitive needs and no regular help, memory care is the safest choice—let’s look into more support.")
+                        st.write(f"{blurb} With your cognitive needs and no regular help, memory care is the safest choice—let’s enhance support with a specialist.")
 
                 # In-Home Care (only if no cognitive/memory risk and viable support)
                 elif (independence in ["I need help with some of these tasks regularly", "I rely on someone else for most daily tasks"] and
