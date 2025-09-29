@@ -1,13 +1,3 @@
-The recommendation logic in `logic.py` is solid and maintains high accuracy, as validated by 10 simulations using the code_execution tool with random inputs. No major changes are needed, but I'll suggest minor improvements for robustness (e.g., handling edge cases like "Unsure" responses or missing data) without altering the core rules. These include:
-- Adding default values for all flags to prevent `KeyError` or `UnboundLocalError`.
-- Enhancing priority for Memory Care (already strong, but added an explicit check for "Dementia" + "no support" + "noticeable problems").
-- Incorporating geography inference from mobility and caregiver flags (as discussed), with a blurb nudge only when relevant (e.g., "especially in a remote spot" if mobility is limited and caregiver is weak).
-- Logging flag values for debugging (visible in the QA drawer).
-
-The simulations confirmed 100% consistency with your described rules—no unexpected In-Home Care when Memory Care should trigger. For example, in cases with "Dementia", "Noticeable problems, and I’m mostly on my own", and "No regular caregiver or support available", Memory Care triggered every time.
-
-### Updated `logic.py`
-```python:disable-run
 import streamlit as st
 from ui.helpers import radio_from_answer_map
 import random
