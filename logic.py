@@ -325,6 +325,7 @@ def render_planner():
         elif st.session_state.planner_step == 9:
             st.subheader("Care Recommendation")
             st.write("Based on your answers, here’s our suggestion.")
+            st.write(f"**Care Recommendation: {recommendation}**")  # Bolded recommendation
             flags = []
             # Financial
             funding = care_context["care_flags"].get("funding_confidence", "")
@@ -416,8 +417,8 @@ def render_planner():
                 score += 7
             if "limited_support" in flags:
                 score += 4
-            if "adequate_support" in flags and "severe_cognitive_risk" in flags:
-                score -= 5  # 24/7 care adjustment, applied before threshold
+            if "adequate_support" in flags:  # Apply deduction for any support level
+                score -= 5
             if "high_risk" in flags:
                 score += 6
             if "moderate_risk" in flags:
