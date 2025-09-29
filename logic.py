@@ -1,6 +1,7 @@
 import streamlit as st
 from ui.helpers import radio_from_answer_map
 import random
+import unicodedata
 if "care_context" not in st.session_state:
     st.session_state.care_context = {
         "audience_type": None,
@@ -321,15 +322,59 @@ def render_planner():
             st.subheader("Get Your Recommendation")
             if st.button("Get My Care Recommendation"):
                 st.subheader("Care Recommendation")
-                independence = care_context["care_flags"].get("independence_level", "")
-                caregiver = care_context["care_flags"].get("caregiver_support", "Yes, I have someone with me most of the time")
-                mobility = care_context["care_flags"].get("mobility_issue", False)
-                falls_risk = care_context["care_flags"].get("falls_risk", False)
-                cognitive = care_context["care_flags"].get("cognitive_function", "My memory’s sharp, no help needed")
-                recent_fall = care_context["derived_flags"].get("recent_fall", False)
-                living_goal = care_context["care_flags"].get("living_goal", "Not important—I’m open to other options")
-                chronic_conditions = care_context["care_flags"].get("chronic_conditions", [])
-                mobility_issue = "getting around okay" if not mobility else "struggling with movement"
+                def _norm(s):
+                    if not isinstance(s, str):
+                        return ""
+                    s2 = unicodedata.normalize("NFKC", s).strip().lower()
+                    return " ".join(s2.split())
+                INDEPENDENCE_MAP = {
+                    _norm("I’m fully independent and handle all tasks on my own"): "indep_full",
+                    _norm("I occasionally need reminders or light assistance"): "indep_light",
+                    _norm("I need help with some of these tasks regularly"): "indep_some",
+                    _norm("I rely on someone else for most daily tasks"): "indep_most",
+                }
+                CAREGIVER_MAP = {
+                    _norm("Yes, I have someone with me most of the time"): "support_most",
+                    _norm("Yes, I have support a few days a week"): "support_some",
+                    _norm("Infrequently—someone checks in occasionally"): "support_rare",
+                    _norm("No regular caregiver or support available"): "support_none",
+                }
+                COGNITION_MAP = {
+                    _norm("My memory’s sharp, no help needed"): "cog_clear",
+                    _norm("Slight forgetfulness, but someone helps daily"): "cog_mild_help",
+                    _norm("Noticeable problems, and support’s always there"): "cog_noticeable_with_support",
+                    _norm("Noticeable problems, and I’m mostly on my own"): "cog_noticeable_alone",
+                }
+                SAFETY_MAP = {
+                    _norm("Very safe—I have everything I need"): "safe_high",
+                    _norm("Mostly safe, but a few things concern me"): "safe_medium",
+                    _norm("Sometimes I feel unsafe or unsure"): "safe_low",
+                }
+                GOAL_MAP = {
+                    _norm("Not important—I’m open to other options"): "goal_open",
+                    _norm("Somewhat important—I’d prefer to stay but could move"): "goal_pref_home",
+                    _norm("Very important—I strongly want to stay home"): "goal_strong_home",
+                }
+                independence_raw = care_context["care_flags"].get("independence_level", "")
+                caregiver_raw = care_context["care_flags"].get("caregiver_support", "")
+                cognitive_raw = care_context["care_flags"].get("cognitive_function", "")
+                safety_raw = care_context["care_flags"].get("safety_level_text", "") or care_context["care_flags"].get("safety_select_text", "")
+                living_goal_raw = care_context["care_flags"].get("living_goal", "")
+                mobility_bool = bool(care_context["care_flags"].get("mobility_issue", False))
+                falls_bool = bool(care_context["care_flags"].get("falls_risk", False))
+                recent_fall = bool(care_context["derived_flags"].get("recent_fall", False))
+                conditions = set(care_context["care_flags"].get("chronic_conditions", []))
+                indep = INDEPENDENCE_MAP.get(_norm(independence_raw), "")
+                careg = CAREGIVER_MAP.get(_norm(caregiver_raw), "")
+                cogn = COGNITION_MAP.get(_norm(cognitive_raw), "")
+                safe = SAFETY_MAP.get(_norm(safety_raw), "")
+                goal = GOAL_MAP.get(_norm(living_goal_raw), "")
+                has_dementia = any(c.strip().lower() == "dementia" for c in conditions)
+                cog_severe = cogn in {"cog_noticeable_with_support", "cog_noticeable_alone"} or has_dementia
+                low_support = careg in {"support_rare", "support_none"}
+                limited_support = careg in {"support_some", "support_rare", "support_none"}
+                safety_concern = falls_bool or recent_fall or safe in {"safe_medium", "safe_low"}
+                high_adl_need = indep in {"indep_some", "indep_most"}
                 in_home_blurbs = [
                     f"We're here for you, {care_context['people'][0]}. With some support at home, you can stay where you feel most comfortable—let's make it safe.",
                     f"It’s okay to need a hand, {care_context['people'][0]}. Staying home is doable with the right help—let’s set that up together.",
@@ -351,33 +396,30 @@ def render_planner():
                     f"We care about you, {care_context['people'][0]}. Your cognitive state points to memory care—additional support could be tailored.",
                     f"You’re not alone, {care_context['people'][0]}. Memory care fits your cognitive needs—let’s find ways to boost that support."
                 ]
-                if (cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or "Dementia" in chronic_conditions) and caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"]:
+                if cog_severe and (safety_concern or high_adl_need or limited_support):
                     recommendation = "Memory Care"
                     blurb = random.choice(memory_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
-                    if living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"]:
-                        st.write(f"{blurb} Given your cognitive state and lack of support, memory care is essential—let’s work with a specialist to enhance care options.")
-                    else:
-                        st.write(f"{blurb} With your cognitive needs and no regular help, memory care is the safest choice—let’s enhance support with a specialist.")
-                elif independence in ["I’m fully independent and handle all tasks on my own", "I occasionally need reminders or light assistance"] and caregiver in ["Yes, I have someone with me most of the time", "Yes, I have support a few days a week"] and living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"] and cognitive not in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and "Dementia" not in chronic_conditions:
+                    st.write(f"{blurb} Given the memory and safety considerations, a secure memory care setting is the safest fit.")
+                elif indep in {"indep_full", "indep_light"} and careg in {"support_most", "support_some"} and goal in {"goal_strong_home", "goal_pref_home"} and not cog_severe:
                     recommendation = "In-Home Care"
                     blurb = random.choice(in_home_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} With {mobility_issue}, in-home support can maintain your independence with existing help.")
-                elif mobility and falls_risk and caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and living_goal in ["Not important—I’m open to other options", "Unsure"] and cognitive not in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and "Dementia" not in chronic_conditions:
+                    mobility_issue = "struggling with movement" if mobility_bool else "getting around okay"
+                    st.write(f"{blurb} With {mobility_issue}, consistent in-home support can keep you safe where you are.")
+                elif mobility_bool and safety_concern and low_support and goal in {"goal_open", "goal_unsure"} and not cog_severe:
                     recommendation = "Assisted Living"
                     blurb = random.choice(assisted_blurbs)
-                    if living_goal == "Very important—I strongly want to stay home":
-                        st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Your safety’s the priority with falls and {mobility_issue}—this is the safest option now.")
-                    else:
-                        st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Since you’re {mobility_issue} and help is sparse, especially in a remote area, this keeps you secure.")
-                else:
-                    recommendation = "Memory Care"
-                    blurb = random.choice(memory_blurbs)
                     st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} Based on your cognitive needs, memory care is recommended—please consult a specialist.")
+                    st.write(f"{blurb} This balances safety, daily help, and fewer burdens on family.")
+                else:
+                    recommendation = "Memory Care" if cog_severe else "Assisted Living"
+                    blurb = random.choice(memory_blurbs if recommendation == "Memory Care" else assisted_blurbs)
+                    st.write(f"**Recommendation:** {recommendation}")
+                    if recommendation == "Memory Care":
+                        st.write(f"{blurb} Based on cognition indicators, a dedicated memory setting is recommended.")
+                    else:
+                        st.write(f"{blurb} Based on overall risk and support, assisted living is the safer next step.")
                 st.write(f"**Details:** Based on your answers, we suggest {recommendation}")
 def render_step(step):
     if step == "intro":
