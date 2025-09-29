@@ -269,14 +269,18 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 8:
-            st.subheader("Step 8: Chronic Conditions")
-            st.write("Which chronic conditions do you have?")
-            condition_options = ["Diabetes", "Hypertension", "Dementia", "COPD", "CHF", "Arthritis", "Parkinson's", "Stroke"]
-            conditions = st.multiselect("Which chronic conditions do you have?", condition_options, key="chronic_conditions_select")
-            if conditions:
-                care_context["care_flags"]["chronic_conditions"] = conditions
+            st.subheader("Step 8: Fall History")
+            st.write("Have you had a fall recently?")
+            fall_options = {
+                "1": "Yes",
+                "2": "No",
+                "3": "Unsure"
+            }
+            fall_history = st.radio("Have you had a fall in the past six months?", [fall_options["1"], fall_options["2"], fall_options["3"]], key="fall_history_select", index=0)
+            if fall_history:
+                care_context["derived_flags"]["recent_fall"] = fall_history == "Yes"
                 st.session_state.care_context = care_context
-                st.write(f"Chronic conditions: {', '.join(care_context['care_flags']['chronic_conditions'])}.")
+                st.write(f"Fall history: {care_context['derived_flags'].get('recent_fall', 'Not set')}.")
             if st.button("Proceed", key="planner_proceed_8"):
                 st.session_state.planner_step = 9
                 st.rerun()
@@ -285,19 +289,14 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 9:
-            st.subheader("Step 9: Accessibility")
-            st.write("How accessible are services from your home?")
-            accessibility_options = {
-                "1": "I can walk to most of them easily",
-                "2": "I can drive or get a ride with little trouble",
-                "3": "It’s difficult to get to these places without help",
-                "4": "I have no easy access and need assistance to get anywhere"
-            }
-            accessibility = st.radio("How accessible are services like pharmacies, grocery stores, and doctor’s offices from your home?", [accessibility_options["1"], accessibility_options["2"], accessibility_options["3"], accessibility_options["4"]], key="accessibility_select", index=0)
-            if accessibility:
-                care_context["care_flags"]["accessibility"] = accessibility
+            st.subheader("Step 9: Chronic Conditions")
+            st.write("Which chronic conditions do you have?")
+            condition_options = ["Diabetes", "Hypertension", "Dementia", "COPD", "CHF", "Arthritis", "Parkinson's", "Stroke"]
+            conditions = st.multiselect("Which chronic conditions do you have?", condition_options, key="chronic_conditions_select")
+            if conditions:
+                care_context["care_flags"]["chronic_conditions"] = conditions
                 st.session_state.care_context = care_context
-                st.write(f"Accessibility: {care_context['care_flags']['accessibility']}.")
+                st.write(f"Chronic conditions: {', '.join(care_context['care_flags']['chronic_conditions'])}.")
             if st.button("Proceed", key="planner_proceed_9"):
                 st.session_state.planner_step = 10
                 st.rerun()
