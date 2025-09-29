@@ -680,22 +680,29 @@ def render_planner():
                 st.subheader("Care Recommendation")
                 flags = []
                 indep = care_context["care_flags"].get("independence_level")
-                if indep in ["I rely on someone else for most daily tasks"]:
-                    flags.append("high_dependence")
+                if indep in ["I’m fully independent and handle all tasks on my own"]:
+                    pass
+                elif indep in ["I occasionally need reminders or light assistance"]:
+                    pass
                 elif indep in ["I need help with some of these tasks regularly"]:
                     flags.append("moderate_dependence")
+                elif indep in ["I rely on someone else for most daily tasks"]:
+                    flags.append("high_dependence")
                 if care_context["care_flags"].get("mobility_issue"):
                     flags.append("high_mobility_dependence")
                 elif care_context["derived_flags"].get("inferred_mobility_aid") in [
                     "I use a cane or walker for longer distances",
-                    "I need assistance for most movement around the home"
+                    "I need assistance for most movement around the home",
+                    "I am mostly immobile or need a wheelchair"
                 ]:
                     flags.append("moderate_mobility")
                 social = care_context["care_flags"].get("social_disconnection")
-                if social in ["Often—I feel isolated or down much of the time"]:
-                    flags.append("high_risk")
+                if social in ["Rarely—I’m socially active and feel good most days"]:
+                    pass
                 elif social in ["Sometimes—I connect weekly but have some down moments"]:
                     flags.append("moderate_risk")
+                elif social in ["Often—I feel isolated or down much of the time"]:
+                    flags.append("high_risk")
                 if social in ["Often—I feel isolated or down much of the time", "Sometimes—I connect weekly but have some down moments"]:
                     flags.append("mental_health_concern")
                 support = care_context["care_flags"].get("caregiver_support")
@@ -706,12 +713,14 @@ def render_planner():
                 elif support in ["Yes, I have someone with me most of the time", "Yes, I have support a few days a week"]:
                     flags.append("adequate_support")
                 cog = care_context["care_flags"].get("cognitive_function")
-                if cog in ["Noticeable problems, and I’m mostly on my own"]:
-                    flags.append("severe_cognitive_risk")
-                elif cog in ["Noticeable problems, and support’s always there"]:
-                    flags.append("moderate_cognitive_decline")
+                if cog in ["My memory’s sharp, no help needed"]:
+                    pass
                 elif cog in ["Slight forgetfulness, but someone helps daily"]:
                     flags.append("mild_cognitive_decline")
+                elif cog in ["Noticeable problems, and support’s always there"]:
+                    flags.append("moderate_cognitive_decline")
+                elif cog in ["Noticeable problems, and I’m mostly on my own"]:
+                    flags.append("severe_cognitive_risk")
                 has_falls_risk = bool(care_context["care_flags"].get("falls_risk"))
                 recent_fall = bool(care_context["derived_flags"].get("recent_fall", False))
                 if has_falls_risk and recent_fall:
@@ -719,12 +728,12 @@ def render_planner():
                 elif has_falls_risk:
                     flags.append("moderate_safety_concern")
                 funding = care_context["care_flags"].get("funding_confidence")
-                if funding in ["Very worried—cost is a big concern for me", "I am on Medicaid"]:
-                    flags.append("needs_financial_assistance")
+                if funding in ["Not worried—I can cover any care I need"]:
+                    flags.append("can_afford_care")
                 elif funding in ["Somewhat worried—I’d need to budget carefully"]:
                     flags.append("moderate_financial_concern")
-                elif funding in ["Not worried—I can cover any care I need"]:
-                    flags.append("can_afford_care")
+                elif funding in ["Very worried—cost is a big concern for me", "I am on Medicaid"]:
+                    flags.append("needs_financial_assistance")
                 name = care_context["people"][0] if care_context["people"] else "friend"
                 living_goal = care_context["care_flags"].get("living_goal", "Not important—I’m open to other options")
                 recommendation, message = get_recommendation(name, flags, living_goal)
