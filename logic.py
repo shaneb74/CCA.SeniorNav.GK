@@ -338,6 +338,9 @@ def render_planner():
                 living_goal = care_context["care_flags"].get("living_goal", "")
                 chronic_conditions = care_context["care_flags"].get("chronic_conditions", [])
 
+                # Initialize mobility_issue with a default
+                mobility_issue = "getting around okay" if not mobility else "struggling with movement"
+
                 # Conversational blurbs (5 per condition, empathetic, dynamic)
                 in_home_blurbs = [
                     f"We're here for you, {care_context['people'][0]}. With some support at home, you can stay where you feel most comfortable—let's make it safe.",
@@ -351,7 +354,7 @@ def render_planner():
                     f"It’s tough to manage alone, {care_context['people'][0]}. Assisted living brings support where you need it most—let’s make the move smooth.",
                     f"Your safety matters, {care_context['people'][0]}. With falls and limited help, assisted living could be your next step—let’s explore it.",
                     f"We’ve got your back, {care_context['people'][0]}. Assisted living fits with your needs—let’s find a place that feels right.",
-                    f"You deserve peace, {care_context['people'][0]}. Assisted living can handle the risks—let’s get you settled with care.",
+                    f"You deserve peace of mind, {care_context['people'][0]}. Assisted living can handle the risks—let’s get you settled with care.",
                 ]
                 memory_blurbs = [
                     f"We’re here, {care_context['people'][0]}. Memory care can support those memory moments—let’s keep you safe and engaged.",
@@ -374,7 +377,6 @@ def render_planner():
                     living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"]):
                     recommendation = "In-Home Care"
                     blurb = random.choice(in_home_blurbs)
-                    mobility_issue = "struggling with movement" if mobility else "getting around okay"
                     st.write(f"**Recommendation:** {recommendation}")
                     st.write(f"{blurb} With {mobility_issue} and limited help, in-home support can keep you where you love.")
 
@@ -386,7 +388,7 @@ def render_planner():
                     blurb = random.choice(assisted_blurbs)
                     if living_goal == "Very important—I strongly want to stay home":
                         st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Your safety’s our focus with falls and mobility issues—even though you’d rather stay home, this is the safest path right now.")
+                        st.write(f"{blurb} Your safety’s our focus with falls and {mobility_issue}—this is the safest path right now.")
                     else:
                         st.write(f"**Recommendation:** {recommendation}")
                         st.write(f"{blurb} Since you’re {mobility_issue} and help is sparse, especially in a remote spot, this keeps you secure.")
@@ -399,7 +401,7 @@ def render_planner():
                     blurb = random.choice(memory_blurbs)
                     if living_goal == "Very important—I strongly want to stay home":
                         st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Your memory needs steady support, which home can’t provide safely right now—even though you’d prefer to stay.")
+                        st.write(f"{blurb} Your memory needs steady support, which home can’t provide safely right now.")
                     else:
                         st.write(f"**Recommendation:** {recommendation}")
                         st.write(f"{blurb} With memory challenges and little help, this ensures you’re cared for daily.")
