@@ -131,9 +131,9 @@ def render_planner():
             }
             funding_confidence = st.radio("How confident are you that your savings will cover long-term care?", [funding_options["1"], funding_options["2"], funding_options["3"], funding_options["4"]], key="funding_confidence_select", index=0, help="Note: Medicaid is not Medicare. Medicaid helps with long-term care for those with limited income and assets, while Medicare covers hospital and doctor visits.")
             if funding_confidence:
-                care_context["care_flags"]["funding_confidence"] = funding_confidence
+                care_context["care_flags"]["funding_confidence"] = funding_options[funding_confidence]
                 st.session_state.care_context = care_context
-                if funding_confidence == "I am on Medicaid":
+                if funding_confidence == "4":
                     st.write("We can connect you to Medicaid-friendly care options—just tap here.", unsafe_allow_html=True)
                     if st.button("Get Options", key="medicaid_options"):
                         st.session_state.step = "tools"
@@ -156,7 +156,7 @@ def render_planner():
             }
             independence = st.radio("How independent are you with daily tasks such as bathing, dressing, and preparing meals?", [independence_options["1"], independence_options["2"], independence_options["3"], independence_options["4"]], key="independence_select", index=0)
             if independence:
-                care_context["care_flags"]["independence_level"] = independence
+                care_context["care_flags"]["independence_level"] = independence_options[independence]
                 st.session_state.care_context = care_context
                 st.write(f"Independence level: {care_context['care_flags']['independence_level']}.")
             if st.button("Proceed", key="planner_proceed_2"):
@@ -168,7 +168,7 @@ def render_planner():
 
         elif st.session_state.planner_step == 3:
             st.subheader("Step 3: Mobility")
-            st.write("How would you describe your mobility? (e.g., walking, driving, or using rideshare)")
+            st.write("How would you describe your mobility?")
             mobility_options = {
                 "1": "I walk easily without any support",
                 "2": "I use a cane or walker for longer distances",
@@ -179,7 +179,7 @@ def render_planner():
             if mobility:
                 care_context["care_flags"]["mobility_issue"] = mobility != mobility_options["1"]
                 if mobility != mobility_options["1"]:
-                    care_context["derived_flags"]["inferred_mobility_aid"] = mobility
+                    care_context["derived_flags"]["inferred_mobility_aid"] = mobility_options[mobility]
                 st.session_state.care_context = care_context
                 st.write(f"Mobility: {care_context['care_flags']['mobility_issue']}.")
             if st.button("Proceed", key="planner_proceed_3"):
@@ -199,7 +199,7 @@ def render_planner():
             }
             social = st.radio("How often do you feel lonely, down, or socially disconnected?", [social_options["1"], social_options["2"], social_options["3"]], key="social_select", index=0)
             if social:
-                care_context["care_flags"]["social_disconnection"] = social
+                care_context["care_flags"]["social_disconnection"] = social_options[social]
                 st.session_state.care_context = care_context
                 st.write(f"Social connection: {care_context['care_flags']['social_disconnection']}.")
             if st.button("Proceed", key="planner_proceed_4"):
@@ -220,7 +220,7 @@ def render_planner():
             }
             caregiver = st.radio("Do you have a caregiver or family member who can help regularly?", [caregiver_options["1"], caregiver_options["2"], caregiver_options["3"], caregiver_options["4"]], key="caregiver_select", index=0)
             if caregiver:
-                care_context["care_flags"]["caregiver_support"] = caregiver
+                care_context["care_flags"]["caregiver_support"] = caregiver_options[caregiver]
                 st.session_state.care_context = care_context
                 st.write(f"Caregiver support: {care_context['care_flags']['caregiver_support']}.")
             if st.button("Proceed", key="planner_proceed_5"):
@@ -241,7 +241,7 @@ def render_planner():
             }
             cognition = st.radio("Thinking about your memory and focus, is someone usually around to help you?", [cognition_options["1"], cognition_options["2"], cognition_options["3"], cognition_options["4"]], key="cognition_select", index=0)
             if cognition:
-                care_context["care_flags"]["cognitive_function"] = cognition
+                care_context["care_flags"]["cognitive_function"] = cognition_options[cognition]
                 st.session_state.care_context = care_context
                 st.write(f"Cognitive function: {care_context['care_flags']['cognitive_function']}.")
             if st.button("Proceed", key="planner_proceed_6"):
@@ -320,112 +320,13 @@ def render_planner():
                 care_context["care_flags"]["living_goal"] = goal
                 st.session_state.care_context = care_context
                 st.write(f"Home preference: {care_context['care_flags']['living_goal']}.")
-            if st.button("Proceed", key="planner_proceed_10"):
-                st.session_state.planner_step = 11
+            if st.button("Finish", key="planner_finish"):
+                st.session_state.step = "calculator"
+                st.session_state.planner_step = 1
                 st.rerun()
             if st.button("Go Back", key="planner_back_10"):
                 st.session_state.planner_step = 9
                 st.rerun()
-
-        elif st.session_state.planner_step == 11:
-            st.subheader("Get Your Recommendation")
-            if st.button("Get My Care Recommendation"):
-                # Recommendation Logic
-                st.subheader("Care Recommendation")
-                recommendation = "Consult Needed"  # Default fallback
-                independence = care_context["care_flags"].get("independence_level", "")
-                caregiver = care_context["care_flags"].get("caregiver_support", "Yes, I have someone with me most of the time")
-                mobility = care_context["care_flags"].get("mobility_issue", False)
-                falls_risk = care_context["care_flags"].get("falls_risk", False)
-                cognitive = care_context["care_flags"].get("cognitive_function", "My memory’s sharp, no help needed")
-                recent_fall = care_context["derived_flags"].get("recent_fall", False)
-                living_goal = care_context["care_flags"].get("living_goal", "Not important—I’m open to other options")
-                chronic_conditions = care_context["care_flags"].get("chronic_conditions", [])
-                accessibility = care_context["care_flags"].get("accessibility", "I can walk to most of them easily")
-
-                # Initialize mobility_issue with a default
-                mobility_issue = "getting around okay" if not mobility else "struggling with movement"
-
-                # Conversational blurbs (5 per condition, empathetic, dynamic)
-                in_home_blurbs = [
-                    f"We're here for you, {care_context['people'][0]}. With some support at home, you can stay where you feel most comfortable—let's make it safe.",
-                    f"It’s okay to need a hand, {care_context['people'][0]}. Staying home is doable with the right help—let’s set that up together.",
-                    f"You’re managing well, {care_context['people'][0]}. A little in-home care can keep you rooted—we’ll find the best fit.",
-                    f"No need to rush away, {care_context['people'][0]}. With some assistance, home can stay your haven—let’s plan it out.",
-                    f"We see your strength, {care_context['people'][0]}. In-home care can ease the load so you stay put—ready to start?",
-                ]
-                assisted_blurbs = [
-                    f"We’re looking out for you, {care_context['people'][0]}. Assisted living offers safety with your mobility challenges—let’s ensure you’re secure.",
-                    f"It’s tough to manage alone, {care_context['people'][0]}. Assisted living brings support where you need it most—let’s make the move smooth.",
-                    f"Your safety matters, {care_context['people'][0]}. With falls and limited help, assisted living could be your next step—let’s explore it.",
-                    f"We’ve got your back, {care_context['people'][0]}. Assisted living fits with your needs—let’s find a place that feels right.",
-                    f"You deserve peace, {care_context['people'][0]}. Assisted living can handle the risks—let’s get you settled with care.",
-                ]
-                memory_blurbs = [
-                    f"We’re here, {care_context['people'][0]}. Memory care can support those memory moments—let’s keep you safe and engaged.",
-                    f"It’s alright to need more, {care_context['people'][0]}. Memory care offers the help you deserve—let’s find a gentle fit.",
-                    f"Your mind’s worth protecting, {care_context['people'][0]}. Memory care with support can ease the load—let’s take that step.",
-                    f"We care about you, {care_context['people'][0]}. Memory care brings the right team for your needs—let’s make it work.",
-                    f"You’re not alone, {care_context['people'][0]}. Memory care can guide you through—let’s ensure you’re supported every day.",
-                ]
-                consult_blurbs = [
-                    f"We’re with you, {care_context['people'][0]}. Your needs are unique—let’s get an expert to tailor the next move.",
-                    f"It’s a big choice, {care_context['people'][0]}. A consult can clarify what’s best—let’s connect you with someone.",
-                    f"You’re doing great, {care_context['people'][0]}. A professional can sort this out—let’s get you the right advice.",
-                    f"We see the balance, {care_context['people'][0]}. A consult will pin down your path—let’s make it clear together.",
-                    f"No rush, {care_context['people'][0]}. An expert can guide us—let’s set up that support.",
-                ]
-
-                # Memory Care (prioritized if cognitive issues or dementia with no support)
-                if ((cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or
-                     "Dementia" in chronic_conditions) and
-                    caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"]):
-                    recommendation = "Memory Care"
-                    blurb = random.choice(memory_blurbs)
-                    if living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"]:
-                        st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Your memory needs steady support, and with no one around, home isn’t safe right now. Let’s schedule a specialist.")
-                    else:
-                        st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} With memory challenges and little help, this ensures you’re cared for daily. Let’s get a specialist involved.")
-
-                # In-Home Care (only if no cognitive/memory risk and viable with support)
-                elif (independence in ["I need help with some of these tasks regularly", "I rely on someone else for most daily tasks"] and
-                      caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
-                      living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"] and
-                      cognitive not in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and
-                      "Dementia" not in chronic_conditions and
-                      accessibility in ["I can walk to most of them easily", "I can drive or get a ride with little trouble"]):
-                    recommendation = "In-Home Care"
-                    blurb = random.choice(in_home_blurbs)
-                    st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} With {mobility_issue} and limited help, in-home support can keep you where you love, especially with nearby services.")
-
-                # Assisted Living (only if no cognitive/memory risk and safety concerns)
-                elif (mobility and falls_risk and
-                      caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
-                      living_goal in ["Not important—I’m open to other options", "Unsure"] and
-                      cognitive not in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and
-                      "Dementia" not in chronic_conditions):
-                    recommendation = "Assisted Living"
-                    blurb = random.choice(assisted_blurbs)
-                    if living_goal == "Very important—I strongly want to stay home":
-                        st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Your safety’s our focus with falls and {mobility_issue}—this is the safest path right now.")
-                    else:
-                        st.write(f"**Recommendation:** {recommendation}")
-                        st.write(f"{blurb} Since you’re {mobility_issue} and help is sparse, especially in a remote spot, this keeps you secure.")
-
-                # Consult Needed (fallback for mixed or unclear cases)
-                else:
-                    recommendation = "Consult Needed"
-                    blurb = random.choice(consult_blurbs)
-                    st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} Your needs need a closer look—let’s get a specialist to guide us.")
-                    if cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] or "Dementia" in chronic_conditions:
-                        st.write(f"We’ve noted memory concerns—please prioritize this with the expert.")
-
-                st.write(f"**Details:** Based on your answers, we suggest {recommendation}.")
 
 # Dispatcher
 STEP_MAP = {
