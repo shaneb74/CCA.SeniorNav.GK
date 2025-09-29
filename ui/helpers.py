@@ -16,16 +16,22 @@ def _is_intlike(x) -> bool:
     try:
         int(str(x))
         return True
-    except Exception:
+    except (ValueError, TypeError):
         return False
 
 def radio_from_answer_map(label, amap, *, key, help_text=None, default_key=None) -> str | None:
     keys, labels = order_answer_map(amap)
     if not labels:
+        st.warning(f"No valid options for radio: {label}")
+        return default_key
+    if not all(isinstance(l, str) for l in labels):
+        st.error(f"Invalid label types in {label}: {labels}")
         return default_key
     if default_key is not None and str(default_key) in keys:
         idx = keys.index(str(default_key))
     else:
         idx = 0
+    if idx >= len(labels):
+        idx = 0  # Fallback to first option if index is out of range
     sel_label = st.radio(label, labels, index=idx, key=key, help_text=help_text)
-    return keys[labels.index(sel_label)]
+    return keys[labels.index(sel_label)] if sel_label in labels else default_key
