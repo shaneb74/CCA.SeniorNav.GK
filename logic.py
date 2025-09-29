@@ -1,7 +1,8 @@
 import streamlit as st
 from ui.helpers import radio_from_answer_map
 import random
-import unicodedata
+
+# Shared Context
 if "care_context" not in st.session_state:
     st.session_state.care_context = {
         "audience_type": None,
@@ -9,12 +10,321 @@ if "care_context" not in st.session_state:
         "care_flags": {},
         "derived_flags": {}
     }
+
 care_context = st.session_state.care_context
+
+# Recommendation Logic JSON
+RECOMMENDATION_LOGIC = {
+  "scoring": {
+    "in_home": {
+      "care_burden": 1,
+      "social_isolation": 1,
+      "mental_health_concern": 1,
+      "financial_feasibility": 1,
+      "home_safety": 1,
+      "geographic_access": 1,
+      "cognitive_function": 1
+    },
+    "assisted_living": {
+      "care_burden": 3,
+      "social_isolation": 3,
+      "mental_health_concern": 2,
+      "home_safety": 2,
+      "geographic_access": 2,
+      "cognitive_function": 2
+    }
+  },
+  "dependence_flag_logic": {
+    "trigger_if_flags": [
+      "high_dependence",
+      "high_mobility_dependence",
+      "no_support",
+      "severe_cognitive_risk",
+      "high_safety_concern"
+    ],
+    "criteria": "Trigger if any 2 or more of the above flags are present",
+    "message_template": "{greeting} {name}, we see you’re navigating challenges like {key_issues}. {recommendation} would offer the support and safety you need. {preference_clause}"
+  },
+  "social_isolation_warning": {
+    "trigger_if_flags": [
+      "high_risk",
+      "mental_health_concern"
+    ],
+    "message_template": "{greeting} {name}, feeling lonely or down can weigh on you. {recommendation} could bring more connection and warmth to your days. {preference_clause}"
+  },
+  "cognitive_decline_warning": {
+    "trigger_if_flags": [
+      "moderate_cognitive_decline",
+      "severe_cognitive_risk"
+    ],
+    "criteria": "Show if moderate_cognitive_decline or severe_cognitive_risk is present",
+    "message_template": "{greeting} {name}, those memory challenges are something to watch. {recommendation} can provide the right support to keep you safe. {preference_clause}"
+  },
+  "final_decision_thresholds": {
+    "assisted_living": "Recommend if assisted_living score >= 6",
+    "in_home_with_support": "Recommend if in_home score >= 3 and assisted_living score < 6",
+    "no_care_needed": "Recommend if in_home score < 3 and assisted_living score < 3 and no dependence flags"
+  },
+  "final_recommendation": {
+    "memory_care_override": {
+      "trigger_if_flags": [
+        "severe_cognitive_risk"
+      ],
+      "criteria": "Always trigger if severe_cognitive_risk and no_support are present",
+      "message_template": "{greeting} {name}, with significant memory challenges and no one around to help, memory care is the best option to keep you safe. {preference_clause}"
+    }
+  },
+  "message_templates": {
+    "greeting": [
+        "We're here for you",
+        "We understand this is a big step",
+        "It's good you're looking into this",
+        "We're glad you're taking this step",
+        "Let's find the best fit for you"
+    ],
+    "preference_clause": {
+        "strong_home": "Since staying home is important to you, let's see how we can make that work with extra support.",
+        "pref_home": "You'd prefer to stay home, so let's explore ways to make that possible.",
+        "open": "You're open to options, so let's look at assisted living communities that feel like home.",
+        "unsure": "If you're unsure, let's talk through the options together."
+    },
+    "key_issues": {
+        "high_dependence": [
+            "needing daily help with tasks",
+            "relying on assistance for daily activities",
+            "having high dependence on support",
+            "requiring help for everyday needs",
+            "depending on others for routine tasks"
+        ],
+        "high_mobility_dependence": [
+            "needing a lot of help to get around",
+            "relying on assistance for mobility",
+            "having high mobility needs",
+            "requiring support to move safely",
+            "depending on help for movement"
+        ],
+        "no_support": [
+            "having no one around to help",
+            "lacking regular support",
+            "being on your own most of the time",
+            "not having daily assistance",
+            "missing consistent help"
+        ],
+        "severe_cognitive_risk": [
+            "facing serious memory challenges",
+            "having significant cognitive concerns",
+            "dealing with severe memory issues",
+            "experiencing serious cognitive changes",
+            "navigating major cognitive risks"
+        ],
+        "high_safety_concern": [
+            "facing safety risks at home",
+            "having major safety concerns",
+            "dealing with high risk of falls or emergencies",
+            "needing more safety measures",
+            "worrying about safety in your home"
+        ],
+        "high_risk": [
+            "facing high social isolation",
+            "feeling very isolated",
+            "having significant social disconnection",
+            "dealing with strong feelings of loneliness",
+            "experiencing high isolation risks"
+        ],
+        "mental_health_concern": [
+            "dealing with down moments",
+            "feeling down or lonely",
+            "having mental health concerns",
+            "experiencing emotional challenges",
+            "navigating mental health issues"
+        ],
+        "moderate_dependence": [
+            "needing some help with tasks",
+            "requiring occasional assistance",
+            "having moderate dependence on support",
+            "depending on help for some activities",
+            "needing moderate daily support"
+        ],
+        "moderate_mobility": [
+            "needing some mobility help",
+            "requiring occasional support to get around",
+            "having moderate mobility needs",
+            "using aids for longer distances",
+            "managing with some mobility assistance"
+        ],
+        "moderate_cognitive_decline": [
+            "noticing some memory changes",
+            "experiencing moderate memory issues",
+            "dealing with slight forgetfulness",
+            "having moderate cognitive concerns",
+            "navigating some cognitive changes"
+        ],
+        "mild_cognitive_decline": [
+            "having slight forgetfulness",
+            "noticing mild memory changes",
+            "dealing with minor cognitive issues",
+            "experiencing slight cognitive decline",
+            "managing mild memory concerns"
+        ],
+        "moderate_safety_concern": [
+            "having some safety concerns",
+            "feeling somewhat unsafe at times",
+            "dealing with moderate risk at home",
+            "needing some safety improvements",
+            "worrying a bit about falls or emergencies"
+        ],
+        "low_access": [
+            "needing help to access services",
+            "finding it tough to reach pharmacies or doctors",
+            "struggling to get to essential services",
+            "having trouble accessing stores or care"
+        ],
+        "very_low_access": [
+            "having no easy way to reach services",
+            "relying on others to get to stores or doctors",
+            "no simple access to pharmacies or doctors",
+            "needing a lot of help to reach services",
+            "finding services really hard to access"
+        ],
+        "needs_financial_assistance": [
+            "worrying about the cost of care",
+            "needing help to make care affordable",
+            "feeling concerned about paying for support",
+            "finding care costs a big challenge",
+            "stressing about how to cover care expenses"
+        ],
+        "can_afford_care": [
+            "having no worries about care costs",
+            "being financially secure for any care",
+            "feeling confident about covering care expenses",
+            "able to afford care without stress",
+            "comfortable with paying for any care needed"
+        ],
+        "moderate_financial_concern": [
+            "needing to budget carefully for care",
+            "being mindful of care costs",
+            "managing finances but watching costs closely",
+            "feeling some concern about care expenses",
+            "keeping an eye on care costs to stay comfortable"
+        ]
+    },
+    "flag_to_category_mapping": {
+      "high_dependence": "care_burden",
+      "moderate_dependence": "care_burden",
+      "high_mobility_dependence": "care_burden",
+      "moderate_mobility": "care_burden",
+      "high_risk": "social_isolation",
+      "moderate_risk": "social_isolation",
+      "mental_health_concern": "mental_health_concern",
+      "no_support": "caregiver_support",
+      "limited_support": "caregiver_support",
+      "moderate_cognitive_decline": "cognitive_function",
+      "mild_cognitive_decline": "cognitive_function",
+      "severe_cognitive_risk": "cognitive_function",
+      "moderate_safety_concern": "home_safety",
+      "high_safety_concern": "home_safety",
+      "low_access": "geographic_access",
+      "very_low_access": "geographic_access",
+      "needs_financial_assistance": "financial_feasibility",
+      "moderate_financial_concern": "financial_feasibility",
+      "can_afford_care": "financial_feasibility"
+    }
+}
+
+# Flag Mapping Function
+def map_flags_to_categories(flags):
+    category_scores = {"in_home": 0, "assisted_living": 0}
+    for flag in flags:
+        if flag in RECOMMENDATION_LOGIC["flag_to_category_mapping"]:
+            category = RECOMMENDATION_LOGIC["flag_to_category_mapping"][flag]
+            if category in RECOMMENDATION_LOGIC["scoring"]["in_home"]:
+                category_scores["in_home"] += RECOMMENDATION_LOGIC["scoring"]["in_home"][category]
+            if category in RECOMMENDATION_LOGIC["scoring"]["assisted_living"]:
+                category_scores["assisted_living"] += RECOMMENDATION_LOGIC["scoring"]["assisted_living"][category]
+    return category_scores
+
+# Dependence Flag Logic
+def check_dependence_flags(flags):
+    dependence_flags = [flag for flag in RECOMMENDATION_LOGIC["dependence_flag_logic"]["trigger_if_flags"] if flag in flags]
+    return len(dependence_flags) >= 2
+
+# Warning Messages
+def get_warning_message(warning_type, name, recommendation, preference_clause):
+    template = RECOMMENDATION_LOGIC[warning_type]["message_template"]
+    greeting = random.choice(RECOMMENDATION_LOGIC["message_templates"]["greeting"])
+    return template.format(greeting=greeting, name=name, recommendation=recommendation, preference_clause=preference_clause)
+
+# Recommendation Logic
+def get_recommendation(name, flags, living_goal):
+    preference_clause = RECOMMENDATION_LOGIC["message_templates"]["preference_clause"].get(
+        {"Very important—I strongly want to stay home": "strong_home",
+         "Somewhat important—I’d prefer to stay but could move": "pref_home",
+         "Not important—I’m open to other options": "open"}.get(living_goal, "unsure"),
+        "If you're unsure, let's talk through the options together."
+    )
+    key_issues = ", ".join(random.choice(RECOMMENDATION_LOGIC["message_templates"]["key_issues"].get(flag, ["various challenges"])) for flag in flags if flag in RECOMMENDATION_LOGIC["message_templates"]["key_issues"])
+    scores = map_flags_to_categories(flags)
+    dependence_triggered = check_dependence_flags(flags)
+
+    if "severe_cognitive_risk" in flags and "no_support" in flags:
+        recommendation = "Memory Care"
+        message = RECOMMENDATION_LOGIC["final_recommendation"]["memory_care_override"]["message_template"].format(
+            greeting=random.choice(RECOMMENDATION_LOGIC["message_templates"]["greeting"]),
+            name=name,
+            preference_clause=preference_clause
+        )
+    elif scores["assisted_living"] >= 6:
+        recommendation = "Assisted Living"
+        message = RECOMMENDATION_LOGIC["dependence_flag_logic"]["message_template"].format(
+            greeting=random.choice(RECOMMENDATION_LOGIC["message_templates"]["greeting"]),
+            name=name,
+            key_issues=key_issues,
+            recommendation=recommendation,
+            preference_clause=preference_clause
+        )
+        if any(flag in flags for flag in RECOMMENDATION_LOGIC["social_isolation_warning"]["trigger_if_flags"]):
+            message += " " + get_warning_message("social_isolation_warning", name, recommendation, preference_clause)
+        if any(flag in flags for flag in RECOMMENDATION_LOGIC["cognitive_decline_warning"]["trigger_if_flags"]):
+            message += " " + get_warning_message("cognitive_decline_warning", name, recommendation, preference_clause)
+    elif scores["in_home"] >= 3 and scores["assisted_living"] < 6:
+        recommendation = "In-Home Care with Support"
+        message = RECOMMENDATION_LOGIC["dependence_flag_logic"]["message_template"].format(
+            greeting=random.choice(RECOMMENDATION_LOGIC["message_templates"]["greeting"]),
+            name=name,
+            key_issues=key_issues,
+            recommendation=recommendation,
+            preference_clause=preference_clause
+        )
+        if any(flag in flags for flag in RECOMMENDATION_LOGIC["social_isolation_warning"]["trigger_if_flags"]):
+            message += " " + get_warning_message("social_isolation_warning", name, recommendation, preference_clause)
+        if any(flag in flags for flag in RECOMMENDATION_LOGIC["cognitive_decline_warning"]["trigger_if_flags"]):
+            message += " " + get_warning_message("cognitive_decline_warning", name, recommendation, preference_clause)
+    elif scores["in_home"] < 3 and scores["assisted_living"] < 3 and not dependence_triggered:
+        recommendation = "No Care Needed at This Time"
+        message = f"{random.choice(RECOMMENDATION_LOGIC['message_templates']['greeting'])} {name}, it looks like you're managing well for now. {preference_clause}"
+    else:
+        recommendation = "Assisted Living"
+        message = RECOMMENDATION_LOGIC["dependence_flag_logic"]["message_template"].format(
+            greeting=random.choice(RECOMMENDATION_LOGIC["message_templates"]["greeting"]),
+            name=name,
+            key_issues=key_issues,
+            recommendation=recommendation,
+            preference_clause=preference_clause
+        )
+        if any(flag in flags for flag in RECOMMENDATION_LOGIC["social_isolation_warning"]["trigger_if_flags"]):
+            message += " " + get_warning_message("social_isolation_warning", name, recommendation, preference_clause)
+        if any(flag in flags for flag in RECOMMENDATION_LOGIC["cognitive_decline_warning"]["trigger_if_flags"]):
+            message += " " + get_warning_message("cognitive_decline_warning", name, recommendation, preference_clause)
+
+    return recommendation, message
+
+# ### Audiencing Functions
 def render_audiencing():
     st.header("Who Are We Planning For?")
     st.write("Let’s start by understanding your planning needs.")
     if "audiencing_step" not in st.session_state:
         st.session_state.audiencing_step = 1
+
     if st.session_state.audiencing_step == 1:
         st.subheader("Step 1: Who Are You Planning For?")
         audience_options = {
@@ -42,6 +352,7 @@ def render_audiencing():
         if st.button("Next", key="audiencing_next_1", disabled=not audience_type):
             st.session_state.audiencing_step = 2
             st.rerun()
+
     if st.session_state.audiencing_step == 2:
         st.subheader("Step 2: Name and Relation")
         st.write("Great—let’s make it personal. Who are we helping?")
@@ -95,10 +406,13 @@ def render_audiencing():
             st.session_state.care_context = care_context
             st.write(f"Okay—we’re building this for {', '.join(care_context['people'])} as {care_context.get('professional_role')}")
         if st.button("Proceed to Guided Care Plan", key="audiencing_proceed", disabled=not (care_context.get("audience_type") and care_context.get("people") and care_context.get("relation"))):
-            if (care_context["audience_type"] == "Planning for one person" and care_context["people"] and care_context["relation"]) or (care_context["audience_type"] == "Planning for two people" and len(care_context["people"]) == 2 and care_context["relation"]) or (care_context["audience_type"] == "Planning as a professional"):
+            if (care_context["audience_type"] == "Planning for one person" and care_context["people"] and care_context["relation"]) or \
+               (care_context["audience_type"] == "Planning for two people" and len(care_context["people"]) == 2 and care_context["relation"]) or \
+               (care_context["audience_type"] == "Planning as a professional"):
                 st.session_state.step = "planner"
                 st.session_state.audiencing_step = 1
                 st.rerun()
+
 def render_planner():
     st.header("Guided Care Plan")
     st.write("Let’s walk through a few questions to understand your care needs.")
@@ -322,105 +636,47 @@ def render_planner():
             st.subheader("Get Your Recommendation")
             if st.button("Get My Care Recommendation"):
                 st.subheader("Care Recommendation")
-                def _norm(s):
-                    if not isinstance(s, str):
-                        return ""
-                    s2 = unicodedata.normalize("NFKC", s).strip().lower()
-                    return " ".join(s2.split())
-                INDEPENDENCE_MAP = {
-                    _norm("I’m fully independent and handle all tasks on my own"): "indep_full",
-                    _norm("I occasionally need reminders or light assistance"): "indep_light",
-                    _norm("I need help with some of these tasks regularly"): "indep_some",
-                    _norm("I rely on someone else for most daily tasks"): "indep_most",
-                }
-                CAREGIVER_MAP = {
-                    _norm("Yes, I have someone with me most of the time"): "support_most",
-                    _norm("Yes, I have support a few days a week"): "support_some",
-                    _norm("Infrequently—someone checks in occasionally"): "support_rare",
-                    _norm("No regular caregiver or support available"): "support_none",
-                }
-                COGNITION_MAP = {
-                    _norm("My memory’s sharp, no help needed"): "cog_clear",
-                    _norm("Slight forgetfulness, but someone helps daily"): "cog_mild_help",
-                    _norm("Noticeable problems, and support’s always there"): "cog_noticeable_with_support",
-                    _norm("Noticeable problems, and I’m mostly on my own"): "cog_noticeable_alone",
-                }
-                SAFETY_MAP = {
-                    _norm("Very safe—I have everything I need"): "safe_high",
-                    _norm("Mostly safe, but a few things concern me"): "safe_medium",
-                    _norm("Sometimes I feel unsafe or unsure"): "safe_low",
-                }
-                GOAL_MAP = {
-                    _norm("Not important—I’m open to other options"): "goal_open",
-                    _norm("Somewhat important—I’d prefer to stay but could move"): "goal_pref_home",
-                    _norm("Very important—I strongly want to stay home"): "goal_strong_home",
-                }
-                independence_raw = care_context["care_flags"].get("independence_level", "")
-                caregiver_raw = care_context["care_flags"].get("caregiver_support", "")
-                cognitive_raw = care_context["care_flags"].get("cognitive_function", "")
-                safety_raw = care_context["care_flags"].get("safety_level_text", "") or care_context["care_flags"].get("safety_select_text", "")
-                living_goal_raw = care_context["care_flags"].get("living_goal", "")
-                mobility_bool = bool(care_context["care_flags"].get("mobility_issue", False))
-                falls_bool = bool(care_context["care_flags"].get("falls_risk", False))
-                recent_fall = bool(care_context["derived_flags"].get("recent_fall", False))
-                conditions = set(care_context["care_flags"].get("chronic_conditions", []))
-                indep = INDEPENDENCE_MAP.get(_norm(independence_raw), "")
-                careg = CAREGIVER_MAP.get(_norm(caregiver_raw), "")
-                cogn = COGNITION_MAP.get(_norm(cognitive_raw), "")
-                safe = SAFETY_MAP.get(_norm(safety_raw), "")
-                goal = GOAL_MAP.get(_norm(living_goal_raw), "")
-                has_dementia = any(c.strip().lower() == "dementia" for c in conditions)
-                cog_severe = cogn in {"cog_noticeable_with_support", "cog_noticeable_alone"} or has_dementia
-                low_support = careg in {"support_rare", "support_none"}
-                limited_support = careg in {"support_some", "support_rare", "support_none"}
-                safety_concern = falls_bool or recent_fall or safe in {"safe_medium", "safe_low"}
-                high_adl_need = indep in {"indep_some", "indep_most"}
-                in_home_blurbs = [
-                    f"We're here for you, {care_context['people'][0]}. With some support at home, you can stay where you feel most comfortable—let's make it safe.",
-                    f"It’s okay to need a hand, {care_context['people'][0]}. Staying home is doable with the right help—let’s set that up together.",
-                    f"You’re managing well, {care_context['people'][0]}. A little in-home care can keep you rooted—we’ll find the best fit.",
-                    f"No need to rush away, {care_context['people'][0]}. With some assistance, home can stay your haven—let’s plan it out.",
-                    f"We see your strength, {care_context['people'][0]}. In-home care can ease the load so you stay put—ready to start?"
-                ]
-                assisted_blurbs = [
-                    f"We’re looking out for you, {care_context['people'][0]}. Assisted living offers safety with your mobility challenges—let’s ensure you’re secure.",
-                    f"It’s tough to manage alone, {care_context['people'][0]}. Assisted living brings support where you need it most—let’s make the move smooth.",
-                    f"Your safety matters, {care_context['people'][0]}. With falls and limited help, assisted living could be your next step—let’s explore it.",
-                    f"We’ve got your back, {care_context['people'][0]}. Assisted living fits with your needs—let’s find a place that feels right.",
-                    f"You deserve peace, {care_context['people'][0]}. Assisted living can handle the risks—let’s get you settled with care."
-                ]
-                memory_blurbs = [
-                    f"We’re here, {care_context['people'][0]}. Given your cognitive state, memory care is our recommendation to keep you safe—let’s explore options with more support.",
-                    f"It’s alright, {care_context['people'][0]}. With your memory challenges, memory care is best—there may be ways to enhance support further.",
-                    f"Your well-being matters, {care_context['people'][0]}. Memory care is advised due to cognitive needs—let’s look into additional care options.",
-                    f"We care about you, {care_context['people'][0]}. Your cognitive state points to memory care—additional support could be tailored.",
-                    f"You’re not alone, {care_context['people'][0]}. Memory care fits your cognitive needs—let’s find ways to boost that support."
-                ]
-                if cog_severe and (safety_concern or high_adl_need or limited_support):
-                    recommendation = "Memory Care"
-                    blurb = random.choice(memory_blurbs)
-                    st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} Given the memory and safety considerations, a secure memory care setting is the safest fit.")
-                elif indep in {"indep_full", "indep_light"} and careg in {"support_most", "support_some"} and goal in {"goal_strong_home", "goal_pref_home"} and not cog_severe:
-                    recommendation = "In-Home Care"
-                    blurb = random.choice(in_home_blurbs)
-                    st.write(f"**Recommendation:** {recommendation}")
-                    mobility_issue = "struggling with movement" if mobility_bool else "getting around okay"
-                    st.write(f"{blurb} With {mobility_issue}, consistent in-home support can keep you safe where you are.")
-                elif mobility_bool and safety_concern and low_support and goal in {"goal_open", "goal_unsure"} and not cog_severe:
-                    recommendation = "Assisted Living"
-                    blurb = random.choice(assisted_blurbs)
-                    st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} This balances safety, daily help, and fewer burdens on family.")
+                # Map raw inputs to flags
+                flags = []
+                if care_context["care_flags"].get("independence_level") in ["I rely on someone else for most daily tasks"]:
+                    flags.append("high_dependence")
+                elif care_context["care_flags"].get("independence_level") in ["I need help with some of these tasks regularly"]:
+                    flags.append("moderate_dependence")
+                if care_context["care_flags"].get("mobility_issue"):
+                    flags.append("high_mobility_dependence")
+                elif care_context["derived_flags"].get("inferred_mobility_aid") in ["I use a cane or walker for longer distances", "I need assistance for most movement around the home"]:
+                    flags.append("moderate_mobility")
+                if care_context["care_flags"].get("social_disconnection") in ["Often—I feel isolated or down much of the time"]:
+                    flags.append("high_risk")
+                elif care_context["care_flags"].get("social_disconnection") in ["Sometimes—I connect weekly but have some down moments"]:
+                    flags.append("moderate_risk")
+                if care_context["care_flags"].get("social_disconnection") in ["Often—I feel isolated or down much of the time", "Sometimes—I connect weekly but have some down moments"]:
+                    flags.append("mental_health_concern")
+                if care_context["care_flags"].get("caregiver_support") in ["No regular caregiver or support available"]:
+                    flags.append("no_support")
+                elif care_context["care_flags"].get("caregiver_support") in ["Infrequently—someone checks in occasionally", "Yes, I have support a few days a week"]:
+                    flags.append("limited_support")
+                if care_context["care_flags"].get("cognitive_function") in ["Noticeable problems, and support’s always there", "Noticeable problems, and I’m mostly on my own"]:
+                    flags.append("moderate_cognitive_decline")
+                elif care_context["care_flags"].get("cognitive_function") in ["Noticeable problems, and I’m mostly on my own"]:
+                    flags.append("severe_cognitive_risk")
+                if care_context["care_flags"].get("falls_risk"):
+                    flags.append("high_safety_concern")
+                elif care_context["care_flags"].get("falls_risk") and care_context["derived_flags"].get("recent_fall", False):
+                    flags.append("moderate_safety_concern")
+                if care_context["care_flags"].get("funding_confidence") in ["Very worried—cost is a big concern for me", "I am on Medicaid"]:
+                    flags.append("needs_financial_assistance")
+                elif care_context["care_flags"].get("funding_confidence") in ["Somewhat worried—I’d need to budget carefully"]:
+                    flags.append("moderate_financial_concern")
                 else:
-                    recommendation = "Memory Care" if cog_severe else "Assisted Living"
-                    blurb = random.choice(memory_blurbs if recommendation == "Memory Care" else assisted_blurbs)
-                    st.write(f"**Recommendation:** {recommendation}")
-                    if recommendation == "Memory Care":
-                        st.write(f"{blurb} Based on cognition indicators, a dedicated memory setting is recommended.")
-                    else:
-                        st.write(f"{blurb} Based on overall risk and support, assisted living is the safer next step.")
-                st.write(f"**Details:** Based on your answers, we suggest {recommendation}")
+                    flags.append("can_afford_care")
+
+                # Get recommendation
+                name = care_context["people"][0] if care_context["people"] else "friend"
+                living_goal = care_context["care_flags"].get("living_goal", "Not important—I’m open to other options")
+                recommendation, message = get_recommendation(name, flags, living_goal)
+                st.write(message)
+
 def render_step(step):
     if step == "intro":
         st.header("Welcome to Senior Navigator")
