@@ -59,10 +59,10 @@ def render_planner():
             st.subheader("Your Cognition")
             st.write("Next, let’s talk about your memory and thinking.")
             cognition_options = {
-                "1": "My memory’s sharp, no help needed",
-                "2": "Slight forgetfulness",
-                "3": "Noticeable problems",
-                "4": "Significant problems"
+                "1": "My memory feels sharp—no real issues",
+                "2": "Occasional lapses—like forgetting what I was saying",
+                "3": "Noticeable problems—like missing meds or appointments",
+                "4": "Serious confusion—like losing track of time, place, or familiar faces"
             }
             cognition_options_list = list(cognition_options.values())
             cognition = st.radio(
@@ -84,8 +84,12 @@ def render_planner():
         elif st.session_state.planner_step == 3:
             st.subheader("Your Caregiver Support")
             cog = care_context["care_flags"].get("cognitive_function", "")
-            if "Noticeable problems" in cog or "Significant problems" in cog:
-                st.write(f"Since you've noted {cog.lower()}, it’s key to know: who’s there to help if memory slips?")
+            if "Occasional lapses" in cog or "Noticeable problems" in cog or "Serious confusion" in cog:
+                funding = care_context["care_flags"].get("funding_confidence", "")
+                if "Not worried—I can afford any care I need" in funding:
+                    st.write(f"Great, you’re financially secure. With {cog.lower()}, would 24/7 caregivers at home work?")
+                else:
+                    st.write(f"Since you’ve noted {cog.lower()}, it’s key to know: who’s there if memory slips?")
             else:
                 st.write("How often do you have someone to help with daily needs?")
             caregiver_options = {
@@ -115,27 +119,22 @@ def render_planner():
             st.subheader("Your Medication Management")
             takes_meds = st.radio(
                 "Do you take any daily prescription meds (e.g., for heart, mood, or memory)?",
-                ["Yes", "No"],
+                ["No", "Yes"],
+                index=0,  # Default to No
                 key="takes_meds_select"
             )
             if takes_meds == "Yes":
                 cog = care_context["care_flags"].get("cognitive_function", "")
-                if "Slight forgetfulness" in cog or "Noticeable problems" in cog or "Significant problems" in cog:
+                if "Occasional lapses" in cog or "Noticeable problems" in cog or "Serious confusion" in cog:
                     st.write(f"Since you’ve noted {cog.lower()}, how confident are you with your meds?")
-                    med_options = {
-                        "1": "I manage them rock-solid",
-                        "2": "I’m pretty sure, with reminders",
-                        "3": "I need help sometimes",
-                        "4": "I can’t count on myself"
-                    }
                 else:
                     st.write("How confident are you managing your meds?")
-                    med_options = {
-                        "1": "I manage them rock-solid",
-                        "2": "I’m pretty sure, with reminders",
-                        "3": "I need help sometimes",
-                        "4": "I can’t count on myself"
-                    }
+                med_options = {
+                    "1": "I manage them rock-solid",
+                    "2": "I’m pretty sure, with reminders",
+                    "3": "I need help sometimes",
+                    "4": "I can’t count on myself"
+                }
                 med_options_list = list(med_options.values())
                 med_confidence = st.radio(
                     "How do you handle your medications?",
@@ -210,6 +209,7 @@ def render_planner():
         elif st.session_state.planner_step == 7:
             st.subheader("Your World")
             st.write("Finally, let’s look at your living situation.")
+
             st.subheader("Social Connection")
             st.write("How connected are you with family, friends, or neighbors?")
             social_options = {
@@ -326,19 +326,20 @@ def render_planner():
             st.subheader("Care Recommendation")
             st.write("Based on your answers, here’s our suggestion.")
             flags = []
-            # Financial (no Medicaid impact per your rule)
-            if care_context["care_flags"].get("funding_confidence") in ["Very worried—cost is a big concern for me", "Somewhat worried—I’d need to budget carefully"]:
+            # Financial
+            funding = care_context["care_flags"].get("funding_confidence", "")
+            if funding in ["Very worried—cost is a big concern for me", "Somewhat worried—I’d need to budget carefully"]:
                 flags.append("needs_financial_assistance")
-            elif care_context["care_flags"].get("funding_confidence") == "Not worried—I can afford any care I need":
+            elif funding == "Not worried—I can afford any care I need":
                 flags.append("can_afford_care")
 
             # Cognition
             cog = care_context["care_flags"].get("cognitive_function", "")
-            if "Significant problems" in cog:
+            if "Serious confusion" in cog or "Dementia" in care_context["care_flags"].get("chronic_conditions", []) or "Parkinson's" in care_context["care_flags"].get("chronic_conditions", []):
                 flags.append("severe_cognitive_risk")
             elif "Noticeable problems" in cog:
                 flags.append("moderate_cognitive_decline")
-            elif "Slight forgetfulness" in cog:
+            elif "Occasional lapses" in cog:
                 flags.append("mild_cognitive_decline")
 
             # Caregiver Support
@@ -351,7 +352,7 @@ def render_planner():
                 flags.append("adequate_support")
 
             # Medication Adherence
-            med_adherence = care_context["care_flags"].get("med_adherence", "")
+            med_adherence = care_context["care_flags"].get("med_adherence", "No")
             if med_adherence in ["I need help sometimes", "I can’t count on myself"]:
                 flags.append("med_adherence_risk")
 
@@ -390,26 +391,30 @@ def render_planner():
             if care_context["derived_flags"].get("recent_fall", False):
                 flags.append("high_safety_concern")
 
-            # Chronic Conditions
+            # Chronic Conditions (beyond dementia)
             conditions = care_context["care_flags"].get("chronic_conditions", [])
-            if "Dementia" in conditions or "Parkinson's" in conditions:
-                flags.append("severe_cognitive_risk")
-            elif "CHF" in conditions or "COPD" in conditions:
+            if "CHF" in conditions or "COPD" in conditions:
                 if "high_mobility_dependence" in flags or "moderate_safety_concern" in flags:
                     flags.append("chronic_health_risk")
 
-            # Score and Recommend
+            # Score Calculation
             score = 0
             if "severe_cognitive_risk" in flags:
                 score += 15
-            if "moderate_cognitive_decline" in flags or "mild_cognitive_decline" in flags:
-                score += 8
+            if "moderate_cognitive_decline" in flags:
+                score += 5
+            if "mild_cognitive_decline" in flags:
+                score += 3
             if "high_dependence" in flags or "high_mobility_dependence" in flags:
                 score += 10
             if "moderate_dependence" in flags or "moderate_mobility" in flags:
                 score += 5
-            if "no_support" in flags or "limited_support" in flags:
+            if "no_support" in flags:
                 score += 7
+            if "limited_support" in flags:
+                score += 4
+            if "adequate_support" in flags and "severe_cognitive_risk" in flags:
+                score -= 5  # 24/7 care adjustment
             if "high_risk" in flags:
                 score += 6
             if "moderate_risk" in flags:
@@ -425,26 +430,22 @@ def render_planner():
             if "chronic_health_risk" in flags:
                 score += 7
 
-            # Adjust for support with severe cognition
-            if "severe_cognitive_risk" in flags and "adequate_support" in flags:
-                score -= 5  # Reflects 24/7 skilled care possibility
-
             # Recommendation
             recommendation = "No Care Needed at This Time"
             message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, it looks like you\'re managing well for now."
-            if score >= 25 or ("severe_cognitive_risk" in flags and "no_support" in flags):
+            if ("severe_cognitive_risk" in flags and "no_support" in flags) or score >= 25:
                 recommendation = "Memory Care"
                 issues = [f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns', 'dealing with severe memory issues']) if 'severe_cognitive_risk' in flags else ''}",
                           f"{random.choice(['needing daily help with tasks', 'relying on assistance for daily activities']) if 'high_dependence' in flags else ''}",
                           f"{random.choice(['needing a lot of help to get around', 'relying on assistance for mobility']) if 'high_mobility_dependence' in flags else ''}"]
                 issues = [i for i in issues if i]
-                message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, with {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'significant challenges'}, Memory Care is the safest option. If you have 24/7 skilled care at home, aging in place could work—let’s explore that."
+                message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, with {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'significant challenges'}, Memory Care is the safest choice. If you have 24/7 skilled care at home, aging in place could work—let’s explore that."
             elif score >= 15:
                 recommendation = "Assisted Living"
                 issues = [f"{random.choice(['needing daily help with tasks', 'relying on assistance for daily activities']) if 'high_dependence' in flags else random.choice(['needing some help with tasks', 'requiring occasional assistance']) if 'moderate_dependence' in flags else ''}",
                           f"{random.choice(['needing a lot of help to get around', 'relying on assistance for mobility']) if 'high_mobility_dependence' in flags else random.choice(['needing some mobility help', 'using aids for longer distances']) if 'moderate_mobility' in flags else ''}",
                           f"{random.choice(['having no one around to help', 'lacking regular support']) if 'no_support' in flags else random.choice(['having no one around infrequently', 'lacking support occasionally']) if 'limited_support' in flags else ''}",
-                          f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns']) if 'severe_cognitive_risk' in flags else random.choice(['noticing some memory changes', 'experiencing moderate memory issues']) if 'moderate_cognitive_decline' in flags else ''}",
+                          f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns']) if 'severe_cognitive_risk' in flags else random.choice(['occasional lapses', 'noticeable problems']) if 'moderate_cognitive_decline' in flags else ''}",
                           f"{random.choice(['facing safety risks at home', 'having major safety concerns']) if 'high_safety_concern' in flags else random.choice(['having some safety concerns', 'feeling somewhat unsafe']) if 'moderate_safety_concern' in flags else ''}"]
                 issues = [i for i in issues if i][:3]  # Top 3 issues
                 preference = {
@@ -458,7 +459,7 @@ def render_planner():
                 issues = [f"{random.choice(['needing some help with tasks', 'requiring occasional assistance']) if 'moderate_dependence' in flags else ''}",
                           f"{random.choice(['needing some mobility help', 'using aids for longer distances']) if 'moderate_mobility' in flags else ''}",
                           f"{random.choice(['having no one around infrequently', 'lacking support occasionally']) if 'limited_support' in flags else ''}",
-                          f"{random.choice(['noticing some memory changes', 'experiencing moderate memory issues']) if 'moderate_cognitive_decline' in flags else ''}",
+                          f"{random.choice(['occasional lapses', 'noticeable problems']) if 'moderate_cognitive_decline' in flags else ''}",
                           f"{random.choice(['having some safety concerns', 'feeling somewhat unsafe']) if 'moderate_safety_concern' in flags else ''}"]
                 issues = [i for i in issues if i][:3]  # Top 3 issues
                 preference = {
