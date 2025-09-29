@@ -46,9 +46,11 @@ def render_audiencing():
                     care_context["professional_role"] = sub_type
             st.session_state.care_context = care_context
             st.write(f"Planning for: {care_context.get('audience_type', 'not specified yet')} as {care_context.get('professional_role', 'self')}")
+        # Only proceed if a selection is made
         if st.button("Next", key="audiencing_next_1", disabled=audience_type_idx is None):
-            st.session_state.audiencing_step = 2
-            st.rerun()
+            if audience_type_idx is not None:  # Double-check to avoid race condition
+                st.session_state.audiencing_step = 2
+                st.rerun()
 
     if st.session_state.audiencing_step == 2:
         st.subheader("Step 2: Name and Relation")
