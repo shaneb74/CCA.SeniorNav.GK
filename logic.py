@@ -74,17 +74,17 @@ RECOMMENDATION_LOGIC = {
     },
     "message_templates": {
         "greeting": [
-            "We’re here for you",
+            "We're here for you",
             "We understand this is a big step",
-            "It’s good you’re looking into this",
-            "We’re glad you’re taking this step",
-            "Let’s find the best fit for you"
+            "It's good you're looking into this",
+            "We're glad you're taking this step",
+            "Let's find the best fit for you"
         ],
         "preference_clause": {
-            "strong_home": "Since staying home is important to you, let’s see how we can make that work with extra support.",
-            "pref_home": "You’d prefer to stay home, so let’s explore ways to make that possible.",
-            "open": "You’re open to options, so let’s look at assisted living communities that feel like home.",
-            "unsure": "If you’re unsure, let’s talk through the options together."
+            "strong_home": "Since staying home is important to you, let's see how we can make that work with extra support.",
+            "pref_home": "You'd prefer to stay home, so let's explore ways to make that possible.",
+            "open": "You're open to options, so let's look at assisted living communities that feel like home.",
+            "unsure": "If you're unsure, let's talk through the options together."
         },
         "key_issues": {
             "high_dependence": [
@@ -230,19 +230,46 @@ RECOMMENDATION_LOGIC = {
     }
 }
 
+def _validate_config(cfg):
+    required_top = ["scoring", "flag_to_category_mapping"]
+    for k in required_top:
+        if k not in cfg:
+            st.error(f"Config missing required key: '{k}'. Check RECOMMENDATION_LOGIC initialization.")
+            st.stop()
+    scoring = cfg.get("scoring", {})
+    for bucket in ["in_home", "assisted_living"]:
+        if bucket not in scoring or not isinstance(scoring[bucket], dict):
+            st.error(f"Config scoring bucket '{bucket}' missing or malformed.")
+            st.stop()
+
+_validate_config(RECOMMENDATION_LOGIC)
+
 def map_flags_to_categories(flags):
-    category_scores = {"in_home": 0, "assisted_living": 0}
-    for flag in flags:
-        if flag in RECOMMENDATION_LOGIC["flag_to_category_mapping"]:
-            category = RECOMMENDATION_LOGIC["flag_to_category_mapping"][flag]
-            if category in RECOMMENDATION_LOGIC["scoring"]["in_home"]:
-                category_scores["in_home"] += RECOMMENDATION_LOGIC["scoring"]["in_home"][category]
-            if category in RECOMMENDATION_LOGIC["scoring"]["assisted_living"]:
-                category_scores["assisted_living"] += RECOMMENDATION_LOGIC["scoring"]["assisted_living"][category]
-    return category_scores
+    cfg = RECOMMENDATION_LOGIC or {}
+    mapping = cfg.get("flag_to_category_mapping") or {}
+    scoring = cfg.get("scoring") or {}
+    in_home_weights = scoring.get("in_home") or {}
+    al_weights = scoring.get("assisted_living") or {}
+    scores = {"in_home": 0, "assisted_living": 0}
+    unknown_flags = []
+    for flag in flags or []:
+        category = mapping.get(flag)
+        if not category:
+            unknown_flags.append(flag)
+            continue
+        if category in in_home_weights:
+            scores["in_home"] += in_home_weights[category]
+        if category in al_weights:
+            scores["assisted_living"] += al_weights[category]
+    if unknown_flags and st.session_state.get("show_qa"):
+        st.info(f"Unmapped flags (not scored): {sorted(set(unknown_flags))}")
+    return scores
 
 def check_dependence_flags(flags):
-    dependence_flags = [flag for flag in RECOMMENDATION_LOGIC["dependence_flag_logic"]["trigger_if_flags"] if flag in flags]
+    dep_cfg = (RECOMMENDATION_LOGIC.get("dependence_flag_logic") or {}).get("trigger_if_flags") or []
+    if not isinstance(dep_cfg, (list, tuple, set)):
+        dep_cfg = []
+    dependence_flags = [flag for flag in flags or [] if flag in dep_cfg]
     return len(dependence_flags) >= 2
 
 def get_warning_message(warning_type, name, recommendation, preference_clause):
@@ -258,7 +285,7 @@ def get_recommendation(name, flags, living_goal):
     }.get(living_goal, "unsure")
     preference_clause = RECOMMENDATION_LOGIC["message_templates"]["preference_clause"].get(
         preference_key,
-        "If you’re unsure, let’s talk through the options together."
+        "If you're unsure, let's talk through the options together."
     )
     key_issues = ", ".join(
         random.choice(RECOMMENDATION_LOGIC["message_templates"]["key_issues"].get(flag, ["various challenges"]))
@@ -302,7 +329,7 @@ def get_recommendation(name, flags, living_goal):
             message += " " + get_warning_message("cognitive_decline_warning", name, recommendation, preference_clause)
     elif scores["in_home"] < 3 and scores["assisted_living"] < 3 and not dependence_triggered:
         recommendation = "No Care Needed at This Time"
-        message = f"{random.choice(RECOMMENDATION_LOGIC['message_templates']['greeting'])} {name}, it looks like you’re managing well for now. {preference_clause}"
+        message = f"{random.choice(RECOMMENDATION_LOGIC['message_templates']['greeting'])} {name}, it looks like you're managing well for now. {preference_clause}"
     else:
         recommendation = "Assisted Living"
         message = RECOMMENDATION_LOGIC["dependence_flag_logic"]["message_template"].format(
