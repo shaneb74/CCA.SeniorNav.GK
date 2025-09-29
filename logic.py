@@ -57,7 +57,7 @@ def render_audiencing():
 # ### Guided Care Plan Functions
 def render_planner():
     st.header("Guided Care Plan")
-    st.write("Answer these questions to assess your care needs.")
+    st.write("Let’s walk through these questions to understand your care needs.")
     if "planner_step" not in st.session_state:
         st.session_state.planner_step = 1
 
