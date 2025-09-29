@@ -108,13 +108,14 @@ def render_planner():
     if "planner_step" not in st.session_state:
         st.session_state.planner_step = 1
 
-    # QA Drawer at the bottom, out of the way
-    with st.expander("View Answers & Flags", expanded=False):
-        st.write("**Audience Type:**", care_context.get("audience_type", "Not set"))
-        st.write("**People:**", ", ".join(care_context.get("people", [])))
-        st.write("**Relation:**", care_context.get("relation", "Not set"))
-        for flag_type in ["care_flags", "derived_flags"]:
-            st.write(f"**{flag_type.replace('_', ' ').title()}:**", care_context.get(flag_type, {}))
+    # QA Drawer at the bottom, out of the way (hidden during Audiencing Step 2)
+    if st.session_state.get("step") == "planner" or st.session_state.get("audiencing_step", 1) != 2:
+        with st.expander("View Answers & Flags", expanded=False):
+            st.write("**Audience Type:**", care_context.get("audience_type", "Not set"))
+            st.write("**People:**", ", ".join(care_context.get("people", [])))
+            st.write("**Relation:**", care_context.get("relation", "Not set"))
+            st.write("**Care Flags:**", {k: v for k, v in care_context.get("care_flags", {}).items() if v})
+            st.write("**Derived Flags:**", {k: v for k, v in care_context.get("derived_flags", {}).items() if v})
 
     # Step-based question rendering in a frame
     with st.container():
