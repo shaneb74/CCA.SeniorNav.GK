@@ -16,7 +16,7 @@ care_context = st.session_state.care_context
 # ### Audiencing Functions
 def render_audiencing():
     st.header("Who Are We Planning For?")
-    st.write("Let’s start by understanding your planning needs.")
+    st.write("Let's start by understanding your planning needs.")
     if "audiencing_step" not in st.session_state:
         st.session_state.audiencing_step = 1
 
@@ -37,7 +37,7 @@ def render_audiencing():
                     "1": "Discharge planner",
                     "2": "Making a referral"
                 }
-                sub_type = st.radio("What’s your role?", [professional_sub_options["1"], professional_sub_options["2"]], key="professional_sub_type", index=0)
+                sub_type = st.radio("What's your role?", [professional_sub_options["1"], professional_sub_options["2"]], key="professional_sub_type", index=0)
                 care_context["professional_role"] = sub_type
             st.session_state.care_context = care_context
             st.write(f"Planning for: {care_context.get('audience_type', 'not specified yet')} as {care_context.get('professional_role', 'self')}")
@@ -168,7 +168,7 @@ def render_planner():
 
         elif st.session_state.planner_step == 3:
             st.subheader("Step 3: Mobility")
-            st.write("How would you describe your mobility?")
+            st.write("How would you describe your mobility? (e.g., walking, driving, or using rideshare)")
             mobility_options = {
                 "1": "I walk easily without any support",
                 "2": "I use a cane or walker for longer distances",
@@ -292,19 +292,14 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 9:
-            st.subheader("Step 9: Accessibility")
-            st.write("How accessible are services from your home?")
-            accessibility_options = {
-                "1": "I can walk to most of them easily",
-                "2": "I can drive or get a ride with little trouble",
-                "3": "It’s difficult to get to these places without help",
-                "4": "I have no easy access and need assistance to get anywhere"
-            }
-            accessibility = st.radio("How accessible are services like pharmacies, grocery stores, and doctor’s offices from your home?", [accessibility_options["1"], accessibility_options["2"], accessibility_options["3"], accessibility_options["4"]], key="accessibility_select", index=0)
-            if accessibility:
-                care_context["care_flags"]["accessibility"] = accessibility
+            st.subheader("Step 9: Chronic Conditions")
+            st.write("Which chronic conditions do you have?")
+            condition_options = ["Diabetes", "Hypertension", "Dementia", "COPD", "CHF", "Arthritis", "Parkinson's", "Stroke"]
+            conditions = st.multiselect("Which chronic conditions do you have?", condition_options, key="chronic_conditions_select")
+            if conditions:
+                care_context["care_flags"]["chronic_conditions"] = conditions
                 st.session_state.care_context = care_context
-                st.write(f"Accessibility: {care_context['care_flags']['accessibility']}.")
+                st.write(f"Chronic conditions: {', '.join(care_context['care_flags']['chronic_conditions'])}.")
             if st.button("Proceed", key="planner_proceed_9"):
                 st.session_state.planner_step = 10
                 st.rerun()
@@ -333,14 +328,14 @@ def render_planner():
             # Recommendation Logic
             if st.session_state.planner_step == 10 and "living_goal" in care_context["care_flags"]:
                 st.subheader("Care Recommendation")
-                recommendation = "Consult Needed"  # Default fallback
+                # Default values for robustness
                 independence = care_context["care_flags"].get("independence_level", "")
-                caregiver = care_context["care_flags"].get("caregiver_support", "")
+                caregiver = care_context["care_flags"].get("caregiver_support", "Yes, I have someone with me most of the time")
                 mobility = care_context["care_flags"].get("mobility_issue", False)
                 falls_risk = care_context["care_flags"].get("falls_risk", False)
-                cognitive = care_context["care_flags"].get("cognitive_function", "")
+                cognitive = care_context["care_flags"].get("cognitive_function", "My memory’s sharp, no help needed")
                 recent_fall = care_context["derived_flags"].get("recent_fall", False)
-                living_goal = care_context["care_flags"].get("living_goal", "")
+                living_goal = care_context["care_flags"].get("living_goal", "Not important—I’m open to other options")
                 chronic_conditions = care_context["care_flags"].get("chronic_conditions", [])
 
                 # Initialize mobility_issue with a default
@@ -376,21 +371,10 @@ def render_planner():
                     f"No rush, {care_context['people'][0]}. An expert can guide us—let’s set up that support.",
                 ]
 
-                # In-Home Care (only if memory/cognitive risk is absent)
-                if (independence in ["I need help with some of these tasks regularly", "I rely on someone else for most daily tasks"] and
+                # Memory Care (highest priority with cognitive risk)
+                if (cognitive in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and
                     caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
-                    living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"] and
-                    cognitive not in ["Noticeable problems, and support’s always there", "Noticeable problems, and I’m mostly on my own"] and
-                    "Dementia" not in chronic_conditions):
-                    recommendation = "In-Home Care"
-                    blurb = random.choice(in_home_blurbs)
-                    st.write(f"**Recommendation:** {recommendation}")
-                    st.write(f"{blurb} With {mobility_issue} and limited help, in-home support can keep you where you love.")
-
-                # Memory Care (prioritized over other options if cognitive risk is high)
-                elif (cognitive in ["Noticeable problems, and support’s always there", "Noticeable problems, and I’m mostly on my own"] and
-                      caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
-                      "Dementia" in chronic_conditions):
+                    "Dementia" in chronic_conditions):
                     recommendation = "Memory Care"
                     blurb = random.choice(memory_blurbs)
                     if living_goal == "Very important—I strongly want to stay home":
@@ -400,11 +384,22 @@ def render_planner():
                         st.write(f"**Recommendation:** {recommendation}")
                         st.write(f"{blurb} With memory challenges and little help, this ensures you’re cared for daily.")
 
-                # Assisted Living (only if memory risk is absent)
+                # In-Home Care (only if no cognitive/memory risk)
+                elif (independence in ["I need help with some of these tasks regularly", "I rely on someone else for most daily tasks"] and
+                      caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
+                      living_goal in ["Very important—I strongly want to stay home", "Somewhat important—I’d prefer to stay but could move"] and
+                      cognitive not in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and
+                      "Dementia" not in chronic_conditions):
+                    recommendation = "In-Home Care"
+                    blurb = random.choice(in_home_blurbs)
+                    st.write(f"**Recommendation:** {recommendation}")
+                    st.write(f"{blurb} With {mobility_issue} and limited help, in-home support can keep you where you love.")
+
+                # Assisted Living (only if no cognitive/memory risk)
                 elif (mobility and falls_risk and
                       caregiver in ["Infrequently—someone checks in occasionally", "No regular caregiver or support available"] and
                       living_goal in ["Not important—I’m open to other options", "Unsure"] and
-                      cognitive not in ["Noticeable problems, and support’s always there", "Noticeable problems, and I’m mostly on my own"] and
+                      cognitive not in ["Noticeable problems, and support's always there", "Noticeable problems, and I'm mostly on my own"] and
                       "Dementia" not in chronic_conditions):
                     recommendation = "Assisted Living"
                     blurb = random.choice(assisted_blurbs)
@@ -435,38 +430,3 @@ def render_step(step: str):
     """Dispatch to the appropriate step function."""
     func = STEP_MAP.get(step, lambda: st.error(f"Unknown step: {step}"))
     func()
-
-</xaiArtifact>
-
-### Deployment Instructions
-1. **Edit on GitHub**:
-   - Go to `https://github.com/shaneb74/cca.seniornav.gk/main/logic.py`.
-   - Replace the entire content with the `logic.py` artifact above.
-   - Commit with: "Fix UnboundLocalError in recommendation logic by initializing mobility_issue (2025-09-29 13:10 CDT)".
-
-2. **Redeploy on Streamlit Cloud**:
-   - Streamlit Cloud will auto-rebuild from the `main` branch.
-   - If no update in 5-10 minutes, manually redeploy via the Streamlit Community Cloud dashboard: "Manage app" → "Redeploy" for `shaneb74/cca-seniornav-gk`.
-   - Check logs via "Manage app" for build success.
-
-3. **Testing**:
-   - Visit your app URL (e.g., `https://shaneb74-cca-seniornav-gk.streamlit.app/`).
-   - Complete Audiencing and all 10 Guided Care Plan steps.
-   - After "Finish" on Step 10, verify the "Care Recommendation" section:
-     - No `UnboundLocalError`.
-     - Correct recommendation with a random, empathetic blurb.
-     - Geography context (e.g., "especially in a remote spot") if mobility and caregiver suggest isolation.
-     - No "let’s figure it out" for clear assisted living/memory care; only in-home support options for viable stay-home cases.
-   - Test edge cases (e.g., cognitive issues, no support, "Stay home" → Memory Care, no home option).
-
-4. **Feedback**:
-   - Report any errors or blurb issues (e.g., tone, repetition).
-   - Confirm accuracy against your agent-tested scenarios.
-
-### Notes
-- **Fix**: Initialized `mobility_issue` outside the conditions, fixing the `UnboundLocalError`.
-- **Accuracy**: Preserves your 100% agent-tested logic, with geography inferred from mobility and caregiver.
-- **Blurbs**: Five per condition, randomized, empathetic, personalized with names.
-- **End of Process**: This is the final update per your request. Test and deploy—conversation ends here.
-
-Good luck with the rollout!
