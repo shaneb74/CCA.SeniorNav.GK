@@ -2,7 +2,6 @@ import streamlit as st
 from ui.helpers import radio_from_answer_map
 import random
 
-# Shared Context
 if "care_context" not in st.session_state:
     st.session_state.care_context = {
         "audience_type": None,
@@ -13,7 +12,6 @@ if "care_context" not in st.session_state:
 
 care_context = st.session_state.care_context
 
-# Recommendation Logic JSON
 RECOMMENDATION_LOGIC = {
     "scoring": {
         "in_home": {
@@ -232,7 +230,6 @@ RECOMMENDATION_LOGIC = {
     }
 }
 
-# Flag Mapping Function
 def map_flags_to_categories(flags):
     category_scores = {"in_home": 0, "assisted_living": 0}
     for flag in flags:
@@ -244,40 +241,32 @@ def map_flags_to_categories(flags):
                 category_scores["assisted_living"] += RECOMMENDATION_LOGIC["scoring"]["assisted_living"][category]
     return category_scores
 
-# Dependence Flag Logic
 def check_dependence_flags(flags):
     dependence_flags = [flag for flag in RECOMMENDATION_LOGIC["dependence_flag_logic"]["trigger_if_flags"] if flag in flags]
     return len(dependence_flags) >= 2
 
-# Warning Messages
 def get_warning_message(warning_type, name, recommendation, preference_clause):
     template = RECOMMENDATION_LOGIC[warning_type]["message_template"]
     greeting = random.choice(RECOMMENDATION_LOGIC["message_templates"]["greeting"])
     return template.format(greeting=greeting, name=name, recommendation=recommendation, preference_clause=preference_clause)
 
-# Recommendation Logic
 def get_recommendation(name, flags, living_goal):
     preference_key = {
         "Very important—I strongly want to stay home": "strong_home",
         "Somewhat important—I’d prefer to stay but could move": "pref_home",
         "Not important—I’m open to other options": "open"
     }.get(living_goal, "unsure")
-
     preference_clause = RECOMMENDATION_LOGIC["message_templates"]["preference_clause"].get(
         preference_key,
         "If you're unsure, let's talk through the options together."
     )
-
     key_issues = ", ".join(
         random.choice(RECOMMENDATION_LOGIC["message_templates"]["key_issues"].get(flag, ["various challenges"]))
         for flag in flags
         if flag in RECOMMENDATION_LOGIC["message_templates"]["key_issues"]
     )
-
     scores = map_flags_to_categories(flags)
     dependence_triggered = check_dependence_flags(flags)
-
-    # Memory Care override (as defined)
     if "severe_cognitive_risk" in flags and "no_support" in flags:
         recommendation = "Memory Care"
         message = RECOMMENDATION_LOGIC["final_recommendation"]["memory_care_override"]["message_template"].format(
@@ -327,16 +316,13 @@ def get_recommendation(name, flags, living_goal):
             message += " " + get_warning_message("social_isolation_warning", name, recommendation, preference_clause)
         if any(flag in flags for flag in RECOMMENDATION_LOGIC["cognitive_decline_warning"]["trigger_if_flags"]):
             message += " " + get_warning_message("cognitive_decline_warning", name, recommendation, preference_clause)
-
     return recommendation, message
 
-# Audiencing
 def render_audiencing():
     st.header("Who Are We Planning For?")
     st.write("Let’s start by understanding your planning needs.")
     if "audiencing_step" not in st.session_state:
         st.session_state.audiencing_step = 1
-
     if st.session_state.audiencing_step == 1:
         st.subheader("Step 1: Who Are You Planning For?")
         audience_options = {
@@ -364,7 +350,6 @@ def render_audiencing():
         if st.button("Next", key="audiencing_next_1", disabled=not audience_type):
             st.session_state.audiencing_step = 2
             st.rerun()
-
     if st.session_state.audiencing_step == 2:
         st.subheader("Step 2: Name and Relation")
         st.write("Great—let’s make it personal. Who are we helping?")
@@ -428,7 +413,6 @@ def render_planner():
     st.write("Let’s walk through a few questions to understand your care needs.")
     if "planner_step" not in st.session_state:
         st.session_state.planner_step = 1
-
     if st.session_state.get("step") == "planner" and st.session_state.get("show_qa", True):
         with st.expander("View Answers & Flags", expanded=False):
             st.write("**Audience Type:**", care_context.get("audience_type", "Not set"))
@@ -436,7 +420,6 @@ def render_planner():
             st.write("**Relation:**", care_context.get("relation", "Not set"))
             st.write("**Care Flags:**", {k: v for k, v in care_context.get("care_flags", {}).items() if v})
             st.write("**Derived Flags:**", {k: v for k, v in care_context.get("derived_flags", {}).items() if v})
-
     with st.container():
         if st.session_state.planner_step == 1:
             st.subheader("Step 1: Financial Confidence")
@@ -467,7 +450,6 @@ def render_planner():
                 st.rerun()
             if st.button("Go Back", key="planner_back_1", disabled=True):
                 pass
-
         elif st.session_state.planner_step == 2:
             st.subheader("Step 2: Daily Independence")
             st.write("How independent are you with daily tasks?")
@@ -493,7 +475,6 @@ def render_planner():
             if st.button("Go Back", key="planner_back_2"):
                 st.session_state.planner_step = 1
                 st.rerun()
-
         elif st.session_state.planner_step == 3:
             st.subheader("Step 3: Mobility")
             st.write("How would you describe your mobility? (e.g., walking, driving, or using rideshare)")
@@ -517,7 +498,6 @@ def render_planner():
             if st.button("Go Back", key="planner_back_3"):
                 st.session_state.planner_step = 2
                 st.rerun()
-
         elif st.session_state.planner_step == 4:
             st.subheader("Step 4: Social Connection")
             st.write("How often do you feel lonely, down, or socially disconnected?")
@@ -542,7 +522,6 @@ def render_planner():
             if st.button("Go Back", key="planner_back_4"):
                 st.session_state.planner_step = 3
                 st.rerun()
-
         elif st.session_state.planner_step == 5:
             st.subheader("Step 5: Caregiver Support")
             st.write("Do you have a caregiver or family member who can help regularly?")
@@ -568,7 +547,6 @@ def render_planner():
             if st.button("Go Back", key="planner_back_5"):
                 st.session_state.planner_step = 4
                 st.rerun()
-
         elif st.session_state.planner_step == 6:
             st.subheader("Step 6: Cognitive Function")
             st.write("Thinking about your memory and focus, is someone usually around to help you?")
@@ -594,7 +572,6 @@ def render_planner():
             if st.button("Go Back", key="planner_back_6"):
                 st.session_state.planner_step = 5
                 st.rerun()
-
         elif st.session_state.planner_step == 7:
             st.subheader("Step 7: Home Safety")
             st.write("How safe do you feel in your home?")
@@ -619,7 +596,6 @@ def render_planner():
             if st.button("Go Back", key="planner_back_7"):
                 st.session_state.planner_step = 6
                 st.rerun()
-
         elif st.session_state.planner_step == 8:
             st.subheader("Step 8: Fall History")
             st.write("Have you had a fall recently?")
@@ -636,7 +612,6 @@ def render_planner():
             if st.button("Go Back", key="planner_back_8"):
                 st.session_state.planner_step = 7
                 st.rerun()
-
         elif st.session_state.planner_step == 9:
             st.subheader("Step 9: Chronic Conditions")
             st.write("Which chronic conditions do you have?")
@@ -652,7 +627,6 @@ def render_planner():
             if st.button("Go Back", key="planner_back_9"):
                 st.session_state.planner_step = 8
                 st.rerun()
-
         elif st.session_state.planner_step == 10:
             st.subheader("Step 10: Home Preference")
             st.write("How important is it for you to stay in your current home?")
@@ -673,23 +647,16 @@ def render_planner():
             if st.button("Go Back", key="planner_back_10"):
                 st.session_state.planner_step = 9
                 st.rerun()
-
         elif st.session_state.planner_step == 11:
             st.subheader("Get Your Recommendation")
             if st.button("Get My Care Recommendation"):
                 st.subheader("Care Recommendation")
-
-                # Map raw inputs to flags
                 flags = []
-
-                # Independence -> dependence flags
                 indep = care_context["care_flags"].get("independence_level")
                 if indep in ["I rely on someone else for most daily tasks"]:
                     flags.append("high_dependence")
                 elif indep in ["I need help with some of these tasks regularly"]:
                     flags.append("moderate_dependence")
-
-                # Mobility
                 if care_context["care_flags"].get("mobility_issue"):
                     flags.append("high_mobility_dependence")
                 elif care_context["derived_flags"].get("inferred_mobility_aid") in [
@@ -697,8 +664,6 @@ def render_planner():
                     "I need assistance for most movement around the home"
                 ]:
                     flags.append("moderate_mobility")
-
-                # Social disconnection
                 social = care_context["care_flags"].get("social_disconnection")
                 if social in ["Often—I feel isolated or down much of the time"]:
                     flags.append("high_risk")
@@ -706,15 +671,11 @@ def render_planner():
                     flags.append("moderate_risk")
                 if social in ["Often—I feel isolated or down much of the time", "Sometimes—I connect weekly but have some down moments"]:
                     flags.append("mental_health_concern")
-
-                # Caregiver support
                 support = care_context["care_flags"].get("caregiver_support")
                 if support in ["No regular caregiver or support available"]:
                     flags.append("no_support")
                 elif support in ["Infrequently—someone checks in occasionally", "Yes, I have support a few days a week"]:
                     flags.append("limited_support")
-
-                # Cognition: fix unreachable branch by splitting moderate vs severe
                 cog = care_context["care_flags"].get("cognitive_function")
                 if cog in ["Noticeable problems, and I'm mostly on my own"]:
                     flags.append("severe_cognitive_risk")
@@ -722,16 +683,12 @@ def render_planner():
                     flags.append("moderate_cognitive_decline")
                 elif cog in ["Slight forgetfulness, but someone helps daily"]:
                     flags.append("mild_cognitive_decline")
-
-                # Safety: let recent fall upgrade to high; else moderate if general risk
                 has_falls_risk = bool(care_context["care_flags"].get("falls_risk"))
                 recent_fall = bool(care_context["derived_flags"].get("recent_fall", False))
                 if has_falls_risk and recent_fall:
                     flags.append("high_safety_concern")
                 elif has_falls_risk:
                     flags.append("moderate_safety_concern")
-
-                # Funding
                 funding = care_context["care_flags"].get("funding_confidence")
                 if funding in ["Very worried—cost is a big concern for me", "I am on Medicaid"]:
                     flags.append("needs_financial_assistance")
@@ -739,8 +696,6 @@ def render_planner():
                     flags.append("moderate_financial_concern")
                 elif funding in ["Not worried—I can cover any care I need"]:
                     flags.append("can_afford_care")
-
-                # Get recommendation
                 name = care_context["people"][0] if care_context["people"] else "friend"
                 living_goal = care_context["care_flags"].get("living_goal", "Not important—I’m open to other options")
                 recommendation, message = get_recommendation(name, flags, living_goal)
@@ -748,10 +703,29 @@ def render_planner():
 
 def render_step(step):
     if step == "intro":
-        st.header("Welcome to Senior Navigator")
+        st.title("Senior Navigator")
+        st.write("Welcome! Start by exploring your options.")
+        if st.button("Get Started"):
+            st.session_state.step = "audiencing"
+            st.session_state.audiencing_step = 1
+            st.rerun()
+    elif step == "qa":
+        st.header("QA View")
+        with st.expander("Answers & Flags", expanded=True):
+            st.write("**Audience Type:**", care_context.get("audience_type", "Not set"))
+            st.write("**People:**", ", ".join(care_context.get("people", [])))
+            st.write("**Relation:**", care_context.get("relation", "Not set"))
+            st.write("**Care Flags:**", {k: v for k, v in care_context.get("care_flags", {}).items() if v})
+            st.write("**Derived Flags:**", {k: v for k, v in care_context.get("derived_flags", {}).items() if v})
     elif step == "audiencing":
         render_audiencing()
     elif step == "planner":
         render_planner()
+    elif step == "cost_planner":
+        st.header("Cost Planner")
+        st.write("This section is under development.")
+    elif step == "advisor":
+        st.header("Plan for My Advisor")
+        st.write("This section is under development.")
     else:
         st.error("Unknown step: " + step)
