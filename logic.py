@@ -8,6 +8,7 @@ st.markdown(
     <style>
     .question-text {
         font-size: 18px !important;
+        font-weight: 500;
     }
     </style>
     """,
@@ -816,7 +817,7 @@ def render_planner():
 def render_step(step):
     if step == "intro":
         st.title("Senior Navigator")
-        st.write("Welcome! Start by exploring your options.")
+        st.write("Welcome! Start by exploring your care options.")
         if st.button("Get Started"):
             st.session_state.step = "planner"
             st.session_state.planner_step = 1
