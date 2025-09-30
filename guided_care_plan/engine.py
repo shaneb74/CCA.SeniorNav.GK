@@ -11,9 +11,12 @@ def _q_title(title: str):
     st.markdown(f"<div class='q-title'>{title}</div>", unsafe_allow_html=True)
 
 def _info_below(bullets):
-    if not bullets: 
-        st.markdown("<div class='info-spacer'></div>", unsafe_allow_html=True)
+    """Render the help expander below the nav buttons."""
+    if not bullets:
+        # still drop a little vertical rhythm so spacing feels deliberate
+        st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
         return
+    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
     with st.expander("Why we ask"):
         for i, b in enumerate(bullets, start=1):
             st.markdown(f"{i}. {b}")
@@ -71,7 +74,11 @@ def _derive_flags():
 def _recommendation():
     st.subheader("Recommendation (preview)")
     ctx = st.session_state.care_context
-    st.json({"flags": ctx.get("flags", {}), "derived": ctx.get("derived", {}), "chronic_conditions": ctx.get("chronic_conditions", [])})
+    st.json({
+        "flags": ctx.get("flags", {}),
+        "derived": ctx.get("derived", {}),
+        "chronic_conditions": ctx.get("chronic_conditions", []),
+    })
 
 def run_flow():
     _ensure_state()
@@ -84,28 +91,31 @@ def run_flow():
 
     # Steps 1..N
     if 1 <= step <= len(QUESTIONS):
-        key, prompt, options, bullets = QUESTIONS[step-1]
+        key, prompt, options, bullets = QUESTIONS[step - 1]
         _q_title(f"Step {step}: {prompt}")
+
         if key == "chronic_conditions":
-            sele = st.multiselect("Select all that apply", options, key="chronic_conditions")
-            care["chronic_conditions"] = list(sele)
+            selected = st.multiselect("Select all that apply", options, key="chronic_conditions")
+            care["chronic_conditions"] = list(selected)
         else:
             sel = st.radio("", options, key=f"q_{key}", index=None)
             if sel is not None:
                 care["flags"][key] = sel
 
-        _info_below(bullets)
-
+        # Nav buttons row
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Back", type="secondary"):
-                st.session_state.planner_step = max(0, step-1)
+                st.session_state.planner_step = max(0, step - 1)
                 st.rerun()
         with c2:
-            disabled = False if key=="chronic_conditions" else care["flags"].get(key) is None
+            disabled = False if key == "chronic_conditions" else care["flags"].get(key) is None
             if st.button("Next", type="primary", disabled=disabled):
                 st.session_state.planner_step = step + 1
                 st.rerun()
+
+        # Help expander BELOW the buttons
+        _info_below(bullets)
         return
 
     # After last question
