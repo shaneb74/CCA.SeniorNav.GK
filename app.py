@@ -1,7 +1,7 @@
 import streamlit as st
 
 try:
-    from logic import render_step, run_tests
+    from logic import render_step
 except ImportError as e:
     st.error(f"Failed to import logic module: {e}")
     st.stop()
@@ -13,7 +13,6 @@ st.sidebar.checkbox("QA View", value=False, key="show_qa")
 if st.sidebar.button("Guided Care Plan"):
     st.session_state.step = "planner"
     st.rerun()
-st.sidebar.button("Run Test Cases", key="debug_tests", on_click=lambda: run_tests())
 
 if "step" not in st.session_state:
     st.session_state.step = "intro"
