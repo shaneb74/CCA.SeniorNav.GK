@@ -19,13 +19,12 @@ st.markdown("""
 [data-testid="stRadio"] div[role="radiogroup"]{
   display:grid;
   gap: var(--pill-gap);
-  /* auto-fit fills the row; minmax ensures each pill is reasonably wide */
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  max-width: 960px;                      /* wider so pills breathe */
-  margin: 0 auto;                        /* center the whole group */
+  max-width: 960px;
+  margin: 0 auto;
 }
 
-/* Strengthen radio question labels (the line above the pills) */
+/* Strengthen radio question labels (if used) */
 [data-testid="stRadio"] > label{
   font-size: 1.05rem !important;
   font-weight: 600 !important;
@@ -50,9 +49,8 @@ st.markdown("""
   cursor:pointer; transition:all .12s ease-in-out;
   font-size:var(--pill-font); line-height:1.3;
   user-select:none; text-align:center; font-weight:600;
-
-  width: 100%;              /* fill the grid cell */
-  min-height: 56px;         /* nice, tappable */
+  width: 100%;
+  min-height: 56px;
 }
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:last-child:hover{ background:var(--pill-hover); }
 [data-testid="stRadio"] input[type="radio"]:checked + div{
@@ -97,6 +95,8 @@ button[aria-expanded][role="button"]:hover{ color:#1e40af !important; text-decor
 
 /* Our custom question title style (used in engine.py) */
 .q-title{ font-size: 1.15rem; font-weight: 700; color:#111827; margin:.25rem 0 .5rem; }
+/* Larger prompt line (e.g., Step 0 "Who are you planning care for today?") */
+.q-prompt{ font-size: 20px; font-weight: 700; color:#111827; margin:.35rem 0 .65rem; display:block; }
 
 /* Tighten mobile padding */
 @media (max-width: 480px){

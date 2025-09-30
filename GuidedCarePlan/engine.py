@@ -2,7 +2,6 @@ import streamlit as st
 from .questions import QUESTIONS
 
 def _q_header(title: str):
-    # Larger, styled question title
     st.markdown(f"<div class='q-title'>{title}</div>", unsafe_allow_html=True)
 
 def _guided_header():
@@ -164,8 +163,10 @@ def run_flow():
     # Step 0 – Audiencing
     if step == 0:
         st.subheader("Planning Context")
+        # Larger prompt line
+        st.markdown("<div class='q-prompt'>Who are you planning care for today?</div>", unsafe_allow_html=True)
         care_context["audience_type"] = st.radio(
-            "Who are you planning care for today?",
+            "",  # empty label; we render our own prompt above
             ["One person", "Two people", "Professional"],
             index=0
         )
@@ -188,7 +189,6 @@ def run_flow():
     if 1 <= step <= len(QUESTIONS):
         _guided_header()
         key, prompt, options, bullets = QUESTIONS[step - 1]
-
         _q_header(f"Step {step}: {prompt}")
 
         if key == "chronic_conditions":
