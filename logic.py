@@ -335,15 +335,17 @@ def run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # Info as a centered popover placed BELOW the options (no fake link)
+        # Info as a centered popover BELOW the options but ABOVE Back/Next
         if bullets:
-            st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
-            left, mid, right = st.columns([1, 2, 1])
-            with mid:
-                with st.popover("Why we ask", use_container_width=True):
-                    for i, bullet in enumerate(bullets, start=1):
-                        st.markdown(f"{i}. {bullet}")
-            st.markdown("<div style='height:.25rem'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
+            info_row = st.container()  # separate block so it doesn't clump with buttons
+            with info_row:
+                left, mid, right = st.columns([1, 2, 1])
+                with mid:
+                    with st.popover("Why we ask", use_container_width=True):
+                        for i, bullet in enumerate(bullets, start=1):
+                            st.markdown(f"{i}. {bullet}")
+            st.markdown("<div style='height:1.5rem'></div>", unsafe_allow_html=True)
 
         # Buttons (kept side-by-side; CSS in app.py ensures horizontal layout on mobile)
         c1, c2 = st.columns(2)
