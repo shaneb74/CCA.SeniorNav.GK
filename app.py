@@ -23,11 +23,11 @@ STYLES = """
   --radius:14px;
   --light-brand:#6BA8FF;
 }
-.block-container { max-width:1360px; padding-top:1rem !important; }
+.block-container { max-width:1360px; padding-top: 0 !important; }
 header[data-testid="stHeader"] { background: transparent; }
 footer { visibility: hidden; }
 p, .stMarkdown { font-size: 18px !important; line-height: 1.65; color: var(--ink) !important; }
-h1 { font-size: 44px; margin:0 0 .25rem 0; color: var(--ink); }
+h1 { font-size: 44px; margin:0 0 0 .25rem; color: var(--ink); }
 h2 { font-size: 32px !important; line-height: 1.3; margin:.75rem 0 .35rem 0; color: var(--ink); }
 h3 { font-size: 20px; margin:.5rem 0 .25rem 0; color: var(--ink); }
 small, .stCaption { font-size: 15px !important; color: var(--muted); }
@@ -45,7 +45,6 @@ small, .stCaption { font-size: 15px !important; color: var(--muted); }
 </style>
 """
 st.markdown(STYLES, unsafe_allow_html=True)
-st.markdown('<style>header[data-testid="stHeader"] { height: 0px !important; padding: 0 !important; }</style>', unsafe_allow_html=True)
 
 # ---- Session bootstrap ----
 if "care_context" not in st.session_state:
@@ -70,7 +69,7 @@ if st.session_state.step == "planner":
         f'<span class="progress-chip {'active' if i == active_idx else ''}">{i+1}. {txt}</span>'
         for i, txt in enumerate(labels)
     )
-    st.markdown(f'<div class="progress-bar">{chips}</div>", unsafe_allow_html=True')
+    st.markdown(f'<div class="progress-bar">{chips}</div>', unsafe_allow_html=True)
 
 logic.render_step(st.session_state.step)
 st.markdown("</div>", unsafe_allow_html=True)
