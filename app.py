@@ -7,10 +7,10 @@ st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 st.markdown("""
 <style>
 :root{
-  --pill-radius:14px; --pill-pad:.65rem 1rem; --pill-gap:.65rem;
+  --pill-radius:14px; --pill-pad:.70rem 1rem; --pill-gap:.70rem;
   --pill-text:#111827; --pill-bg:#F3F4F6; --pill-brd:#E5E7EB; --pill-hover:#E9EBF0;
   --pill-selected:#1F2937; --pill-selected-hover:#111827; --pill-shadow:0 2px 6px rgba(17,24,39,.08);
-  --pill-font:15px; --btn-primary:#2E6EFF; --btn-primary-hover:#1F5AE6;
+  --pill-font:16px; --btn-primary:#2E6EFF; --btn-primary-hover:#1F5AE6;
   --btn-secondary-bg:#EAF2FF; --btn-secondary-text:#2E6EFF; --btn-secondary-brd:#D6E4FF;
 }
 
@@ -19,18 +19,24 @@ st.markdown("""
 [data-testid="stRadio"] div[role="radiogroup"]{
   display:grid;
   gap: var(--pill-gap);
-  grid-template-columns: 1fr;            /* mobile default: 1 column */
-  max-width: 720px;                      /* comfortable measure */
+  /* auto-fit fills the row; minmax ensures each pill is reasonably wide */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  max-width: 960px;                      /* wider so pills breathe */
   margin: 0 auto;                        /* center the whole group */
 }
-@media (min-width: 640px){               /* tablet and up */
-  [data-testid="stRadio"] div[role="radiogroup"]{
-    grid-template-columns: 1fr 1fr;      /* 2 columns */
-  }
+
+/* Strengthen radio question labels (the line above the pills) */
+[data-testid="stRadio"] > label{
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color:#111827 !important;
+  margin-bottom:.5rem !important;
 }
 
-/* Hide default bullets and make each label look like a pill button */
-[data-testid="stRadio"] div[role="radiogroup"] > label{ margin:0 !important; padding:0 !important; display:block; position:relative; }
+/* Hide default radio bullets and style each label like a pill button */
+[data-testid="stRadio"] div[role="radiogroup"] > label{ 
+  margin:0 !important; padding:0 !important; display:block; position:relative; width:100%;
+}
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child{ display:none !important; }
 [data-testid="stRadio"] input[type="radio"]{
   position:absolute !important; opacity:0 !important; width:1px; height:1px;
@@ -43,15 +49,16 @@ st.markdown("""
   padding:var(--pill-pad); box-shadow:var(--pill-shadow);
   cursor:pointer; transition:all .12s ease-in-out;
   font-size:var(--pill-font); line-height:1.3;
-  user-select:none; text-align:center; font-weight:500;
-  width: 100%;       /* take full width of grid cell */
-  min-height: 56px;  /* taller for comfort */
+  user-select:none; text-align:center; font-weight:600;
+
+  width: 100%;              /* fill the grid cell */
+  min-height: 56px;         /* nice, tappable */
 }
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:last-child:hover{ background:var(--pill-hover); }
 [data-testid="stRadio"] input[type="radio"]:checked + div{
   background:var(--pill-selected) !important; color:#FFFFFF !important;
   border-color:var(--pill-selected) !important;
-  box-shadow:0 3px 12px rgba(31,41,55,.25); font-weight:600;
+  box-shadow:0 3px 12px rgba(31,41,55,.25); font-weight:700;
 }
 [data-testid="stRadio"] input[type="radio"]:checked + div:hover{
   background:var(--pill-selected-hover) !important; border-color:var(--pill-selected-hover) !important;
@@ -61,7 +68,7 @@ st.markdown("""
 }
 
 /* Buttons */
-.stButton > button { padding:.6rem 1rem; }
+.stButton > button { padding:.7rem 1.1rem; }
 button[kind="primary"]{
   background:var(--btn-primary) !important; color:#fff !important;
   border-radius:12px !important; border:0 !important;
@@ -69,7 +76,7 @@ button[kind="primary"]{
 }
 button[kind="primary"]:hover{ background:var(--btn-primary-hover) !important; }
 button[kind="secondary"]{
-  background:var(--btn-secondary-bg) !important; color:var(--btn-secondary-text) !important;
+  background:var(--btn-secondary-bg) !important; color:#2E6EFF !important;
   border:1px solid var(--btn-secondary-brd) !important; border-radius:12px !important;
 }
 
@@ -88,7 +95,10 @@ button[aria-expanded][role="button"]{
 }
 button[aria-expanded][role="button"]:hover{ color:#1e40af !important; text-decoration: underline; }
 
-/* Tighten mobile padding a bit */
+/* Our custom question title style (used in engine.py) */
+.q-title{ font-size: 1.15rem; font-weight: 700; color:#111827; margin:.25rem 0 .5rem; }
+
+/* Tighten mobile padding */
 @media (max-width: 480px){
   .block-container{ padding-left:1rem !important; padding-right:1rem !important; }
 }

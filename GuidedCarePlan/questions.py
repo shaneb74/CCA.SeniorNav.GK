@@ -1,4 +1,6 @@
-QUESTIONS = [
+from typing import List, Tuple
+
+QUESTIONS: List[Tuple[str,str,list,list|None]] = [
     ("funding_confidence",
      "How would you describe your financial situation when it comes to paying for care?",
      ["Very confident", "Somewhat confident", "Not confident", "On Medicaid"],

@@ -2,7 +2,8 @@ import streamlit as st
 from .questions import QUESTIONS
 
 def _q_header(title: str):
-    st.markdown(f"**{title}**")
+    # Larger, styled question title
+    st.markdown(f"<div class='q-title'>{title}</div>", unsafe_allow_html=True)
 
 def _guided_header():
     st.markdown("### Guided Care Plan")
@@ -198,7 +199,7 @@ def run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # a little breathing room before actions
+        # spacing before actions
         st.markdown("<div style='height: 1.25rem'></div>", unsafe_allow_html=True)
 
         # Centered Back/Next row
