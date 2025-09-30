@@ -231,6 +231,7 @@ def run_flow():
     care_context = st.session_state.care_context
     step = st.session_state.planner_step
 
+    # Step 0 – Audiencing
     if step == 0:
         st.subheader("Planning Context")
         care_context["audience_type"] = st.radio(
@@ -253,11 +254,15 @@ def run_flow():
             st.rerun()
         return
 
+    # Steps 1..N
     if 1 <= step <= len(QUESTIONS):
         _guided_header()
         key, prompt, options, bullets = QUESTIONS[step - 1]
+
+        # Title
         _q_header(f"Step {step}: {prompt}")
 
+        # Options
         if key == "chronic_conditions":
             _ = st.multiselect("Select all that apply", QUESTIONS[8][2], key="chronic_conditions")
             care_context["chronic_conditions"] = list(st.session_state.get("chronic_conditions", []))
@@ -266,7 +271,7 @@ def run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # --- Navigation buttons first ---
+        # --- Navigation buttons first (mobile keeps them horizontal via CSS) ---
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Back", type="secondary"):
@@ -278,9 +283,9 @@ def run_flow():
                 st.session_state.planner_step = step + 1
                 st.rerun()
 
-        # --- Then the info popover BELOW the buttons ---
+        # --- Then the info popover BELOW the buttons, with extra breathing room ---
         if bullets:
-            st.markdown("<div style='height:2rem'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:3rem'></div>", unsafe_allow_html=True)
             lower_row = st.container()
             with lower_row:
                 l, m, r = st.columns([1, 2, 1])
@@ -288,8 +293,9 @@ def run_flow():
                     with st.popover("Why we ask", use_container_width=True):
                         for i, bullet in enumerate(bullets, start=1):
                             st.markdown(f"{i}. {bullet}")
-            st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:2rem'></div>", unsafe_allow_html=True)
         return
 
+    # After last answer
     _derive_after_answers()
     _render_recommendation()
