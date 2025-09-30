@@ -430,7 +430,6 @@ def render_planner():
                                 st.write(f"Glad to hear—{safety.lower()} sounds reassuring.")
                             _nav_row("Next →", not safety, lambda: st.session_state.update(world_step=4) or st.rerun(), 
                                      "← Back", False, lambda: st.session_state.update(world_step=2) or st.rerun(), "world_3")
-
                 elif st.session_state.world_step == 4:
                     with container.container():
                         st.markdown("<h2>Step 7: Have you had any falls lately?</h2>", unsafe_allow_html=True)
@@ -438,14 +437,15 @@ def render_planner():
                         if fall_history:
                             care_context["derived_flags"]["recent_fall"] = fall_history == "Yes"
                             st.session_state.care_context = care_context
-            if fall_history == "Yes":
-                st.write("Thanks for letting me know.")
-else:
+                            if fall_history == "Yes":
+                                st.write("Thanks for letting me know.")
+                            else:
                                 st.write("Noted.")
-                            _nav_row("Next →", not fall_history, lambda: st.session_state.update(world_step=5) or st.rerun(), 
+                            _nav_row("Next →", not fall_history, lambda: st.session_state.update(world_step=5) or st.rerun(),
                                      "← Back", False, lambda: st.session_state.update(world_step=3) or st.rerun(), "world_4")
 
                 elif st.session_state.world_step == 5:
+
                     with container.container():
                         st.markdown("<h2>Step 7: Any ongoing health issues?</h2>", unsafe_allow_html=True)
                         condition_options = ["Diabetes", "Hypertension", "Dementia", "Parkinson's", "COPD", "CHF", "Arthritis", "Stroke"]
