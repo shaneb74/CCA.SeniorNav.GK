@@ -24,7 +24,16 @@ h1, .stApp h1 { font-size: var(--h1-size) !important; font-weight: var(--h1-weig
 /* Intro block: center it on desktop for consistent alignment */
 .intro-wrap { max-width: 960px; margin: 0 auto 1rem; }
 .intro-head { font-size: var(--intro-h-size); font-weight: var(--intro-h-weight); margin:.25rem 0 .5rem; }
-.intro-body { font-size: var(--intro-b-size); font-weight: var(--intro-b-weight); color:#374151; max-width:var(--intro-max); line-height:1.55; }
+.intro-body {
+  font-size: var(--intro-b-size);
+  font-weight: var(--intro-b-weight);
+  color:#374151;
+  max-width: var(--intro-max);          /* 64ch */
+  line-height: 1.55;
+  margin-left: auto !important;         /* center the paragraph block */
+  margin-right: auto !important;        /* center the paragraph block */
+  text-align: left;                     /* keep readable ragged-left text */
+  }
 
 /* Question titles */
 .q-title, .q-prompt { font-size: var(--q-title-size); font-weight: var(--q-title-weight); color:#111827; margin:.5rem 0 .75rem; }
