@@ -1,5 +1,5 @@
 import streamlit as st
-import logic  # local module with the app's core logic
+import logic 
 
 st.set_page_config(page_title="Senior Navigator", page_icon="🧭", layout="wide")
 
