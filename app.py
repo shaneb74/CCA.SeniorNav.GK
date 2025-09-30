@@ -40,20 +40,7 @@ small, .stCaption { font-size: 15px !important; color: var(--muted); }
 
 /* Buttons: enforce white text and inline layout */
 .stButton > button{
-  width:auto !important; display:inline-flex; align-items:center; justify-content:center;
-  background-color: var(--brand) !important; color: #ffffff !important;
-  border:none !important; border-radius:10px !important;
-  padding:12px 20px !important; font-size:18px !important; font-weight:600 !important;
-  box-shadow:0 4px 8px rgba(0,0,0,.15) !important;
-}
-.stButton > button:hover{ filter:brightness(1.05); }
-.section-card .stButton{ display:inline-block !important; margin:0 12px 0 0; }
-.section-card .stButton + .stButton > button{
-  background:#ffffff !important; color:#0f172a !important;
-  border:1px solid #CBD5E1 !important; box-shadow:none !important;
-}
-.stButton > button:disabled{
-  background:#E2E8F0 !important; color:#475569 !important;
+  width:auto !important; display:inline-flex; align-items:center; justify-content:center; white-space:nowrap; background:var(--brand) !important; color: var(--brand-ink) !important;
   border:1px solid #CBD5E1 !important; opacity:1; box-shadow:none !important;
 }
 </style>
@@ -64,7 +51,9 @@ st.markdown(STYLES, unsafe_allow_html=True)
 if "care_context" not in st.session_state:
     st.session_state.care_context = {"audience_type": None, "people": [], "care_flags": {}, "derived_flags": {}}
 if "step" not in st.session_state:
-    st.session_state.step = "planner"
+    st.session_state.step = "audiencing"
+if "audiencing_step" not in st.session_state:
+    st.session_state.audiencing_step = 1
 if "planner_step" not in st.session_state:
     st.session_state.planner_step = 1
 
@@ -73,13 +62,14 @@ st.markdown("<div class='section-card'>", unsafe_allow_html=True)
 st.markdown("<h1>Guided Care Plan</h1>", unsafe_allow_html=True)
 st.markdown("<p>Let’s walk through your care needs—one friendly step at a time.</p>", unsafe_allow_html=True)
 
-labels = ["Funding","Cognition","Caregiver","Meds","Independence","Mobility","Your World","Home Preference","Recommendation"]
-active_idx = max(1, min(st.session_state.get('planner_step', 1), len(labels))) - 1
-chips = "".join(
-    f'<span class="progress-chip {"active" if i == active_idx else ""}">{i+1}. {txt}</span>'
-    for i, txt in enumerate(labels)
-)
-st.markdown(f'<div class="progress-bar">{chips}</div>', unsafe_allow_html=True)
+if st.session_state.step == "planner":
+    labels = ["Funding","Cognition","Caregiver","Meds","Independence","Mobility","Your World","Home Preference","Recommendation"]
+    active_idx = max(1, min(st.session_state.get('planner_step', 1), len(labels))) - 1
+    chips = "".join(
+        f'<span class="progress-chip {"active" if i == active_idx else ""}">{i+1}. {txt}</span>'
+        for i, txt in enumerate(labels)
+    )
+    st.markdown(f'<div class="progress-bar">{chips}</div>', unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ---- Step card ----
