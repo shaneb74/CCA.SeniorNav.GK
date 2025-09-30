@@ -1,6 +1,15 @@
 import streamlit as st
 import random
 
+if "care_context" not in st.session_state:
+    st.session_state.care_context = {
+        "audience_type": None,
+        "people": [],
+        "care_flags": {},
+        "derived_flags": {}
+    }
+
+care_context = st.session_state.care_context
 
 def run_tests():
     test_cases = [
@@ -307,18 +316,6 @@ def run_tests():
         issues = [i for i in issues if i][:3]  # Top 3 issues
 
         st.write(f"| {case['name']} | {score} | {recommendation} | {', '.join(issues) if issues else 'None'} |")
-
-# Call this in render_step or via button
-
-if "care_context" not in st.session_state:
-    st.session_state.care_context = {
-        "audience_type": None,
-        "people": [],
-        "care_flags": {},
-        "derived_flags": {}
-    }
-
-care_context = st.session_state.care_context
 
 def render_planner():
     st.header("Guided Care Plan")
@@ -674,7 +671,7 @@ def render_planner():
                 flags.append("moderate_dependence")
 
             # Mobility
-            mobility = care_context["care_flags"].get("inferred_mobility_aid", "")
+            mobility = care_context["derived_flags"].get("inferred_mobility_aid", "")
             if "I need assistance for most movement around the home" in mobility or "I am mostly immobile or need a wheelchair" in mobility:
                 flags.append("high_mobility_dependence")
             elif "I use a cane or walker for longer distances" in mobility:
@@ -701,16 +698,16 @@ def render_planner():
             if care_context["derived_flags"].get("recent_fall", False):
                 flags.append("high_safety_concern")
 
-            # Chronic Conditions (beyond dementia)
+            # Chronic Conditions
             conditions = care_context["care_flags"].get("chronic_conditions", [])
             if "CHF" in conditions or "COPD" in conditions:
-                if "high_mobility_dependence" in flags or "moderate_safety_concern" in flags:
+                if "high_mobility_dependence" in flags or "high_safety_concern" in flags:
                     flags.append("chronic_health_risk")
 
             # Score Calculation
             score = 0
             if "severe_cognitive_risk" in flags and "adequate_support" in flags:
-                score += 10  # Reduced from 15 with support
+                score += 10
             elif "severe_cognitive_risk" in flags:
                 score += 15
             if "moderate_cognitive_decline" in flags:
@@ -723,7 +720,9 @@ def render_planner():
                 score += 5
             if "no_support" in flags:
                 score += 7
-            if "adequate_support" in flags:  # Apply deduction for any support level, before threshold
+            if "limited_support" in flags:
+                pass  # No penalty for borderline support
+            if "adequate_support" in flags:
                 score -= 5
             if "high_risk" in flags:
                 score += 6
