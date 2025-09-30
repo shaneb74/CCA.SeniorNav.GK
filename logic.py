@@ -347,8 +347,15 @@ def run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # Info (placed BELOW controls for better mobile ergonomics)
-        _q_info_below(bullets)
+        # Info as a centered link that opens a popover
+        if bullets:
+            st.markdown("<div style='height:.25rem'></div>", unsafe_allow_html=True)
+            c1, c2, c3 = st.columns([1,2,1])
+            with c2:
+                st.markdown("<div class='why-wrap'><a class='why-link'>Why we ask</a></div>", unsafe_allow_html=True)
+                with st.popover("Why we ask", use_container_width=True):
+                    for i, bullet in enumerate(bullets, start=1):
+                        st.markdown(f"{i}. {bullet}")
 
         # Buttons (you can keep these side-by-side with a small CSS tweak in app.py; see note below)
         c1, c2 = st.columns(2)
