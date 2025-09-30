@@ -1,56 +1,73 @@
 import streamlit as st
 import random
 
-# Session state setup (kept here too so this file can run standalone)
+# Lock fonts early-no helpers, no overrides
+st.markdown(
+    '''<style>
+    .stMarkdown {
+        font-size: 22px !important;
+    }
+    .stRadio > div > label span {
+        font-size: 24px !important;
+    }
+    .stRadio > div > label {
+        line-height: 1.5;
+        margin: 6px 0;
+    }
+    .stButton > button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    </style>''',
+    unsafe_allow_html=True
+)
+
+# Session state setup
 if "care_context" not in st.session_state:
     st.session_state.care_context = {
         "audience_type": None,
         "people": [],
         "care_flags": {},
-        "derived_flags": {},
+        "derived_flags": {}
     }
 
 care_context = st.session_state.care_context
 
-
 def render_planner():
+    st.header("Guided Care Plan")
+    st.write("Let’s walk through your care needs.")
     if "planner_step" not in st.session_state:
         st.session_state.planner_step = 1
 
     # Step 1: Funding
     if st.session_state.planner_step == 1:
         st.subheader("Your Financial Confidence")
-        st.write("First, let's talk about your finances.")
+        st.write("Let’s start with something personal—how do you feel about your finances?")
         funding_options = {
             "1": "Not worried—I can afford any care I need",
             "2": "Somewhat worried—I’d need to budget carefully",
             "3": "Very worried—cost is a big concern for me",
-            "4": "I am on Medicaid",
+            "4": "I am on Medicaid"
         }
         funding_options_list = list(funding_options.values())
         funding_confidence = st.radio(
             "How confident are you that your savings will cover long-term care?",
             funding_options_list,
-            key="funding_confidence_select",
+            key="funding_confidence_select"
         )
         if funding_confidence == "I am on Medicaid":
-            st.write(
-                "We can connect you to Medicaid-friendly care options—just tap here.",
-                unsafe_allow_html=True,
-            )
-            if st.button("Get Options", key="medicaid_options"):
+            st.write("That’s great—we can help you find Medicaid-friendly options. Interested?")
+            if st.button("Yes, Show Me", key="medicaid_options"):
                 st.session_state.step = "tools"
                 st.rerun()
         elif funding_confidence:
             care_context["care_flags"]["funding_confidence"] = funding_confidence
             st.session_state.care_context = care_context
-            st.caption(f"You feel: {care_context['care_flags']['funding_confidence']}")
-        if st.button(
-            "Next",
-            key="planner_next_1",
-            disabled=not funding_confidence
-            or funding_confidence == "I am on Medicaid",
-        ):
+            st.write(f"I hear you—it sounds like you feel {care_context['care_flags']['funding_confidence'].lower()}. That’s a good starting point.")
+        if st.button("Next", key="planner_next_1", disabled=not funding_confidence or funding_confidence == "I am on Medicaid"):
             st.session_state.planner_step = 2
             st.rerun()
         if st.button("Go Back", key="planner_back_1", disabled=True):
@@ -59,23 +76,26 @@ def render_planner():
     # Step 2: Cognition
     elif st.session_state.planner_step == 2:
         st.subheader("Your Cognition")
-        st.write("Next, let's talk about your memory and thinking.")
+        st.write("Now, let’s talk about your memory and thinking—how’s it been for you lately?")
         cognition_options = {
             "1": "My memory feels sharp—no real issues",
             "2": "Occasional lapses—like forgetting what I was saying",
             "3": "Noticeable problems—like missing meds or appointments",
-            "4": "Serious confusion—like losing track of time, place, or familiar faces",
+            "4": "Serious confusion—like losing track of time, place, or familiar faces"
         }
         cognition_options_list = list(cognition_options.values())
         cognition = st.radio(
-            "How would you describe your memory and focus?",
+            "How would you describe your memory and focus these days?",
             cognition_options_list,
-            key="cognition_select",
+            key="cognition_select"
         )
         if cognition:
             care_context["care_flags"]["cognitive_function"] = cognition
             st.session_state.care_context = care_context
-            st.caption(f"You noted: {care_context['care_flags']['cognitive_function']}")
+            if "lapses" in cognition.lower() or "problems" in cognition.lower() or "confusion" in cognition.lower():
+                st.write(f"Thanks for sharing that. When those {cognition.split('—')[0].lower()} happen, is there someone around to help?")
+            else:
+                st.write(f"That’s reassuring to hear. You’re doing great with {cognition.lower()}.")
         if st.button("Next", key="planner_next_2", disabled=not cognition):
             st.session_state.planner_step = 3
             st.rerun()
@@ -88,29 +108,32 @@ def render_planner():
         st.subheader("Your Caregiver Support")
         cog = care_context["care_flags"].get("cognitive_function", "")
         funding = care_context["care_flags"].get("funding_confidence", "")
-        if ("Occasional lapses" in cog) or ("Noticeable problems" in cog) or ("Serious confusion" in cog):
+        if "lapses" in cog.lower() or "problems" in cog.lower() or "confusion" in cog.lower():
             if "Not worried—I can afford any care I need" in funding:
-                st.write(f"Great, you're financially secure. With {cog.lower()}, would 24/7 caregivers at home work?")
+                st.write(f"With your financial security and {cog.lower()}, would having 24/7 caregivers at home be an option?")
             else:
-                st.write(f"Since you've noted {cog.lower()}, it's key to know: who's there if memory slips?")
+                st.write(f"Since you mentioned {cog.lower()}, who steps in when memory gets tricky?")
         else:
-            st.write("How often do you have someone to help with daily needs?")
+            st.write("It’s good to know who’s there for you—how often does someone help with daily needs?")
         caregiver_options = {
             "1": "Someone’s with me all the time",
             "2": "Support most days",
             "3": "Someone checks in occasionally",
-            "4": "No regular support",
+            "4": "No regular support"
         }
         caregiver_options_list = list(caregiver_options.values())
         caregiver = st.radio(
-            "How often is someone available to assist you?",
+            "How often do you have someone to lean on for help?",
             caregiver_options_list,
-            key="caregiver_select",
+            key="caregiver_select"
         )
         if caregiver:
             care_context["care_flags"]["caregiver_support"] = caregiver
             st.session_state.care_context = care_context
-            st.caption(f"Support level: {care_context['care_flags']['caregiver_support']}")
+            if "No regular support" in caregiver:
+                st.write("That can feel isolating. Would you like help finding someone to check in?")
+            else:
+                st.write(f"That sounds comforting—{caregiver.lower()} is a solid support.")
         if st.button("Next", key="planner_next_3", disabled=not caregiver):
             st.session_state.planner_step = 4
             st.rerun()
@@ -121,35 +144,37 @@ def render_planner():
     # Step 4: Medication Management
     elif st.session_state.planner_step == 4:
         st.subheader("Your Medication Management")
-        med_confidence = None  # avoids UnboundLocalError when user selects "No"
         takes_meds = st.radio(
-            "Do you take any daily prescription meds (e.g., for heart, mood, or memory)?",
+            "Do you take any daily meds, like for your heart, mood, or memory?",
             ["No", "Yes"],
             index=0,
-            key="takes_meds_select",
+            key="takes_meds_select"
         )
         if takes_meds == "Yes":
             cog = care_context["care_flags"].get("cognitive_function", "")
-            if ("Occasional lapses" in cog) or ("Noticeable problems" in cog) or ("Serious confusion" in cog):
-                st.write(f"Since you've noted {cog.lower()}, how confident are you with your meds?")
+            if "lapses" in cog.lower() or "problems" in cog.lower() or "confusion" in cog.lower():
+                st.write(f"With {cog.lower()}, how do you feel about keeping up with your meds?")
             else:
-                st.write("How confident are you managing your meds?")
+                st.write("You’re on meds—how confident are you managing them?")
             med_options = {
                 "1": "I manage them rock-solid",
-                "2": "I'm pretty sure, with reminders",
+                "2": "I’m pretty sure, with reminders",
                 "3": "I need help sometimes",
-                "4": "I can't count on myself",
+                "4": "I can’t count on myself"
             }
             med_options_list = list(med_options.values())
             med_confidence = st.radio(
-                "How do you handle your medications?",
+                "How do you feel about staying on top of your medications?",
                 med_options_list,
-                key="med_confidence_select",
+                key="med_confidence_select"
             )
             if med_confidence:
                 care_context["care_flags"]["med_adherence"] = med_confidence
                 st.session_state.care_context = care_context
-                st.caption(f"Med management: {care_context['care_flags']['med_adherence']}")
+                if "need help" in med_confidence.lower() or "can’t count" in med_confidence.lower():
+                    st.write("That’s okay—we can find ways to make it easier. Want to explore options?")
+                else:
+                    st.write(f"Good to know—you’re handling {med_confidence.lower()} well.")
         if st.button("Next", key="planner_next_4", disabled=(takes_meds != "No" and not med_confidence)):
             st.session_state.planner_step = 5
             st.rerun()
@@ -160,23 +185,26 @@ def render_planner():
     # Step 5: Daily Independence
     elif st.session_state.planner_step == 5:
         st.subheader("Your Daily Independence")
-        st.write("Now, let's look at your daily routine.")
+        st.write("Let’s talk about your day-to-day—how are you managing?")
         independence_options = {
-            "1": "I'm fully independent and handle all tasks on my own",
+            "1": "I’m fully independent and handle all tasks on my own",
             "2": "I occasionally need reminders or light assistance",
             "3": "I need help with some of these tasks regularly",
-            "4": "I rely on someone else for most daily tasks",
+            "4": "I rely on someone else for most daily tasks"
         }
         independence_options_list = list(independence_options.values())
         independence = st.radio(
-            "How independent are you with tasks like bathing, dressing, or meals?",
+            "How much support do you need with things like bathing, dressing, or meals?",
             independence_options_list,
-            key="independence_select",
+            key="independence_select"
         )
         if independence:
             care_context["care_flags"]["independence_level"] = independence
             st.session_state.care_context = care_context
-            st.caption(f"Independence: {care_context['care_flags']['independence_level']}")
+            if "need help" in independence.lower() or "rely" in independence.lower():
+                st.write("That’s normal—want to talk about what help looks like for you?")
+            else:
+                st.write(f"Nice—you’re doing great with {independence.lower()}.")
         if st.button("Next", key="planner_next_5", disabled=not independence):
             st.session_state.planner_step = 6
             st.rerun()
@@ -187,25 +215,28 @@ def render_planner():
     # Step 6: Mobility
     elif st.session_state.planner_step == 6:
         st.subheader("Your Mobility")
-        st.write("Let's talk about getting around.")
+        st.write("How’s getting around been for you lately?")
         mobility_options = {
             "1": "I walk easily without any support",
             "2": "I use a cane or walker for longer distances",
             "3": "I need assistance for most movement around the home",
-            "4": "I am mostly immobile or need a wheelchair",
+            "4": "I am mostly immobile or need a wheelchair"
         }
         mobility_options_list = list(mobility_options.values())
         mobility = st.radio(
-            "How would you describe your mobility?",
+            "How would you describe how you move around these days?",
             mobility_options_list,
-            key="mobility_select",
+            key="mobility_select"
         )
         if mobility:
             care_context["care_flags"]["mobility_issue"] = mobility != mobility_options_list[0]
             if mobility != mobility_options_list[0]:
                 care_context["derived_flags"]["inferred_mobility_aid"] = mobility
             st.session_state.care_context = care_context
-            st.caption(f"Mobility: {care_context['care_flags']['mobility_issue']}")
+            if "assistance" in mobility.lower() or "immobile" in mobility.lower():
+                st.write("That can be a challenge. Is there anything making it harder at home?")
+            else:
+                st.write(f"Great—you’re moving well with {mobility.lower()}.")
         if st.button("Next", key="planner_next_6", disabled=not mobility):
             st.session_state.planner_step = 7
             st.rerun()
@@ -216,108 +247,74 @@ def render_planner():
     # Step 7: Your World
     elif st.session_state.planner_step == 7:
         st.subheader("Your World")
-        st.write("Finally, let's look at your living situation.")
-
-        st.subheader("Social Connection")
-        st.write("How connected are you with family, friends, or neighbors?")
-        social_options = {
-            "1": "Daily visits or calls",
-            "2": "Weekly check-ins",
-            "3": "Monthly calls",
-            "4": "Mostly alone",
-        }
-        social_options_list = list(social_options.values())
+        st.write("So, tell me—what’s home like for you these days?")
         social = st.radio(
-            "How often do you see or hear from people close to you?",
-            social_options_list,
-            key="social_select",
+            "How often do you connect with family, friends, or neighbors?",
+            ["Daily visits or calls", "Weekly check-ins", "Monthly calls", "Mostly alone"],
+            key="social_select"
         )
         if social:
             care_context["care_flags"]["social_connection"] = social
             st.session_state.care_context = care_context
-            st.caption(f"Social: {care_context['care_flags']['social_connection']}")
+            if "mostly alone" in social.lower():
+                st.write("That can feel isolating. Do family or neighbors check in at all?")
+            else:
+                st.write(f"That’s nice—{social.lower()} keeps things connected.")
 
-        st.subheader("Geography & Access")
-        chronic_conditions = care_context["care_flags"].get("chronic_conditions", [])
-        if chronic_conditions:
-            st.write(f"With conditions like {', '.join(chronic_conditions)}, how easy is it to reach doctors?")
-        else:
-            st.write("How easy is it to reach doctors or stores?")
-        geo_options = {
-            "1": "Easy—I can walk or drive",
-            "2": "Needs a ride, but manageable",
-            "3": "Pretty hard without help",
-            "4": "Impossible alone",
-        }
-        geo_options_list = list(geo_options.values())
+        st.write("What about getting out—how easy is it to reach doctors or stores?")
         geography = st.radio(
-            "How accessible are healthcare and services?",
-            geo_options_list,
-            key="geography_select",
+            "How accessible are healthcare and services for you?",
+            ["Easy—I can walk or drive", "Needs a ride, but manageable", "Pretty hard without help", "Impossible alone"],
+            key="geography_select"
         )
         if geography:
             care_context["care_flags"]["geographic_access"] = geography
             st.session_state.care_context = care_context
-            st.caption(f"Access: {care_context['care_flags']['geographic_access']}")
+            if "hard" in geography.lower() or "impossible" in geography.lower():
+                st.write("That sounds tough. Is transportation the main hurdle?")
+            else:
+                st.write(f"Good to know—{geography.lower()} works for you.")
 
-        st.subheader("Home Safety")
-        st.write("How safe do you feel at home?")
-        safety_options = {
-            "1": "Very safe—I have everything I need",
-            "2": "Mostly safe, but a few concerns",
-            "3": "Sometimes I feel unsafe",
-            "4": "Often feel at risk",
-        }
-        safety_options_list = list(safety_options.values())
+        st.write("Any little things make you worry about safety at home?")
         safety = st.radio(
-            "How safe is your home for falls or emergencies?",
-            safety_options_list,
-            key="safety_select",
+            "How safe do you feel with falls or emergencies?",
+            ["Very safe—I have everything I need", "Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"],
+            key="safety_select"
         )
         if safety:
-            care_context["care_flags"]["falls_risk"] = safety in [
-                "Mostly safe, but a few concerns",
-                "Sometimes I feel unsafe",
-                "Often feel at risk",
-            ]
+            care_context["care_flags"]["falls_risk"] = safety in ["Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"]
             st.session_state.care_context = care_context
-            st.caption(f"Safety: {care_context['care_flags']['falls_risk']}")
+            if "unsafe" in safety.lower() or "concerns" in safety.lower():
+                st.write("That’s worth a closer look. Anything specific, like stairs or lighting?")
+            else:
+                st.write(f"Glad to hear—{safety.lower()} sounds reassuring.")
 
-        st.subheader("Fall History")
-        st.write("Based on your safety answer, let's check this.")
-        fall_options = {"1": "Yes", "2": "No", "3": "Unsure"}
-        fall_options_list = list(fall_options.values())
+        st.write("Based on that, let’s check something quick—have you had any falls lately?")
         fall_history = st.radio(
             "Have you fallen in the last six months?",
-            fall_options_list,
-            key="fall_history_select",
+            ["Yes", "No", "Unsure"],
+            key="fall_history_select"
         )
         if fall_history:
             care_context["derived_flags"]["recent_fall"] = fall_history == "Yes"
             st.session_state.care_context = care_context
-            st.caption(f"Fall history: {care_context['derived_flags'].get('recent_fall', 'Not set')}")
+            if fall_history == "Yes":
+                st.write("Thanks for letting me know. Was it a one-time thing or something recurring?")
+            else:
+                st.write(f"Good—{fall_history.lower()} is a positive sign.")
 
-        st.subheader("Chronic Conditions")
-        st.write("Any ongoing health issues?")
-        condition_options = [
-            "Diabetes", "Hypertension", "Dementia", "Parkinson's",
-            "COPD", "CHF", "Arthritis", "Stroke"
-        ]
-        conditions = st.multiselect(
-            "Which chronic conditions do you have?",
-            condition_options,
-            key="chronic_conditions_select",
-        )
+        st.write("Any ongoing health issues we should know about?")
+        condition_options = ["Diabetes", "Hypertension", "Dementia", "Parkinson's", "COPD", "CHF", "Arthritis", "Stroke"]
+        conditions = st.multiselect("Which chronic conditions do you have?", condition_options, key="chronic_conditions_select")
         if conditions:
             care_context["care_flags"]["chronic_conditions"] = conditions
             st.session_state.care_context = care_context
-            st.caption(f"Chronic conditions: {', '.join(care_context['care_flags']['chronic_conditions'])}")
+            if len(conditions) > 1:
+                st.write(f"Got it—you’re managing {', '.join(conditions[:-1]) + ' and ' + conditions[-1]}. That’s a lot—any giving you trouble?")
+            else:
+                st.write(f"Noted—{', '.join(conditions)} is on our radar. How’s that been for you?")
 
-        if st.button(
-            "Next",
-            key="planner_next_7",
-            disabled=not (social and geography and safety and conditions is not None),
-        ):
+        if st.button("Next", key="planner_next_7", disabled=not (social and geography and safety and fall_history and conditions is not None)):
             st.session_state.planner_step = 8
             st.rerun()
         if st.button("Go Back", key="planner_back_7"):
@@ -327,22 +324,25 @@ def render_planner():
     # Step 8: Home Preference
     elif st.session_state.planner_step == 8:
         st.subheader("Your Home Preference")
-        st.write("Lastly, how do you feel about staying home?")
+        st.write("Lastly, how do you feel about staying in your current home?")
         goal_options = {
-            "1": "Not important—I'm open to other options",
-            "2": "Somewhat important—I'd prefer to stay but could move",
-            "3": "Very important—I strongly want to stay home",
+            "1": "Not important—I’m open to other options",
+            "2": "Somewhat important—I’d prefer to stay but could move",
+            "3": "Very important—I strongly want to stay home"
         }
         goal_options_list = list(goal_options.values())
         goal = st.radio(
-            "How important is it to stay in your current home?",
+            "How much does staying home mean to you right now?",
             goal_options_list,
-            key="goal_select",
+            key="goal_select"
         )
         if goal:
             care_context["care_flags"]["living_goal"] = goal
             st.session_state.care_context = care_context
-            st.caption(f"Preference: {care_context['care_flags']['living_goal']}")
+            if "important" in goal.lower():
+                st.write("I get it—home’s special. What makes it so important to you?")
+            else:
+                st.write(f"That’s flexible—{goal.lower()} gives us room to explore.")
         if st.button("Get Recommendation", key="planner_next_8", disabled=not goal):
             st.session_state.planner_step = 9
             st.rerun()
@@ -355,13 +355,9 @@ def render_planner():
         st.subheader("Care Recommendation")
         st.write("Based on your answers, here’s our suggestion.")
         flags = []
-
         # Financial
         funding = care_context["care_flags"].get("funding_confidence", "")
-        if funding in [
-            "Very worried—cost is a big concern for me",
-            "Somewhat worried—I’d need to budget carefully",
-        ]:
+        if funding in ["Very worried—cost is a big concern for me", "Somewhat worried—I’d need to budget carefully"]:
             flags.append("needs_financial_assistance")
         elif funding == "Not worried—I can afford any care I need":
             flags.append("can_afford_care")
@@ -369,7 +365,7 @@ def render_planner():
         # Cognition
         cog = care_context["care_flags"].get("cognitive_function", "")
         conditions = care_context["care_flags"].get("chronic_conditions", [])
-        if ("Serious confusion" in cog) or ("Dementia" in conditions) or ("Parkinson's" in conditions):
+        if "Serious confusion" in cog or "Dementia" in conditions or "Parkinson's" in conditions:
             flags.append("severe_cognitive_risk")
         elif "Noticeable problems" in cog:
             flags.append("moderate_cognitive_decline")
@@ -382,12 +378,12 @@ def render_planner():
             flags.append("no_support")
         elif "Someone checks in occasionally" in support:
             flags.append("limited_support")
-        elif ("Support most days" in support) or ("Someone’s with me all the time" in support):
+        elif "Support most days" in support or "Someone’s with me all the time" in support:
             flags.append("adequate_support")
 
         # Medication Adherence
         med_adherence = care_context["care_flags"].get("med_adherence", "No")
-        if med_adherence in ["I need help sometimes", "I can't count on myself"]:
+        if med_adherence in ["I need help sometimes", "I can’t count on myself"]:
             flags.append("med_adherence_risk")
 
         # Independence
@@ -399,7 +395,7 @@ def render_planner():
 
         # Mobility
         mobility = care_context["derived_flags"].get("inferred_mobility_aid", "")
-        if ("I need assistance for most movement around the home" in mobility) or ("I am mostly immobile or need a wheelchair" in mobility):
+        if "I need assistance for most movement around the home" in mobility or "I am mostly immobile or need a wheelchair" in mobility:
             flags.append("high_mobility_dependence")
         elif "I use a cane or walker for longer distances" in mobility:
             flags.append("moderate_mobility")
@@ -413,7 +409,7 @@ def render_planner():
 
         # Geography & Access
         geo = care_context["care_flags"].get("geographic_access", "")
-        if ("Pretty hard without help" in geo) or ("Impossible alone" in geo):
+        if "Pretty hard without help" in geo or "Impossible alone" in geo:
             flags.append("very_low_access")
 
         # Home Safety
@@ -428,12 +424,12 @@ def render_planner():
         # Chronic Conditions
         conditions = care_context["care_flags"].get("chronic_conditions", [])
         if "CHF" in conditions or "COPD" in conditions:
-            if ("high_mobility_dependence" in flags) or ("high_safety_concern" in flags):
+            if "high_mobility_dependence" in flags or "high_safety_concern" in flags:
                 flags.append("chronic_health_risk")
 
         # Score Calculation
         score = 0
-        if ("severe_cognitive_risk" in flags) and ("adequate_support" in flags):
+        if "severe_cognitive_risk" in flags and "adequate_support" in flags:
             score += 10
         elif "severe_cognitive_risk" in flags:
             score += 15
@@ -441,12 +437,14 @@ def render_planner():
             score += 5
         if "mild_cognitive_decline" in flags:
             score += 3
-        if ("high_dependence" in flags) or ("high_mobility_dependence" in flags):
+        if "high_dependence" in flags or "high_mobility_dependence" in flags:
             score += 10
-        if ("moderate_dependence" in flags) or ("moderate_mobility" in flags):
+        if "moderate_dependence" in flags or "moderate_mobility" in flags:
             score += 5
         if "no_support" in flags:
             score += 7
+        if "limited_support" in flags:
+            pass  # No penalty for borderline support
         if "adequate_support" in flags:
             score -= 5
         if "high_risk" in flags:
@@ -464,69 +462,49 @@ def render_planner():
         if "chronic_health_risk" in flags:
             score += 7
 
-        # Recommendation Logic (strings cleaned to ASCII inside the lists)
+        # Recommendation Logic
         if ("severe_cognitive_risk" in flags and "no_support" in flags) or score >= 25:
-            issues = [
-                random.choice(["facing serious memory challenges", "having significant cognitive concerns", "dealing with severe memory issues"]) if "severe_cognitive_risk" in flags else "",
-                random.choice(["needing daily help with tasks", "relying on assistance for daily activities"]) if "high_dependence" in flags else "",
-                random.choice(["needing a lot of help to get around", "relying on assistance for mobility"]) if "high_mobility_dependence" in flags else "",
-            ]
+            recommendation = "Memory Care"
+            issues = [f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns', 'dealing with severe memory issues']) if 'severe_cognitive_risk' in flags else ''}",
+                      f"{random.choice(['needing daily help with tasks', 'relying on assistance for daily activities']) if 'high_dependence' in flags else ''}",
+                      f"{random.choice(['needing a lot of help to get around', 'relying on assistance for mobility']) if 'high_mobility_dependence' in flags else ''}"]
             issues = [i for i in issues if i]
             st.write("**Care Recommendation: Memory Care**")
-            message = (
-                f"{random.choice(['We are here for you', 'We understand this is a big step', 'It is good you are looking into this', 'We are glad you are taking this step', 'Let us find the best fit for you'])} "
-                f"{care_context['people'][0] if care_context['people'] else 'friend'}, "
-                f"with {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'significant challenges'}, "
-                "Memory Care is the safest choice. If you have 24/7 skilled care at home, aging in place could work—let’s explore that."
-            )
+            message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, with {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'significant challenges'}, Memory Care is the safest choice. If you have 24/7 skilled care at home, aging in place could work—let’s explore that."
         elif score >= 15:
-            issues = [
-                random.choice(["needing daily help with tasks", "relying on assistance for daily activities"]) if "high_dependence" in flags else (random.choice(["needing some help with tasks", "requiring occasional assistance"]) if "moderate_dependence" in flags else ""),
-                random.choice(["needing a lot of help to get around", "relying on assistance for mobility"]) if "high_mobility_dependence" in flags else (random.choice(["needing some mobility help", "using aids for longer distances"]) if "moderate_mobility" in flags else ""),
-                random.choice(["having no one around to help", "lacking regular support"]) if "no_support" in flags else (random.choice(["having no one around infrequently", "lacking support occasionally"]) if "limited_support" in flags else ""),
-                random.choice(["facing serious memory challenges", "having significant cognitive concerns"]) if "severe_cognitive_risk" in flags else (random.choice(["occasional lapses", "noticeable problems"]) if "moderate_cognitive_decline" in flags else ""),
-                random.choice(["facing safety risks at home", "having major safety concerns"]) if "high_safety_concern" in flags else (random.choice(["having some safety concerns", "feeling somewhat unsafe"]) if "moderate_safety_concern" in flags else ""),
-            ]
-            issues = [i for i in issues if i][:3]
+            recommendation = "Assisted Living"
+            issues = [f"{random.choice(['needing daily help with tasks', 'relying on assistance for daily activities']) if 'high_dependence' in flags else random.choice(['needing some help with tasks', 'requiring occasional assistance']) if 'moderate_dependence' in flags else ''}",
+                      f"{random.choice(['needing a lot of help to get around', 'relying on assistance for mobility']) if 'high_mobility_dependence' in flags else random.choice(['needing some mobility help', 'using aids for longer distances']) if 'moderate_mobility' in flags else ''}",
+                      f"{random.choice(['having no one around to help', 'lacking regular support']) if 'no_support' in flags else random.choice(['having no one around infrequently', 'lacking support occasionally']) if 'limited_support' in flags else ''}",
+                      f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns']) if 'severe_cognitive_risk' in flags else random.choice(['occasional lapses', 'noticeable problems']) if 'moderate_cognitive_decline' in flags else ''}",
+                      f"{random.choice(['facing safety risks at home', 'having major safety concerns']) if 'high_safety_concern' in flags else random.choice(['having some safety concerns', 'feeling somewhat unsafe']) if 'moderate_safety_concern' in flags else ''}"]
+            issues = [i for i in issues if i][:3]  # Top 3 issues
             st.write("**Care Recommendation: Assisted Living**")
             preference = {
-                "Very important—I strongly want to stay home": "Since staying home is important to you, let's see how we can make that work with extra support.",
-                "Somewhat important—I’d prefer to stay but could move": "You'd prefer to stay home, so let's explore ways to make that possible.",
-                "Not important—I'm open to other options": "You're open to options, so let's look at assisted living communities that feel like home.",
-            }.get(care_context["care_flags"].get("living_goal", ""), "If you're unsure, let's talk through the options together.")
-            message = (
-                f"{random.choice(['We are here for you', 'We understand this is a big step', 'It is good you are looking into this', 'We are glad you are taking this step', 'Let us find the best fit for you'])} "
-                f"{care_context['people'][0] if care_context['people'] else 'friend'}, "
-                f"we see you are navigating challenges like {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'various needs'}. "
-                f"Assisted Living would offer the support and safety you need. {preference}"
-            )
+                "Very important—I strongly want to stay home": "Since staying home is important to you, let’s see how we can make that work with extra support.",
+                "Somewhat important—I’d prefer to stay but could move": "You’d prefer to stay home, so let’s explore ways to make that possible.",
+                "Not important—I’m open to other options": "You’re open to options, so let’s look at assisted living communities that feel like home."
+            }.get(care_context["care_flags"].get("living_goal", ""), "If you’re unsure, let’s talk through the options together.")
+            message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, we see you’re navigating challenges like {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'various needs'}. Assisted Living would offer the support and safety you need. {preference}"
         elif score >= 8:
-            issues = [
-                random.choice(["needing some help with tasks", "requiring occasional assistance"]) if "moderate_dependence" in flags else "",
-                random.choice(["needing some mobility help", "using aids for longer distances"]) if "moderate_mobility" in flags else "",
-                random.choice(["having no one around infrequently", "lacking support occasionally"]) if "limited_support" in flags else "",
-                random.choice(["occasional lapses", "noticeable problems"]) if "moderate_cognitive_decline" in flags else "",
-                random.choice(["having some safety concerns", "feeling somewhat unsafe"]) if "moderate_safety_concern" in flags else "",
-            ]
-            issues = [i for i in issues if i][:3]
+            recommendation = "In-Home Care with Support"
+            issues = [f"{random.choice(['needing some help with tasks', 'requiring occasional assistance']) if 'moderate_dependence' in flags else ''}",
+                      f"{random.choice(['needing some mobility help', 'using aids for longer distances']) if 'moderate_mobility' in flags else ''}",
+                      f"{random.choice(['having no one around infrequently', 'lacking support occasionally']) if 'limited_support' in flags else ''}",
+                      f"{random.choice(['occasional lapses', 'noticeable problems']) if 'moderate_cognitive_decline' in flags else ''}",
+                      f"{random.choice(['having some safety concerns', 'feeling somewhat unsafe']) if 'moderate_safety_concern' in flags else ''}"]
+            issues = [i for i in issues if i][:3]  # Top 3 issues
             st.write("**Care Recommendation: In-Home Care with Support**")
             preference = {
-                "Very important—I strongly want to stay home": "Since staying home is important to you, let's see how we can make that work with extra support.",
-                "Somewhat important—I’d prefer to stay but could move": "You'd prefer to stay home, so let's explore ways to make that possible.",
-                "Not important—I'm open to other options": "You're open to options, so let's look at assisted living communities that feel like home.",
-            }.get(care_context["care_flags"].get("living_goal", ""), "If you're unsure, let's talk through the options together.")
-            message = (
-                f"{random.choice(['We are here for you', 'We understand this is a big step', 'It is good you are looking into this', 'We are glad you are taking this step', 'Let us find the best fit for you'])} "
-                f"{care_context['people'][0] if care_context['people'] else 'friend'}, "
-                f"we see you are navigating challenges like {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'mild needs'}. "
-                f"In-Home Care with Support would offer the help you need. {preference}"
-            )
+                "Very important—I strongly want to stay home": "Since staying home is important to you, let’s see how we can make that work with extra support.",
+                "Somewhat important—I’d prefer to stay but could move": "You’d prefer to stay home, so let’s explore ways to make that possible.",
+                "Not important—I’m open to other options": "You’re open to options, so let’s look at assisted living communities that feel like home."
+            }.get(care_context["care_flags"].get("living_goal", ""), "If you’re unsure, let’s talk through the options together.")
+            message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, we see you’re navigating challenges like {', '.join(issues[:-1]) + (' and ' if len(issues) > 1 else '') + issues[-1] if issues else 'mild needs'}. In-Home Care with Support would offer the help you need. {preference}"
         else:
+            recommendation = "No Care Needed at This Time"
             st.write("**Care Recommendation: No Care Needed at This Time**")
-            message = (
-                f"{random.choice(['We are here for you', 'We understand this is a big step', 'It is good you are looking into this', 'We are glad you are taking this step', 'Let us find the best fit for you'])} "
-                f"{care_context['people'][0] if care_context['people'] else 'friend'}, it looks like you're managing well for now."
-            )
+            message = f"{random.choice(['We\'re here for you', 'We understand this is a big step', 'It\'s good you\'re looking into this', 'We\'re glad you\'re taking this step', 'Let\'s find the best fit for you'])} {care_context['people'][0] if care_context['people'] else 'friend'}, it looks like you\'re managing well for now."
         st.write(message)
 
         if st.button("Restart", key="planner_restart"):
@@ -534,8 +512,7 @@ def render_planner():
             st.session_state.care_context = {"audience_type": None, "people": [], "care_flags": {}, "derived_flags": {}}
             st.rerun()
 
-
-def render_step(step: str):
+def render_step(step):
     if step == "intro":
         st.title("Senior Navigator")
         st.write("Welcome! Start by exploring your care options.")
