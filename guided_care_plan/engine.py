@@ -11,9 +11,7 @@ def _q_title(title: str):
     st.markdown(f"<div class='q-title'>{title}</div>", unsafe_allow_html=True)
 
 def _info_below(bullets):
-    """Render the help expander below the nav buttons."""
     if not bullets:
-        # still drop a little vertical rhythm so spacing feels deliberate
         st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
         return
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
@@ -22,8 +20,16 @@ def _info_below(bullets):
             st.markdown(f"{i}. {b}")
 
 def _audience_screen():
-    st.markdown("<div class='intro-head'>Welcome to Senior Care Navigator</div>", unsafe_allow_html=True)
-    st.markdown("<div class='intro-body'>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</div>", unsafe_allow_html=True)
+    # Centered intro wrapper for desktop
+    st.markdown(
+        "<div class='intro-wrap'>"
+        "<div class='intro-head'>Welcome to Senior Care Navigator</div>"
+        "<div class='intro-body'>We make navigating senior care simple. "
+        "Answer a few quick questions and we’ll connect you with the best options, "
+        "backed by expert guidance — always free for families.</div>"
+        "</div>",
+        unsafe_allow_html=True
+    )
     st.markdown("<div class='q-prompt'>Who are you planning care for today?</div>", unsafe_allow_html=True)
 
     care = st.session_state.care_context
@@ -89,7 +95,6 @@ def run_flow():
         _audience_screen()
         return
 
-    # Steps 1..N
     if 1 <= step <= len(QUESTIONS):
         key, prompt, options, bullets = QUESTIONS[step - 1]
         _q_title(f"Step {step}: {prompt}")
@@ -102,7 +107,7 @@ def run_flow():
             if sel is not None:
                 care["flags"][key] = sel
 
-        # Nav buttons row
+        # Back / Next row (stay horizontal on mobile via CSS above)
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Back", type="secondary"):
@@ -118,6 +123,5 @@ def run_flow():
         _info_below(bullets)
         return
 
-    # After last question
     _derive_flags()
     _recommendation()
