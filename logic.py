@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 
-# Session state setup (kept here too so this file can run standalone)
+# Session state fallback (allows running this file standalone)
 if "care_context" not in st.session_state:
     st.session_state.care_context = {
         "audience_type": None,
@@ -9,13 +9,14 @@ if "care_context" not in st.session_state:
         "care_flags": {},
         "derived_flags": {},
     }
+if "step" not in st.session_state:
+    st.session_state.step = "planner"
+if "planner_step" not in st.session_state:
+    st.session_state.planner_step = 1
 
 care_context = st.session_state.care_context
 
 def render_planner():
-    if "planner_step" not in st.session_state:
-        st.session_state.planner_step = 1
-
     # Step 1: Funding
     if st.session_state.planner_step == 1:
         st.subheader("Your Financial Confidence")
@@ -47,13 +48,11 @@ def render_planner():
         if st.button(
             "Next",
             key="planner_next_1",
-            disabled=not funding_confidence
-            or funding_confidence == "I am on Medicaid",
+            disabled=(not funding_confidence) or (funding_confidence == "I am on Medicaid"),
         ):
             st.session_state.planner_step = 2
             st.rerun()
-        if st.button("Go Back", key="planner_back_1", disabled=True):
-            pass
+        st.button("Go Back", key="planner_back_1", disabled=True)
 
     # Step 2: Cognition
     elif st.session_state.planner_step == 2:
@@ -120,7 +119,7 @@ def render_planner():
     # Step 4: Medication Management
     elif st.session_state.planner_step == 4:
         st.subheader("Your Medication Management")
-        med_confidence = None  # avoids UnboundLocalError when user selects "No"
+        med_confidence = None  # presentation safety for "No" path
         takes_meds = st.radio(
             "Do you take any daily prescription meds (e.g., for heart, mood, or memory)?",
             ["No", "Yes"],
@@ -300,7 +299,7 @@ def render_planner():
         st.write("Any ongoing health issues?")
         condition_options = [
             "Diabetes", "Hypertension", "Dementia", "Parkinson's",
-            "COPD", "CHF", "Arthritis", "Stroke"
+            "COPD", "CHF", "Arthritis", "Stroke",
         ]
         conditions = st.multiselect(
             "Which chronic conditions do you have?",
@@ -463,7 +462,7 @@ def render_planner():
         if "chronic_health_risk" in flags:
             score += 7
 
-        # Recommendation Logic (strings cleaned to ASCII inside the lists)
+        # Recommendation Logic
         if ("severe_cognitive_risk" in flags and "no_support" in flags) or score >= 25:
             issues = [
                 random.choice(["facing serious memory challenges", "having significant cognitive concerns", "dealing with severe memory issues"]) if "severe_cognitive_risk" in flags else "",
