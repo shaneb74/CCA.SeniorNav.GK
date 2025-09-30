@@ -42,9 +42,10 @@ st.markdown("""
   border:1.5px solid var(--pill-brd); border-radius:var(--pill-radius);
   padding:var(--pill-pad); box-shadow:var(--pill-shadow);
   cursor:pointer; transition:all .12s ease-in-out;
-  font-size:var(--pill-font); line-height:1.3; white-space:nowrap;
+  font-size:var(--pill-font); line-height:1.3;
   user-select:none; text-align:center; font-weight:500;
-  min-height: 48px; width: 100%;
+  width: 100%;       /* take full width of grid cell */
+  min-height: 56px;  /* taller for comfort */
 }
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:last-child:hover{ background:var(--pill-hover); }
 [data-testid="stRadio"] input[type="radio"]:checked + div{
