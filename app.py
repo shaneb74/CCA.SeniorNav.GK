@@ -3,22 +3,31 @@ import logic
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# --- Global CSS: Horizontal "answer bar" radios ---
+# --- Global CSS: Horizontal/stacked 'answer bar' radios using CSS Grid ---
 st.markdown("""
 <style>
 :root{
-  --bar-radius:12px; --bar-pad:.55rem .9rem; --bar-gap:.5rem;
+  --bar-radius:12px; --bar-pad:.55rem .9rem; --bar-gap:.6rem;
   --bar-bg:#fff; --bar-bg-hover:#f6f7fb; --bar-bg-active:#0B5CD8;
   --bar-fg:#0f172a; --bar-fg-active:#fff; --bar-brd:#e5e7eb;
   --bar-shadow:0 1px 4px rgba(15,23,42,.06);
   --bar-font:14px;
 }
 
-/* make radios render as horizontal, wrapping "answer bars" */
-[data-testid="stRadio"] > div{ gap: var(--bar-gap) !important; }
-[data-testid="stRadio"] div[role="radiogroup"]{
-  display:flex; flex-wrap:wrap; align-items:stretch; gap:var(--bar-gap);
+/* Radio group container -> grid */
+[data-testid="stRadio"] > div{
+  gap: var(--bar-gap) !important;
 }
+[data-testid="stRadio"] div[role="radiogroup"]{
+  display:grid; gap:var(--bar-gap);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* chips/grid mode */
+  align-items:stretch;
+}
+
+/* To switch to full-width stacked bars, comment the line above and uncomment the next line */
+/* [data-testid="stRadio"] div[role="radiogroup"]{ grid-template-columns: 1fr; } */
+
+/* Each option becomes a bar */
 [data-testid="stRadio"] div[role="radiogroup"] > label{
   margin:0 !important; padding:0 !important; display:block;
 }
@@ -33,20 +42,20 @@ st.markdown("""
 [data-testid="stRadio"] div[role="radiogroup"] > div:hover{
   background:var(--bar-bg-hover);
 }
+
+/* Selected state */
 [data-testid="stRadio"] input[type="radio"]:checked + div{
   background:var(--bar-bg-active); color:var(--bar-fg-active);
   border-color:var(--bar-bg-active);
   box-shadow:0 2px 10px rgba(11,92,216,.25);
 }
+
+/* Hide native dot but keep it accessible */
 [data-testid="stRadio"] input[type="radio"]{
   position:absolute; opacity:0; width:1px; height:1px; overflow:hidden;
 }
 
-/* optional: make bars full-width instead of chips
-[data-testid="stRadio"] div[role="radiogroup"] > div{ width:100% }
-]*/
-
-/* sidebar tidy */
+/* Sidebar polish */
 section[data-testid="stSidebar"]{background:#f8fafc;border-left:1px solid #e5e7eb}
 </style>
 """, unsafe_allow_html=True)
