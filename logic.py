@@ -29,7 +29,7 @@ small, .stCaption { font-size: 15px !important; color: var(--muted); }
 .progress-chip { font-size: 13px; padding: 6px 10px; border-radius: 999px;
   background: var(--chip); color: var(--chip-ink); border: 1px solid var(--chip-b); }
 .progress-chip.active { background: var(--brand); color: #ffffff; border-color: var(--brand); }
-.stRadio > div > label span { font-size: 24px !important; }
+.stRadio > div > label span { font-size: 28px !important; }
 .stRadio > div > label { line-height: 1.5; margin: 6px 0; }
 .stButton > button { width:auto !important; display:inline-flex; align-items:center; justify-content:center;
   white-space:nowrap; background:var(--brand) !important; color: var(--brand-ink) !important;
