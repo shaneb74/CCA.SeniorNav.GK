@@ -8,6 +8,8 @@ except ImportError as e:
 
 st.set_page_config(layout="wide")
 
+st.sidebar.button("Run Test Cases", key="debug_tests", on_click=lambda: run_tests())
+
 st.sidebar.title("Navigation")
 st.sidebar.checkbox("QA View", value=False, key="show_qa")
 if st.sidebar.button("Guided Care Plan"):
