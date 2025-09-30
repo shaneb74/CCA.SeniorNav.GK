@@ -58,7 +58,8 @@ if "planner_step" not in st.session_state:
 
 # ---- Header + progress + step card ----
 st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-st.markdown("<h1>Guided Care Plan</h1>", unsafe_allow_html=True)
+title = "Senior Care Navigator" if st.session_state.step == "audiencing" else "Guided Care Plan"
+st.markdown(f"<h1>{title}</h1>", unsafe_allow_html=True)
 st.markdown("<p>Let’s walk through your care needs—one friendly step at a time.</p>", unsafe_allow_html=True)
 
 if st.session_state.step == "planner":
