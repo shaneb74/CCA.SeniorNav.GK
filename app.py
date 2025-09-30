@@ -8,7 +8,7 @@ st.set_page_config(
     menu_items={"Get Help": None, "Report a bug": None, "About": None},
 )
 
-# Extracted styles from your design
+# Extracted styles from your design with updates
 STYLES = """
 <style>
 :root {
@@ -21,13 +21,14 @@ STYLES = """
   --chip-ink:#1E3A8A;
   --card:#ffffff;
   --radius:14px;
+  --light-brand:#6BA8FF;
 }
 .block-container { max-width:1360px; padding-top:1rem !important; }
 header[data-testid="stHeader"] { background: transparent; }
 footer { visibility: hidden; }
 p, .stMarkdown { font-size: 18px !important; line-height: 1.65; color: var(--ink) !important; }
 h1 { font-size: 44px; margin:0 0 .25rem 0; color: var(--ink); }
-h2 { font-size: 28px; margin:.75rem 0 .35rem 0; color: var(--ink); }
+h2 { font-size: 32px !important; line-height: 1.3; margin:.75rem 0 .35rem 0; color: var(--ink); }
 h3 { font-size: 20px; margin:.5rem 0 .25rem 0; color: var(--ink); }
 small, .stCaption { font-size: 15px !important; color: var(--muted); }
 .section-card { background: var(--card); border: 1px solid #eef0f6; border-radius: var(--radius);
@@ -37,8 +38,10 @@ small, .stCaption { font-size: 15px !important; color: var(--muted); }
   background: var(--chip); color: var(--chip-ink); border: 1px solid var(--chip-b); }
 .progress-chip.active { background: var(--brand); color: #ffffff; border-color: var(--brand); }
 .stButton > button { width:auto !important; display:inline-flex; align-items:center; justify-content:center;
-  white-space:nowrap; background:var(--brand) !important; color: var(--brand-ink) !important;
-  border:1px solid #CBD5E1 !important; opacity:1; box-shadow:none !important; }
+  white-space:nowrap; color: var(--brand-ink) !important; border:1px solid #CBD5E1 !important;
+  opacity:1; box-shadow:none !important; }
+.stButton > button:nth-child(1) { background: var(--light-brand) !important; }
+.stButton > button:nth-child(2) { background: var(--brand) !important; }
 </style>
 """
 st.markdown(STYLES, unsafe_allow_html=True)
