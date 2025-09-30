@@ -1,6 +1,315 @@
 import streamlit as st
 import random
 
+
+def run_tests():
+    test_cases = [
+        {
+            "name": "Alex - COPD + Cane",
+            "funding": "Not worried—I can afford any care I need",
+            "cognition": "Noticeable problems—like missing meds or appointments",
+            "caregiver": "Someone checks in occasionally",
+            "meds": "Yes",
+            "med_adherence": "I’m pretty sure, with reminders",
+            "independence": "I need help with some of these tasks regularly",
+            "mobility": "I use a cane or walker for longer distances",
+            "social": "Monthly calls",
+            "geography": "Needs a ride, but manageable",
+            "safety": "Mostly safe, but a few concerns",
+            "fall": "No",
+            "chronic": ["COPD"],
+            "preference": "Very important—I strongly want to stay home"
+        },
+        {
+            "name": "Jane - Early Dementia",
+            "funding": "Not worried—I can afford any care I need",
+            "cognition": "Occasional lapses—like forgetting what I was saying",
+            "caregiver": "Support most days",
+            "meds": "Yes",
+            "med_adherence": "I need help sometimes",
+            "independence": "I’m fully independent and handle all tasks on my own",
+            "mobility": "I walk easily without any support",
+            "social": "Daily visits or calls",
+            "geography": "Easy—I can walk or drive",
+            "safety": "Very safe—I have everything I need",
+            "fall": "No",
+            "chronic": ["Dementia"],
+            "preference": "Not important—I’m open to other options"
+        },
+        {
+            "name": "Bob - Poor with Support",
+            "funding": "Very worried—cost is a big concern for me",
+            "cognition": "My memory feels sharp—no real issues",
+            "caregiver": "Someone’s with me all the time",
+            "meds": "No",
+            "med_adherence": "No",
+            "independence": "I occasionally need reminders or light assistance",
+            "mobility": "I use a cane or walker for longer distances",
+            "social": "Weekly check-ins",
+            "geography": "Pretty hard without help",
+            "safety": "Mostly safe, but a few concerns",
+            "fall": "Yes",
+            "chronic": [],
+            "preference": "Somewhat important—I’d prefer to stay but could move"
+        },
+        {
+            "name": "Isolated Emma",
+            "funding": "Somewhat worried—I’d need to budget carefully",
+            "cognition": "Noticeable problems—like missing meds or appointments",
+            "caregiver": "No regular support",
+            "meds": "Yes",
+            "med_adherence": "I can’t count on myself",
+            "independence": "I rely on someone else for most daily tasks",
+            "mobility": "I am mostly immobile or need a wheelchair",
+            "social": "Mostly alone",
+            "geography": "Impossible alone",
+            "safety": "Often feel at risk",
+            "fall": "Yes",
+            "chronic": ["CHF"],
+            "preference": "Not important—I’m open to other options"
+        },
+        {
+            "name": "Mobile Mike",
+            "funding": "Not worried—I can afford any care I need",
+            "cognition": "Serious confusion—like losing track of time, place, or familiar faces",
+            "caregiver": "Support most days",
+            "meds": "Yes",
+            "med_adherence": "I manage them rock-solid",
+            "independence": "I’m fully independent and handle all tasks on my own",
+            "mobility": "I walk easily without any support",
+            "social": "Daily visits or calls",
+            "geography": "Easy—I can walk or drive",
+            "safety": "Very safe—I have everything I need",
+            "fall": "No",
+            "chronic": ["Dementia"],
+            "preference": "Very important—I strongly want to stay home"
+        },
+        {
+            "name": "Falls-Prone Fred",
+            "funding": "Very worried—cost is a big concern for me",
+            "cognition": "Occasional lapses—like forgetting what I was saying",
+            "caregiver": "Someone checks in occasionally",
+            "meds": "No",
+            "med_adherence": "No",
+            "independence": "I need help with some of these tasks regularly",
+            "mobility": "I need assistance for most movement around the home",
+            "social": "Weekly check-ins",
+            "geography": "Needs a ride, but manageable",
+            "safety": "Sometimes I feel unsafe",
+            "fall": "Yes",
+            "chronic": ["Arthritis"],
+            "preference": "Somewhat important—I’d prefer to stay but could move"
+        },
+        {
+            "name": "Full-Time Care Carol",
+            "funding": "Not worried—I can afford any care I need",
+            "cognition": "My memory feels sharp—no real issues",
+            "caregiver": "Someone’s with me all the time",
+            "meds": "Yes",
+            "med_adherence": "I manage them rock-solid",
+            "independence": "I rely on someone else for most daily tasks",
+            "mobility": "I am mostly immobile or need a wheelchair",
+            "social": "Daily visits or calls",
+            "geography": "Easy—I can walk or drive",
+            "safety": "Very safe—I have everything I need",
+            "fall": "No",
+            "chronic": [],
+            "preference": "Very important—I strongly want to stay home"
+        },
+        {
+            "name": "No-Meds Nancy",
+            "funding": "Somewhat worried—I’d need to budget carefully",
+            "cognition": "Noticeable problems—like missing meds or appointments",
+            "caregiver": "Support most days",
+            "meds": "No",
+            "med_adherence": "No",
+            "independence": "I occasionally need reminders or light assistance",
+            "mobility": "I use a cane or walker for longer distances",
+            "social": "Monthly calls",
+            "geography": "Pretty hard without help",
+            "safety": "Mostly safe, but a few concerns",
+            "fall": "No",
+            "chronic": ["Hypertension"],
+            "preference": "Not important—I’m open to other options"
+        },
+        {
+            "name": "Home-Hater Hank",
+            "funding": "Very worried—cost is a big concern for me",
+            "cognition": "Serious confusion—like losing track of time, place, or familiar faces",
+            "caregiver": "No regular support",
+            "meds": "Yes",
+            "med_adherence": "I need help sometimes",
+            "independence": "I rely on someone else for most daily tasks",
+            "mobility": "I need assistance for most movement around the home",
+            "social": "Mostly alone",
+            "geography": "Impossible alone",
+            "safety": "Often feel at risk",
+            "fall": "Yes",
+            "chronic": ["Parkinson's"],
+            "preference": "Not important—I’m open to other options"
+        },
+        {
+            "name": "Mild Mary",
+            "funding": "Not worried—I can afford any care I need",
+            "cognition": "Occasional lapses—like forgetting what I was saying",
+            "caregiver": "Someone’s with me all the time",
+            "meds": "Yes",
+            "med_adherence": "I’m pretty sure, with reminders",
+            "independence": "I’m fully independent and handle all tasks on my own",
+            "mobility": "I walk easily without any support",
+            "social": "Daily visits or calls",
+            "geography": "Easy—I can walk or drive",
+            "safety": "Very safe—I have everything I need",
+            "fall": "No",
+            "chronic": [],
+            "preference": "Very important—I strongly want to stay home"
+        }
+    ]
+
+    st.write("### Test Case Results")
+    st.write("| Name                  | Score | Recommendation            | Top 3 Issues                          |")
+    st.write("|-----------------------|-------|---------------------------|---------------------------------------|")
+    for case in test_cases:
+        # Simulate setting care_context
+        care_context["care_flags"] = {}
+        care_context["derived_flags"] = {}
+        care_context["care_flags"]["funding_confidence"] = case["funding"]
+        care_context["care_flags"]["cognitive_function"] = case["cognition"]
+        care_context["care_flags"]["caregiver_support"] = case["caregiver"]
+        care_context["care_flags"]["med_adherence"] = case["med_adherence"] if case["meds"] == "Yes" else "No"
+        care_context["care_flags"]["independence_level"] = case["independence"]
+        care_context["care_flags"]["mobility_issue"] = case["mobility"] != "I walk easily without any support"
+        care_context["derived_flags"]["inferred_mobility_aid"] = case["mobility"]
+        care_context["care_flags"]["social_connection"] = case["social"]
+        care_context["care_flags"]["geographic_access"] = case["geography"]
+        care_context["care_flags"]["falls_risk"] = case["safety"] in ["Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"]
+        care_context["derived_flags"]["recent_fall"] = case["fall"] == "Yes"
+        care_context["care_flags"]["chronic_conditions"] = case["chronic"]
+        care_context["care_flags"]["living_goal"] = case["preference"]
+
+        # Score calculation (simplified from recommendation block)
+        flags = []
+        if care_context["care_flags"]["funding_confidence"] in ["Very worried—cost is a big concern for me", "Somewhat worried—I’d need to budget carefully"]:
+            flags.append("needs_financial_assistance")
+        elif care_context["care_flags"]["funding_confidence"] == "Not worried—I can afford any care I need":
+            flags.append("can_afford_care")
+
+        cog = care_context["care_flags"]["cognitive_function"]
+        conditions = care_context["care_flags"]["chronic_conditions"]
+        if "Serious confusion" in cog or "Dementia" in conditions or "Parkinson's" in conditions:
+            flags.append("severe_cognitive_risk")
+        elif "Noticeable problems" in cog:
+            flags.append("moderate_cognitive_decline")
+        elif "Occasional lapses" in cog:
+            flags.append("mild_cognitive_decline")
+
+        support = care_context["care_flags"]["caregiver_support"]
+        if "No regular support" in support:
+            flags.append("no_support")
+        elif "Someone checks in occasionally" in support:
+            flags.append("limited_support")
+        elif "Support most days" in support or "Someone’s with me all the time" in support:
+            flags.append("adequate_support")
+
+        if care_context["care_flags"]["med_adherence"] in ["I need help sometimes", "I can’t count on myself"]:
+            flags.append("med_adherence_risk")
+
+        indep = care_context["care_flags"]["independence_level"]
+        if "I rely on someone else for most daily tasks" in indep:
+            flags.append("high_dependence")
+        elif "I need help with some of these tasks regularly" in indep:
+            flags.append("moderate_dependence")
+
+        mobility = care_context["derived_flags"]["inferred_mobility_aid"]
+        if "I need assistance for most movement around the home" in mobility or "I am mostly immobile or need a wheelchair" in mobility:
+            flags.append("high_mobility_dependence")
+        elif "I use a cane or walker for longer distances" in mobility:
+            flags.append("moderate_mobility")
+
+        social = care_context["care_flags"]["social_connection"]
+        if "Mostly alone" in social:
+            flags.append("high_risk")
+        elif "Monthly calls" in social:
+            flags.append("moderate_risk")
+
+        geo = care_context["care_flags"]["geographic_access"]
+        if "Pretty hard without help" in geo or "Impossible alone" in geo:
+            flags.append("very_low_access")
+
+        safety = care_context["care_flags"]["falls_risk"]
+        if safety:
+            flags.append("moderate_safety_concern")
+
+        if care_context["derived_flags"]["recent_fall"]:
+            flags.append("high_safety_concern")
+
+        conditions = care_context["care_flags"]["chronic_conditions"]
+        if "CHF" in conditions or "COPD" in conditions:
+            if "high_mobility_dependence" in flags or "high_safety_concern" in flags:
+                flags.append("chronic_health_risk")
+
+        score = 0
+        if "severe_cognitive_risk" in flags and "adequate_support" in flags:
+            score += 10
+        elif "severe_cognitive_risk" in flags:
+            score += 15
+        if "moderate_cognitive_decline" in flags:
+            score += 5
+        if "mild_cognitive_decline" in flags:
+            score += 3
+        if "high_dependence" in flags or "high_mobility_dependence" in flags:
+            score += 10
+        if "moderate_dependence" in flags or "moderate_mobility" in flags:
+            score += 5
+        if "no_support" in flags:
+            score += 7
+        if "limited_support" in flags:
+            pass  # No penalty for borderline support
+        if "adequate_support" in flags:
+            score -= 5
+        if "high_risk" in flags:
+            score += 6
+        if "moderate_risk" in flags:
+            score += 3
+        if "med_adherence_risk" in flags:
+            score += 6
+        if "very_low_access" in flags:
+            score += 4
+        if "moderate_safety_concern" in flags:
+            score += 5
+        if "high_safety_concern" in flags:
+            score += 8
+        if "chronic_health_risk" in flags:
+            score += 7
+
+        # Determine recommendation
+        recommendation = "No Care Needed at This Time"
+        issues = []
+        if ("severe_cognitive_risk" in flags and "no_support" in flags) or score >= 25:
+            recommendation = "Memory Care"
+            issues = [f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns', 'dealing with severe memory issues']) if 'severe_cognitive_risk' in flags else ''}",
+                      f"{random.choice(['needing daily help with tasks', 'relying on assistance for daily activities']) if 'high_dependence' in flags else ''}",
+                      f"{random.choice(['needing a lot of help to get around', 'relying on assistance for mobility']) if 'high_mobility_dependence' in flags else ''}"]
+        elif score >= 15:
+            recommendation = "Assisted Living"
+            issues = [f"{random.choice(['needing daily help with tasks', 'relying on assistance for daily activities']) if 'high_dependence' in flags else random.choice(['needing some help with tasks', 'requiring occasional assistance']) if 'moderate_dependence' in flags else ''}",
+                      f"{random.choice(['needing a lot of help to get around', 'relying on assistance for mobility']) if 'high_mobility_dependence' in flags else random.choice(['needing some mobility help', 'using aids for longer distances']) if 'moderate_mobility' in flags else ''}",
+                      f"{random.choice(['having no one around to help', 'lacking regular support']) if 'no_support' in flags else random.choice(['having no one around infrequently', 'lacking support occasionally']) if 'limited_support' in flags else ''}",
+                      f"{random.choice(['facing serious memory challenges', 'having significant cognitive concerns']) if 'severe_cognitive_risk' in flags else random.choice(['occasional lapses', 'noticeable problems']) if 'moderate_cognitive_decline' in flags else ''}",
+                      f"{random.choice(['facing safety risks at home', 'having major safety concerns']) if 'high_safety_concern' in flags else random.choice(['having some safety concerns', 'feeling somewhat unsafe']) if 'moderate_safety_concern' in flags else ''}"]
+        elif score >= 8:
+            recommendation = "In-Home Care with Support"
+            issues = [f"{random.choice(['needing some help with tasks', 'requiring occasional assistance']) if 'moderate_dependence' in flags else ''}",
+                      f"{random.choice(['needing some mobility help', 'using aids for longer distances']) if 'moderate_mobility' in flags else ''}",
+                      f"{random.choice(['having no one around infrequently', 'lacking support occasionally']) if 'limited_support' in flags else ''}",
+                      f"{random.choice(['occasional lapses', 'noticeable problems']) if 'moderate_cognitive_decline' in flags else ''}",
+                      f"{random.choice(['having some safety concerns', 'feeling somewhat unsafe']) if 'moderate_safety_concern' in flags else ''}"]
+        issues = [i for i in issues if i][:3]  # Top 3 issues
+
+        st.write(f"| {case['name']} | {score} | {recommendation} | {', '.join(issues) if issues else 'None'} |")
+
+# Call this in render_step or via button
+
 if "care_context" not in st.session_state:
     st.session_state.care_context = {
         "audience_type": None,
