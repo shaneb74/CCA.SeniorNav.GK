@@ -1,3 +1,13 @@
+st.markdown('''<style>
+    .stMarkdown p {
+        font-size: 22px !important;
+    }
+    .stRadio label {
+        font-size: 18px !important;
+        margin-top: 5px;
+    }
+</style>''', unsafe_allow_html=True)
+
 import streamlit as st
 import random
 from ui.helpers import radio_from_answer_map
