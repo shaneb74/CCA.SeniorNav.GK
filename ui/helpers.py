@@ -34,21 +34,24 @@ def _is_intlike(x) -> bool:
     except (ValueError, TypeError):
         return False
 
-def radio_from_answer_map(label, amap, *, key, help_text=None, default_key=None) -> str | None:
+def radio_from_answer_map(label, amap, *, key, help_text=None, default_key=None, show_debug=False) -> str | None:
     keys, labels = order_answer_map(amap)
     if not labels:
         st.warning(f"No valid options for radio: {label} with amap {amap}")
         return default_key
-    st.write(f"Debug: labels={labels}, keys={keys}, default_key={default_key}, idx_calc={0 if default_key is None or str(default_key) not in keys else keys.index(str(default_key))}")
     idx = 0 if default_key is None or str(default_key) not in keys else keys.index(str(default_key))
     if idx >= len(labels):
         st.warning(f"Index {idx} out of range for {len(labels)} labels, falling back to 0")
         idx = 0
-    try:
+    if show_debug:
+        st.write(f"Debug: labels={labels}, keys={keys}, default_key={default_key}, idx_calc={idx}")
         st.write(f"Attempting st.radio with label={label}, labels={labels}, idx={idx}, key={key}")
+    try:
         sel_label = st.radio(label, labels, index=idx, key=key)
-        st.write(f"st.radio returned: {sel_label}")
+        if show_debug:
+            st.write(f"st.radio returned: {sel_label}")
         return keys[labels.index(sel_label)] if sel_label in labels else default_key
     except (ValueError, TypeError) as e:
-        st.error(f"st.radio failed with error: {e}, labels={labels}, idx={idx}")
+        if show_debug:
+            st.error(f"st.radio failed with error: {e}, labels={labels}, idx={idx}")
         return default_key
