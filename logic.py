@@ -4,11 +4,11 @@ import random
 # Lock fonts early-no helpers, no overrides
 st.markdown(
     '''<style>
-    .stMarkdown p {
+    .stMarkdown {
         font-size: 22px !important;
     }
-    .stRadio label {
-        font-size: 18px !important;
+    .stRadio > div > label {
+        font-size: 22px !important;
         line-height: 1.5;
         margin: 6px 0;
     }
@@ -36,12 +36,12 @@ care_context = st.session_state.care_context
 
 def render_planner():
     st.header("Guided Care Plan")
-    st.write("Let’s walk through eight quick questions. Takes two minutes.")
+    st.write("Let’s walk through your care needs.")
     if "planner_step" not in st.session_state:
         st.session_state.planner_step = 1
     if st.button("Restart All", key="reset_plans"):
         st.session_state.clear()
-        st.experimental_rerun()
+        st.rerun()  # Updated from st.experimental_rerun()
 
     # Step 1: Funding
     if st.session_state.planner_step == 1:
@@ -508,7 +508,7 @@ def render_planner():
         if st.button("Restart", key="planner_restart"):
             st.session_state.planner_step = 1
             st.session_state.care_context = {"audience_type": None, "people": [], "care_flags": {}, "derived_flags": {}}
-            st.experimental_rerun()
+            st.rerun()
 
 def render_step(step):
     if step == "intro":
