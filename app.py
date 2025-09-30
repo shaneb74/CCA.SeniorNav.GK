@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import logic  # business logic only
 
@@ -99,7 +98,7 @@ if "planner_step" not in st.session_state:
 
 # ---- Sidebar "Navigation" chips (read-only indicator) ----
 if st.session_state.step == "planner":
-    labels = ["Funding","Cognition","Caregiver","Meds","Independence","Mobility","Your World","Home Preference","Recommendation"]
+    labels = ["Funding", "Cognition", "Caregiver", "Meds", "Independence", "Mobility", "Your World", "Home Preference", "Recommendation"]
     active_idx = max(1, min(st.session_state.get("planner_step", 1), len(labels))) - 1
     chips_html = "".join(
         f'<span class="progress-chip {"active" if i==active_idx else ""}">{i+1}. {txt}</span>'
