@@ -30,6 +30,7 @@ h2 { font-size: 28px; margin:.75rem 0 .35rem 0; color: var(--ink); }
 h3 { font-size: 20px; margin:.5rem 0 .25rem 0; color: var(--ink); }
 small, .stCaption { font-size: 15px !important; color: var(--muted); }
 
+
 .section-card{ background: var(--card); border: 1px solid #eef0f6; border-radius: var(--radius);
   padding: 20px 22px; box-shadow: 0 6px 18px rgba(13, 23, 63, 0.06); margin: 12px 0 22px 0; }
 
