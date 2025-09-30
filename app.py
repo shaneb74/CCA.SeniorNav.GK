@@ -1,10 +1,7 @@
 import streamlit as st
 import logic
 
-st.set_page_config(
-    page_title="Senior Care Navigator",
-    layout="centered"
-)
+st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
 # Initialize session state
 if "qa_mode" not in st.session_state:
@@ -17,14 +14,19 @@ if "care_context" not in st.session_state:
         "person_a_name": None,
         "person_b_name": None,
         "flags": {},
-        "chronic_conditions": []
+        "chronic_conditions": [],
+        "derived": {}
     }
+# Ensure chronic_conditions widget state exists (fixes multiselect flicker)
+if "chronic_conditions" not in st.session_state:
+    st.session_state.chronic_conditions = []
 
 # Header (always app-level)
 st.title("Senior Care Navigator")
 
-# QA toggle
-st.checkbox("QA view", key="qa_mode")
+# Sidebar QA toggle to keep UI clean
+with st.sidebar:
+    st.checkbox("QA view", key="qa_mode")
 
 # Delegate flow
 logic.run_flow()
