@@ -9,93 +9,62 @@ st.set_page_config(
 )
 
 # ===== Design System (one source of truth) =====
+
 STYLES = """
 <style>
-:root {
-  --brand:#0B5CD8;
-  --brand-ink:#ffffff;
-  --ink:#0f172a;
-  --muted:#475569;
-  --border:#e6e8f0;
-  --card:#ffffff;
-  --chip:#E6EEFF;
-  --chip-b:#C7D2FE;
-  --chip-ink:#1E3A8A;
-  --radius:14px;
-  --pad:18px;
-  --gap:14px;
+:root{
+  --brand:#0B5CD8; --brand-ink:#fff;
+  --ink:#0f172a; --muted:#475569;
+  --bg:#f6f7fb; --card:#fff; --border:#e5e7eb;
+  --radius:14px; --pad:18px; --gap:14px;
+  --shadow:0 6px 18px rgba(17,24,39,.06);
 }
 
-html, body, [data-testid="stAppViewContainer"] * { box-sizing:border-box; }
-
-.block-container{max-width:1100px;padding-top:8px;}
-header[data-testid="stHeader"] { background:transparent; }
-footer { visibility:hidden; }
-
-/* Sidebar polish */
-section[data-testid="stSidebar"]>div{padding:12px;}
-section[data-testid="stSidebar"]{background:#f8fafc;border-right:1px solid var(--border);}
+/* Base */
+html,body,[data-testid="stAppViewContainer"] *{box-sizing:border-box}
+[data-testid="stAppViewContainer"]{background:var(--bg);}
+.block-container{max-width:980px;padding-top:12px}
+header[data-testid="stHeader"]{background:transparent}
+footer{visibility:hidden}
 
 /* Typography */
-p, .stMarkdown { font-size:18px!important; line-height:1.6; color:var(--ink)!important; }
-h1{font-size:42px;letter-spacing:-.02em;margin:.25rem 0 .25rem 0;color:var(--ink);}
-h2 { font-size:28px!important; line-height:1.25; margin:.75rem 0 .35rem 0; color:var(--ink); }
-h3 { font-size:20px; margin:.5rem 0 .25rem 0; color:var(--ink); }
-small, .stCaption { font-size:14px!important; color:var(--muted); }
+body, .stMarkdown, p{font:16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji; color:var(--ink)!important}
+h1{font-size:34px;margin:.25rem 0 .25rem 0;letter-spacing:-.01em}
+h2{font-size:24px!important;margin:.5rem 0 .35rem 0}
+h3{font-size:18px;margin:.5rem 0 .25rem 0}
+small,.stCaption{font-size:13px!important;color:var(--muted)}
 
-/* Cards */
-.card-hook-container{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 2px 8px rgba(13,23,63,.04);margin:8px 0 16px 0;}
-.card-hook { display:none; }
-
-/* Chips */
-.chip {
-  display:inline-block; background:var(--chip);
-  border:1px solid var(--chip-b); color:var(--chip-ink);
-  padding:.25rem .6rem; border-radius:999px; font-size:12px; margin-right:6px;
-}
-
-/* Progress chips in sidebar */
-.progress-bar{display:flex;flex-direction:column;gap:8px;}
-.progress-chip{border:1px solid var(--border);border-radius:10px;padding:.4rem .6rem;font-size:13px;color:#1f2937;background:#fff;}
-.progress-chip.active{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:600;}
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);margin:8px 0 18px}
+.card > *:last-child{margin-bottom:0}
 
 /* Inputs */
-/* Radio polish */
-[data-testid="stRadio"] div[role="radiogroup"] > div{padding:.25rem .25rem;border-radius:10px;}
-[data-testid="stRadio"] div[role="radiogroup"] > div:hover{background:#f8fafc;}
-[data-testid="stRadio"] [data-testid="stWidgetLabel"], .stSelectbox label, .stTextInput label {
-  font-size:18px!important; font-weight:600; color:#111827; margin:.25rem 0 .35rem 0; display:block;
-}
-.stRadio > div > label span, [data-testid="stRadio"] div[role="radiogroup"] > div > label span {
-  font-size:18px!important;
-}
-.stRadio > div > label, [data-testid="stRadio"] div[role="radiogroup"] > div > label { line-height:1.5; margin:4px 0; display:block; }
-
-.stTextInput input, .stNumberInput input, .stSelectbox select, .stDateInput input {
-  border:1px solid var(--border); border-radius:12px; padding:.6rem .75rem; font-size:16px;
-}
-.stMultiSelect [data-baseweb="select"] { border-radius:12px; }
+label[data-testid="stWidgetLabel"]{font-size:16px!important;font-weight:600;margin:.25rem 0 .25rem 0;color:#111827;display:block}
+[data-testid="stRadio"] div[role="radiogroup"] > div{padding:.3rem .35rem;border-radius:10px}
+[data-testid="stRadio"] div[role="radiogroup"] > div:hover{background:#f1f5f9}
+.stTextInput input,.stNumberInput input,.stSelectbox select{border:1px solid var(--border);border-radius:12px;padding:.55rem .7rem;font-size:16px}
+/* Radio bullet color */
+input[type="radio"] + div:before{accent-color:var(--brand)!important}
 
 /* Buttons */
-[data-testid="baseButton-secondary"], [data-testid="baseButton-primary"], .stButton > button {
-  border-radius:12px; padding:.6rem 1rem; border:1px solid var(--border);
-  box-shadow:0 1px 2px rgba(16,24,40,.05);
-}
-.stButton > button{background:#fff;color:#111827;}
-.stButton > button:hover { border-color:#d0d5dd; }
-/* Primary look when we mark as 'primary' */
-button[kind="primary"] { background:var(--brand)!important; color:var(--brand-ink)!important; border-color:var(--brand)!important; }
+.stButton > button{border-radius:12px;padding:.6rem 1rem;border:1px solid var(--border);box-shadow:0 1px 2px rgba(16,24,40,.05);font-weight:600}
+.stButton > button[kind="primary"], .stButton > button[data-baseweb="buttonPrimary"], .stButton > button:has(+ [data-testid="baseButton-primary"]) {background:var(--brand)!important;color:var(--brand-ink)!important;border-color:var(--brand)!important}
+/* Align nav buttons */
+.nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:12px}
 
-/* Nav row layout */
-.nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:12px;}
-.nav-row .left, .nav-row .right { display:flex; gap:8px; }
+/* Sidebar */
+section[data-testid="stSidebar"]{background:#f8fafc;border-right:1px solid var(--border)}
+section[data-testid="stSidebar"] > div{padding:12px}
+.progress-bar{display:flex;flex-direction:column;gap:8px}
+.progress-chip{border:1px solid var(--border);border-radius:10px;padding:.4rem .6rem;font-size:13px;color:#1f2937;background:#fff}
+.progress-chip.active{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:600}
 
-/* Make default Streamlit elements breathe */
-[data-testid="stVerticalBlock"] > div { margin-bottom:12px; }
-.content-max{max-width:820px;margin-left:auto;margin-right:auto;}
+/* Content width */
+.content{max-width:760px;margin:0 auto}
 </style>
 """
 st.markdown(STYLES, unsafe_allow_html=True)
+
 
 # ---- Session bootstrap ----
 if "care_context" not in st.session_state:

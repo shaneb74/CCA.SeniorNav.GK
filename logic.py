@@ -137,7 +137,7 @@ def render_planner():
     elif step == 9:
         st.markdown("<h2>Recommendation</h2>", unsafe_allow_html=True)
         st.write("This screen should use your existing recommendation logic. The flags collected are in `st.session_state.care_context`.")
-        st.json(st.session_state.care_context)
+        st.code(str(st.session_state.care_context), language="python")
         _nav_row("Start Over", False, lambda: st.session_state.update(step="audiencing", audiencing_step=1, planner_step=1) or st.rerun(),
                  "← Back", False, lambda: st.session_state.update(planner_step=8) or st.rerun(), "planner_9")
 
