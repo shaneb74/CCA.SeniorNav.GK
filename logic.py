@@ -1,3 +1,7 @@
+import streamlit as st
+import random
+from ui.helpers import radio_from_answer_map
+
 st.markdown('''<style>
     .stMarkdown p {
         font-size: 22px !important;
@@ -9,9 +13,6 @@ st.markdown('''<style>
 </style>''', unsafe_allow_html=True)
 
 
-import streamlit as st
-import random
-from ui.helpers import radio_from_answer_map
 
 # Enhanced CSS for readability and layout
 st.markdown(
