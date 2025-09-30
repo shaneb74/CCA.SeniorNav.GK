@@ -48,6 +48,16 @@ small,.stCaption{ font-size:15px!important; color:var(--muted); }
   margin:4px 0 22px 0;
 }
 
+/* Container for consistent button placement */
+.card-hook-container {
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+.card-hook-container > div:last-child {
+  margin-top: auto;
+}
+
 /* Radio prompt + options sizing */
 [data-testid="stRadio"] [data-testid="stWidgetLabel"],
 [data-testid="stWidgetLabel"],
