@@ -438,10 +438,10 @@ def render_planner():
                         if fall_history:
                             care_context["derived_flags"]["recent_fall"] = fall_history == "Yes"
                             st.session_state.care_context = care_context
-                            if fall_history == "Yes":
-                                st.write("Thanks for letting me know. Was it a one-time thing or something recurring?")
-                            else:
-                                st.write(f"Good—{fall_history.lower()} is a positive sign.")
+            if fall_history == "Yes":
+                st.write("Thanks for letting me know.")
+else:
+                                st.write("Noted.")
                             _nav_row("Next →", not fall_history, lambda: st.session_state.update(world_step=5) or st.rerun(), 
                                      "← Back", False, lambda: st.session_state.update(world_step=3) or st.rerun(), "world_4")
 

@@ -11,6 +11,8 @@ st.set_page_config(
 # ===== Global styles (desktop-first, no ghost wrappers) =====
 STYLES = """
 <style>
+/* Design system tokens */
+:root{--pad:16px;--gap:14px;} .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:var(--pad);box-shadow:0 1px 2px rgba(0,0,0,.04);} .chip{display:inline-block;background:var(--chip);border:1px solid var(--chip-b);color:var(--chip-ink);padding:.25rem .5rem;border-radius:999px;font-size:12px;margin-right:6px;} .section{margin:24px 0;} .muted{color:var(--muted);} .tight>*{margin-bottom:.5rem;}
 :root{
   --brand:#2563eb;        /* accessible indigo */
   --brand-ink:#ffffff;
