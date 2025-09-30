@@ -53,7 +53,7 @@ if "audiencing_step" not in st.session_state:
 if "planner_step" not in st.session_state:
     st.session_state.planner_step = 1
 
-# ---- Header + progress ----
+# ---- Header + progress + step card ----
 st.markdown("<div class='section-card'>", unsafe_allow_html=True)
 st.markdown("<h1>Guided Care Plan</h1>", unsafe_allow_html=True)
 st.markdown("<p>Let’s walk through your care needs—one friendly step at a time.</p>", unsafe_allow_html=True)
@@ -66,12 +66,9 @@ if st.session_state.step == "planner":
         for i, txt in enumerate(labels)
     )
     st.markdown(f'<div class="progress-bar">{chips}</div>', unsafe_allow_html=True)
-st.markdown("</div>", unsafe_allow_html=True)
 
-# ---- Step card ----
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
 logic.render_step(st.session_state.step)
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 # ---- Footer ----
 st.markdown("<div style='text-align:center;font-size:13px;margin-top:8px;color:#475569;'>Built with ❤️ to help you navigate care decisions.</div>", unsafe_allow_html=True)
