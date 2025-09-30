@@ -3,7 +3,7 @@ from guided_care_plan.view import render as render_careplan
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# ===== Global CSS: unified type + pill radios =====
+# ===== Global CSS: unified type + pill radios + mobile nav row =====
 st.markdown("""
 <style>
 :root{
@@ -20,9 +20,12 @@ st.markdown("""
 
 /* Title */
 h1, .stApp h1 { font-size: var(--h1-size) !important; font-weight: var(--h1-weight) !important; letter-spacing:-.01em; }
-/* Intro block */
+
+/* Intro block: center it on desktop for consistent alignment */
+.intro-wrap { max-width: 960px; margin: 0 auto 1rem; }
 .intro-head { font-size: var(--intro-h-size); font-weight: var(--intro-h-weight); margin:.25rem 0 .5rem; }
-.intro-body { font-size: var(--intro-b-size); font-weight: var(--intro-b-weight); color:#374151; max-width:var(--intro-max); line-height:1.55; margin-bottom:1.25rem;}
+.intro-body { font-size: var(--intro-b-size); font-weight: var(--intro-b-weight); color:#374151; max-width:var(--intro-max); line-height:1.55; }
+
 /* Question titles */
 .q-title, .q-prompt { font-size: var(--q-title-size); font-weight: var(--q-title-weight); color:#111827; margin:.5rem 0 .75rem; }
 
@@ -60,8 +63,21 @@ button[kind="secondary"]{ background:var(--btn-secondary-bg) !important; color:#
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
 
-/* Why we ask block spacing */
-.info-spacer{ height: 1.25rem; }
+/* Keep Back/Next horizontal on mobile */
+@media (max-width: 480px){
+  /* any two-column row (our Back/Next row) should not wrap */
+  div[data-testid="stHorizontalBlock"]{
+    display:flex !important;
+    flex-wrap: nowrap !important;
+    gap:.75rem !important;
+  }
+  div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{
+    flex:1 1 0% !important;
+    min-width: 0 !important;
+  }
+  .stButton > button{ width:100%; }
+  .block-container{ padding-left:1rem !important; padding-right:1rem !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
