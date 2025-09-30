@@ -52,19 +52,19 @@ if "care_context" not in st.session_state:
 
 care_context = st.session_state.care_context
 
-def _nav_row(next_label, next_disabled, next_action, back_label, back_disabled, back_action):
-    """Render Next/Back horizontally aligned using columns."""
+def _nav_row(next_label, next_disabled, next_action, back_label, back_disabled, back_action, key_prefix):
+    """Render Next/Back horizontally aligned using columns with unique keys."""
     c1, c2 = st.columns([1, 1])
     with c1:
-        if st.button(back_label, disabled=back_disabled):
+        if st.button(back_label, disabled=back_disabled, key=f"{key_prefix}_back"):
             back_action()
     with c2:
-        if st.button(next_label, disabled=next_disabled):
+        if st.button(next_label, disabled=next_disabled, key=f"{key_prefix}_next"):
             next_action()
 
 def render_audiencing():
     st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-    st.markdown("<h2>Step 1: Who are you planning for?</h2>")
+    st.markdown("<h2>Step 1: Who are you planning for?</h2>", unsafe_allow_html=True)
     audience_options = {
         "1": "Planning for one person",
         "2": "Planning for two people",
@@ -87,10 +87,10 @@ def render_audiencing():
                 care_context["professional_role"] = sub_type
         st.session_state.care_context = care_context
         st.write(f"Planning for: {care_context.get('audience_type', 'not specified yet')} as {care_context.get('professional_role', 'self')}")
-    _nav_row("Next", not audience_type, lambda: st.session_state.update(audiencing_step=2) or st.rerun(), "Go Back", True, lambda: None)
+    _nav_row("Next", not audience_type, lambda: st.session_state.update(audiencing_step=2) or st.rerun(), "Go Back", True, lambda: None, "audiencing_1")
 
     if st.session_state.audiencing_step == 2:
-        st.markdown("<h2>Step 2: Tell us who's getting this care</h2>")
+        st.markdown("<h2>Step 2: Tell us who's getting this care</h2>", unsafe_allow_html=True)
         if care_context["audience_type"] == "Planning for one person":
             name = st.text_input("", key="person_name")
             relation_options = {
@@ -142,7 +142,7 @@ def render_audiencing():
             st.write(f"Okay—we’re building this for {', '.join(care_context['people'])} as {care_context.get('professional_role')}.")
         _nav_row("Proceed to Guided Care Plan", not (care_context.get("audience_type") and care_context.get("people") and care_context.get("relation")), 
                  lambda: st.session_state.update(step="planner", audiencing_step=1) or st.rerun(), 
-                 "Go Back", False, lambda: st.session_state.update(audiencing_step=1) or st.rerun())
+                 "Go Back", False, lambda: st.session_state.update(audiencing_step=1) or st.rerun(), "audiencing_2")
     st.markdown("</div>", unsafe_allow_html=True)
 
 def render_planner():
@@ -152,7 +152,7 @@ def render_planner():
 
     # Step 1: Funding
     if st.session_state.planner_step == 1:
-        st.markdown("<h2>Step 1: How do you feel about your finances?</h2>")
+        st.markdown("<h2>Step 1: How do you feel about your finances?</h2>", unsafe_allow_html=True)
         st.write("Let’s start with something personal.")
         funding_options = {
             "1": "Not worried—I can afford any care I need",
@@ -173,11 +173,11 @@ def render_planner():
             st.write(f"I hear you—it sounds like you feel {care_context['care_flags']['funding_confidence'].lower()}. That’s a good starting point.")
         _nav_row("Next", not funding_confidence or funding_confidence == "I am on Medicaid", 
                  lambda: st.session_state.update(planner_step=2) or st.rerun(), 
-                 "Go Back", True, lambda: None)
+                 "Go Back", True, lambda: None, "planner_1")
 
     # Step 2: Cognition
     elif st.session_state.planner_step == 2:
-        st.markdown("<h2>Step 2: How’s your memory and thinking been lately?</h2>")
+        st.markdown("<h2>Step 2: How’s your memory and thinking been lately?</h2>", unsafe_allow_html=True)
         st.write("Now, let’s talk about your memory and focus.")
         cognition_options = {
             "1": "My memory feels sharp—no real issues",
@@ -195,11 +195,11 @@ def render_planner():
             else:
                 st.write(f"That’s reassuring to hear. You’re doing great with {cognition.lower()}.")
         _nav_row("Next", not cognition, lambda: st.session_state.update(planner_step=3) or st.rerun(), 
-                 "Go Back", False, lambda: st.session_state.update(planner_step=1) or st.rerun())
+                 "Go Back", False, lambda: st.session_state.update(planner_step=1) or st.rerun(), "planner_2")
 
     # Step 3: Caregiver Support
     elif st.session_state.planner_step == 3:
-        st.markdown("<h2>Step 3: Who helps you with daily needs?</h2>")
+        st.markdown("<h2>Step 3: Who helps you with daily needs?</h2>", unsafe_allow_html=True)
         st.write("It’s good to know who’s there for you.")
         cog = care_context["care_flags"].get("cognitive_function", "")
         funding = care_context["care_flags"].get("funding_confidence", "")
@@ -226,11 +226,11 @@ def render_planner():
             else:
                 st.write(f"That sounds comforting—{caregiver.lower()} is a solid support.")
         _nav_row("Next", not caregiver, lambda: st.session_state.update(planner_step=4) or st.rerun(), 
-                 "Go Back", False, lambda: st.session_state.update(planner_step=2) or st.rerun())
+                 "Go Back", False, lambda: st.session_state.update(planner_step=2) or st.rerun(), "planner_3")
 
     # Step 4: Medication Management
     elif st.session_state.planner_step == 4:
-        st.markdown("<h2>Step 4: How do you manage your medications?</h2>")
+        st.markdown("<h2>Step 4: How do you manage your medications?</h2>", unsafe_allow_html=True)
         st.write("Let’s talk about your daily meds.")
         takes_meds = st.radio("", ["No", "Yes"], index=0, key="takes_meds_select")
         if takes_meds == "Yes":
@@ -255,11 +255,11 @@ def render_planner():
                 else:
                     st.write(f"Good to know—you’re handling {med_confidence.lower()} well.")
         _nav_row("Next", takes_meds != "No" and not med_confidence, lambda: st.session_state.update(planner_step=5) or st.rerun(), 
-                 "Go Back", False, lambda: st.session_state.update(planner_step=3) or st.rerun())
+                 "Go Back", False, lambda: st.session_state.update(planner_step=3) or st.rerun(), "planner_4")
 
     # Step 5: Daily Independence
     elif st.session_state.planner_step == 5:
-        st.markdown("<h2>Step 5: How much support do you need daily?</h2>")
+        st.markdown("<h2>Step 5: How much support do you need daily?</h2>", unsafe_allow_html=True)
         st.write("Let’s talk about your day-to-day routine.")
         independence_options = {
             "1": "I’m fully independent and handle all tasks on my own",
@@ -277,11 +277,11 @@ def render_planner():
             else:
                 st.write(f"Nice—you’re doing great with {independence.lower()}.")
         _nav_row("Next", not independence, lambda: st.session_state.update(planner_step=6) or st.rerun(), 
-                 "Go Back", False, lambda: st.session_state.update(planner_step=4) or st.rerun())
+                 "Go Back", False, lambda: st.session_state.update(planner_step=4) or st.rerun(), "planner_5")
 
     # Step 6: Mobility
     elif st.session_state.planner_step == 6:
-        st.markdown("<h2>Step 6: How’s your mobility these days?</h2>")
+        st.markdown("<h2>Step 6: How’s your mobility these days?</h2>", unsafe_allow_html=True)
         st.write("How’s getting around been for you lately?")
         mobility_options = {
             "1": "I walk easily without any support",
@@ -301,7 +301,7 @@ def render_planner():
             else:
                 st.write(f"Great—you’re moving well with {mobility.lower()}.")
         _nav_row("Next", not mobility, lambda: st.session_state.update(planner_step=7) or st.rerun(), 
-                 "Go Back", False, lambda: st.session_state.update(planner_step=5) or st.rerun())
+                 "Go Back", False, lambda: st.session_state.update(planner_step=5) or st.rerun(), "planner_6")
 
     # Step 7: Your World
     elif st.session_state.planner_step == 7:
@@ -312,7 +312,7 @@ def render_planner():
 
         if st.session_state.world_step == 1:
             with container.container():
-                st.markdown("<h2>Step 7: How connected are you at home?</h2>")
+                st.markdown("<h2>Step 7: How connected are you at home?</h2>", unsafe_allow_html=True)
                 social = st.radio("", ["Daily visits or calls", "Weekly check-ins", "Monthly calls", "Mostly alone"], key="social_select")
                 if social:
                     care_context["care_flags"]["social_connection"] = social
@@ -327,7 +327,7 @@ def render_planner():
 
         elif st.session_state.world_step == 2:
             with container.container():
-                st.markdown("<h2>Step 7: How easy is it to get out?</h2>")
+                st.markdown("<h2>Step 7: How easy is it to get out?</h2>", unsafe_allow_html=True)
                 geography = st.radio("", ["Easy—I can walk or drive", "Needs a ride, but manageable", "Pretty hard without help", "Impossible alone"], key="geography_select")
                 if geography:
                     care_context["care_flags"]["geographic_access"] = geography
@@ -342,7 +342,7 @@ def render_planner():
 
         elif st.session_state.world_step == 3:
             with container.container():
-                st.markdown("<h2>Step 7: How safe do you feel at home?</h2>")
+                st.markdown("<h2>Step 7: How safe do you feel at home?</h2>", unsafe_allow_html=True)
                 safety = st.radio("", ["Very safe—I have everything I need", "Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"], key="safety_select")
                 if safety:
                     care_context["care_flags"]["falls_risk"] = safety in ["Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"]
@@ -357,7 +357,7 @@ def render_planner():
 
         elif st.session_state.world_step == 4:
             with container.container():
-                st.markdown("<h2>Step 7: Have you had any falls lately?</h2>")
+                st.markdown("<h2>Step 7: Have you had any falls lately?</h2>", unsafe_allow_html=True)
                 fall_history = st.radio("", ["Yes", "No", "Unsure"], key="fall_history_select")
                 if fall_history:
                     care_context["derived_flags"]["recent_fall"] = fall_history == "Yes"
@@ -372,7 +372,7 @@ def render_planner():
 
         elif st.session_state.world_step == 5:
             with container.container():
-                st.markdown("<h2>Step 7: Any ongoing health issues?</h2>")
+                st.markdown("<h2>Step 7: Any ongoing health issues?</h2>", unsafe_allow_html=True)
                 condition_options = ["Diabetes", "Hypertension", "Dementia", "Parkinson's", "COPD", "CHF", "Arthritis", "Stroke"]
                 conditions = st.multiselect("", condition_options, key="chronic_conditions_select")
                 if conditions:
@@ -383,12 +383,12 @@ def render_planner():
                     else:
                         st.write(f"Noted—{', '.join(conditions)} is on our radar. How’s that been for you?")
                 _nav_row("Next", not conditions, lambda: st.session_state.update(planner_step=8) or st.rerun(), 
-                         "Go Back", False, lambda: st.session_state.update(world_step=4) or st.rerun())
+                         "Go Back", False, lambda: st.session_state.update(world_step=4) or st.rerun(), "world_5")
         st.markdown("</div>", unsafe_allow_html=True)
 
     # Step 8: Home Preference
     elif st.session_state.planner_step == 8:
-        st.markdown("<h2>Step 8: How much does staying home matter to you?</h2>")
+        st.markdown("<h2>Step 8: How much does staying home matter to you?</h2>", unsafe_allow_html=True)
         st.write("Lastly, how do you feel about staying in your current home?")
         goal_options = {
             "1": "Not important—I’m open to other options",
@@ -405,11 +405,11 @@ def render_planner():
             else:
                 st.write(f"That’s flexible—{goal.lower()} gives us room to explore.")
         _nav_row("Get Recommendation", not goal, lambda: st.session_state.update(planner_step=9) or st.rerun(), 
-                 "Go Back", False, lambda: st.session_state.update(planner_step=7) or st.rerun())
+                 "Go Back", False, lambda: st.session_state.update(planner_step=7) or st.rerun(), "planner_8")
 
     # Step 9: Recommendation
     elif st.session_state.planner_step == 9:
-        st.markdown("<h2>Step 9: What’s our recommendation?</h2>")
+        st.markdown("<h2>Step 9: What’s our recommendation?</h2>", unsafe_allow_html=True)
         st.write("Based on your answers, here’s our suggestion.")
         flags = []
         # Financial
