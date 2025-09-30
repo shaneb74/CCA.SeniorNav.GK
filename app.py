@@ -3,17 +3,17 @@ import logic
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# ===== Global CSS (palette + pills + progress + mobile tweaks + link trigger) =====
+# ===== Global CSS (palette + pills + progress + mobile tweaks + compact popover trigger) =====
 st.markdown("""
 <style>
 :root{
   /* Pills */
   --pill-radius:14px; --pill-pad:.6rem 1rem; --pill-gap:.6rem;
   --pill-text:#111827;
-  --pill-bg:#F3F4F6;            /* unselected bg */
-  --pill-brd:#E5E7EB;           /* unselected border */
-  --pill-hover:#E9EBF0;         /* unselected hover */
-  --pill-selected:#1F2937;      /* selected bg (slate) */
+  --pill-bg:#F3F4F6;
+  --pill-brd:#E5E7EB;
+  --pill-hover:#E9EBF0;
+  --pill-selected:#1F2937;
   --pill-selected-hover:#111827;
   --pill-shadow:0 2px 6px rgba(17,24,39,.08);
   --pill-font:14px;
@@ -24,10 +24,6 @@ st.markdown("""
   --btn-secondary-bg:#EAF2FF;
   --btn-secondary-text:#2E6EFF;
   --btn-secondary-brd:#D6E4FF;
-
-  /* Helper */
-  --helper-bg:#EEF2FF;
-  --helper-fg:#334155;
 }
 
 /* Radio grid */
@@ -94,12 +90,10 @@ button[kind="secondary"]{
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
 
-/* Link-style popover trigger (we'll label it "Why we ask") */
-a.why-link{
-  color:#2E6EFF; text-decoration:underline; cursor:pointer;
-  font-size:14px; display:inline-block; padding:.25rem .5rem;
+/* Compact popover trigger button */
+button[aria-expanded][role="button"]{
+  padding:.25rem .6rem !important; border-radius:8px !important;
 }
-.why-wrap{ text-align:center; margin:.25rem 0 .5rem 0; }
 
 /* Mobile tweaks: keep Back/Next horizontal + full-width inside columns */
 @media (max-width: 480px){
@@ -146,7 +140,7 @@ if 1 <= step <= total_steps:
     ) + '</div>'
     st.markdown(rail, unsafe_allow_html=True)
 
-# Delegate main flow (renders questions, pills, and buttons)
+# Delegate main flow
 logic.run_flow()
 
 # QA drawer
