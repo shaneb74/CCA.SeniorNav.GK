@@ -3,7 +3,7 @@ from guided_care_plan.view import render as render_careplan
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# ===== Global CSS: unified type + pill radios + mobile nav row =====
+# ======================= Global CSS =======================
 st.markdown("""
 <style>
 :root{
@@ -15,28 +15,22 @@ st.markdown("""
   --h1-size: 2.125rem; --h1-weight: 800;
   --intro-h-size: 1.5rem; --intro-h-weight: 700;
   --intro-b-size: 1rem; --intro-b-weight: 500; --intro-max: 64ch;
-  --q-title-size: 1.125rem; --q-title-weight: 600; --small-size: .875rem;
+  --q-title-size: 1.125rem; --q-title-weight: 700;
 }
 
 /* Title */
 h1, .stApp h1 { font-size: var(--h1-size) !important; font-weight: var(--h1-weight) !important; letter-spacing:-.01em; }
 
-/* Intro block: center it on desktop for consistent alignment */
-.intro-wrap { max-width: 960px; margin: 0 auto 1rem; }
-.intro-head { font-size: var(--intro-h-size); font-weight: var(--intro-h-weight); margin:.25rem 0 .5rem; }
-.intro-body {
-  font-size: var(--intro-b-size);
-  font-weight: var(--intro-b-weight);
-  color:#374151;
-  max-width: var(--intro-max);          /* 64ch */
-  line-height: 1.55;
-  margin-left: auto !important;         /* center the paragraph block */
-  margin-right: auto !important;        /* center the paragraph block */
-  text-align: left;                     /* keep readable ragged-left text */
-  }
+/* Intro block: centered column */
+.intro-wrap    { max-width: 960px; margin: 0 auto 1rem; }
+.intro-head    { font-size: var(--intro-h-size); font-weight: var(--intro-h-weight); margin:.25rem 0 .5rem;
+                 max-width: var(--intro-max); margin-left:auto; margin-right:auto; }
+.intro-body    { font-size: var(--intro-b-size); font-weight: var(--intro-b-weight); color:#374151; max-width:var(--intro-max);
+                 line-height:1.55; margin-left:auto; margin-right:auto; text-align:left; }
+.align-intro   { max-width: var(--intro-max); margin-left:auto; margin-right:auto; }
 
 /* Question titles */
-.q-title, .q-prompt { font-size: var(--q-title-size); font-weight: var(--q-title-weight); color:#111827; margin:.5rem 0 .75rem; }
+.q-title, .q-prompt { font-size: var(--q-title-size); font-weight: var(--q-title-weight); color:#111827; margin:.75rem 0 1rem; }
 
 /* Pill-style radios */
 [data-testid="stRadio"] > div{ gap: var(--pill-gap) !important; }
@@ -74,28 +68,21 @@ button[kind="secondary"]{ background:var(--btn-secondary-bg) !important; color:#
 
 /* Keep Back/Next horizontal on mobile */
 @media (max-width: 480px){
-  /* any two-column row (our Back/Next row) should not wrap */
-  div[data-testid="stHorizontalBlock"]{
-    display:flex !important;
-    flex-wrap: nowrap !important;
-    gap:.75rem !important;
-  }
-  div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{
-    flex:1 1 0% !important;
-    min-width: 0 !important;
-  }
+  div[data-testid="stHorizontalBlock"]{ display:flex !important; flex-wrap: nowrap !important; gap:.75rem !important; }
+  div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{ flex:1 1 0% !important; min-width: 0 !important; }
   .stButton > button{ width:100%; }
   .block-container{ padding-left:1rem !important; padding-right:1rem !important; }
 }
 </style>
 """, unsafe_allow_html=True)
 
+# Optional dev QA
 with st.sidebar:
     st.checkbox("QA view", key="qa_mode")
 
 st.title("Senior Care Navigator")
 
-# Progress rail
+# Progress rail for steps 1..12
 total_steps = 12
 step = st.session_state.get("planner_step", 0)
 if 1 <= step <= total_steps:

@@ -1,4 +1,3 @@
-# key, prompt, options, bullets
 QUESTIONS = [
     ("funding_confidence",
      "How would you describe your financial situation when it comes to paying for care?",
@@ -16,16 +15,19 @@ QUESTIONS = [
     ("adl_dependency",
      "How well can you manage everyday activities like bathing, dressing, or preparing meals on your own?",
      ["Independent", "Occasional reminders", "Help with some tasks", "Rely on help for most tasks"],
-     ["ADLs include bathing, dressing, meals, and chores.", "This helps us understand daily support needs."]),
+     ["ADLs include bathing, dressing, meals, and chores. This tells us the level of daily support."]),
 
     ("meds_complexity",
      "Do you take medications, and how manageable is the routine?",
      ["None", "A few, easy to manage", "Several, harder to manage", "Not sure"],
-     ["This helps us understand missed-med risk when combined with cognition."]),
+     ["This helps us understand missed‑med risk when combined with cognition."]),
 
     ("caregiver_support_level",
      "How much regular support do you have from a caregiver or family member?",
-     ["I have support most of the time", "I have support a few days a week", "I have support occasionally", "I don’t have regular support"],
+     ["I have support most of the time",
+      "I have support a few days a week",
+      "I have support occasionally",
+      "I don’t have regular support"],
      ["Strong support can offset higher daily needs."]),
 
     ("mobility",
@@ -51,7 +53,7 @@ QUESTIONS = [
     ("home_setup_safety",
      "How safe and manageable is your home for daily living as you age?",
      ["Well-prepared", "Mostly safe", "Needs modifications", "Not suitable"],
-     ["Think stairs, bathrooms, lighting, grab bars, and trip hazards. We'll suggest an in-home safety assessment if needed."]),
+     ["Think stairs, bathrooms, lighting, grab bars, and trip hazards. We'll suggest an in‑home safety assessment if needed."]),
 
     ("recent_fall",
      "Has there been a fall in the last 6 months?",
@@ -60,6 +62,9 @@ QUESTIONS = [
 
     ("move_willingness",
      "If care is recommended, how open are you to changing where care happens?",
-     ["I prefer to stay home","I'd rather stay home but open if needed","I'm comfortable either way","I'm comfortable moving"],
+     ["I prefer to stay home",
+      "I'd rather stay home but open if needed",
+      "I'm comfortable either way",
+      "I'm comfortable moving"],
      ["This helps us frame recommendations. It doesn't override safety."]),
 ]

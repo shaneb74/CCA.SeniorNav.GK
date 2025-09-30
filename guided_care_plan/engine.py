@@ -11,16 +11,14 @@ def _q_title(title: str):
     st.markdown(f"<div class='q-title'>{title}</div>", unsafe_allow_html=True)
 
 def _info_below(bullets):
-    if not bullets:
-        st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-        return
     st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+    if not bullets:
+        return
     with st.expander("Why we ask"):
         for i, b in enumerate(bullets, start=1):
             st.markdown(f"{i}. {b}")
 
 def _audience_screen():
-    # Centered intro wrapper for desktop
     st.markdown(
         "<div class='intro-wrap'>"
         "<div class='intro-head'>Welcome to Senior Care Navigator</div>"
@@ -30,7 +28,7 @@ def _audience_screen():
         "</div>",
         unsafe_allow_html=True
     )
-    st.markdown("<div class='q-prompt'>Who are you planning care for today?</div>", unsafe_allow_html=True)
+    st.markdown("<div class='q-prompt align-intro'>Who are you planning care for today?</div>", unsafe_allow_html=True)
 
     care = st.session_state.care_context
     who = st.radio("", ["One person", "Two people", "Professional"], index=0, key="audience_choice")
@@ -107,7 +105,6 @@ def run_flow():
             if sel is not None:
                 care["flags"][key] = sel
 
-        # Back / Next row (stay horizontal on mobile via CSS above)
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Back", type="secondary"):
@@ -119,7 +116,6 @@ def run_flow():
                 st.session_state.planner_step = step + 1
                 st.rerun()
 
-        # Help expander BELOW the buttons
         _info_below(bullets)
         return
 
