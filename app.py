@@ -3,7 +3,7 @@ import logic
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# ===== Global CSS to match design =====
+# ===== Global CSS (v10 palette + mobile button-row fix) =====
 st.markdown("""
 <style>
 :root{
@@ -25,11 +25,6 @@ st.markdown("""
   --btn-secondary-text:#2E6EFF;
   --btn-secondary-brd:#D6E4FF;
 
-  /* Info chip */
-  --info-bg:#EAF2FF;
-  --info-brd:#D6E4FF;
-  --info-fg:#2E6EFF;
-
   /* Helper */
   --helper-bg:#EEF2FF;
   --helper-fg:#334155;
@@ -43,7 +38,7 @@ st.markdown("""
   align-items:stretch;
 }
 
-/* Hide native dot; Streamlit renders label > div(dot) + div(text) */
+/* Hide native radio dot */
 [data-testid="stRadio"] div[role="radiogroup"] > label{ margin:0 !important; padding:0 !important; display:block; position:relative; }
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child{ display:none !important; }
 [data-testid="stRadio"] input[type="radio"]{
@@ -93,7 +88,7 @@ button[kind="secondary"]{
   border:1px solid var(--btn-secondary-brd) !important; border-radius:12px !important;
 }
 
-/* Helper note style */
+/* Helper note style (if you use it) */
 .helper-note{
   background:var(--helper-bg); color:var(--helper-fg);
   padding:.6rem .8rem; border-radius:10px; font-size:13px;
@@ -103,6 +98,19 @@ button[kind="secondary"]{
 .progress-rail{ display:flex; gap:.5rem; margin:.25rem 0 1rem 0; }
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
+
+/* ---------- Mobile tweaks ---------- */
+@media (max-width: 480px){
+  /* Keep 2-button row horizontal and full-width buttons */
+  .block-container div[data-testid="stHorizontalBlock"] { gap:.5rem !important; }
+  .block-container div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{
+    min-width:0 !important; width:50% !important; flex:1 1 50% !important;
+  }
+  .stButton > button{ width:100% !important; }
+
+  /* Slightly tighter page padding on mobile for better fit */
+  .block-container{ padding-left:1rem !important; padding-right:1rem !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -134,7 +142,9 @@ with st.sidebar:
 total_steps = 12
 step = st.session_state.get("planner_step", 0)
 if 1 <= step <= total_steps:
-    rail = '<div class="progress-rail">' + ''.join([f'<div class="seg{" active" if i < step else ""}"></div>' for i in range(total_steps)]) + '</div>'
+    rail = '<div class="progress-rail">' + ''.join(
+        f'<div class="seg{" active" if i < step else ""}"></div>' for i in range(total_steps)
+    ) + '</div>'
     st.markdown(rail, unsafe_allow_html=True)
 
 # Delegate main flow
