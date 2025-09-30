@@ -162,7 +162,8 @@ def run_flow():
 
     # Step 0 – Audiencing
     if step == 0:
-        st.subheader("Planning Context")
+        st.subheader("Welcome to Senior Care Navigator")
+        st.markdown("We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.")
         # Larger prompt line
         st.markdown("<div class='q-prompt'>Who are you planning care for today?</div>", unsafe_allow_html=True)
         care_context["audience_type"] = st.radio(
