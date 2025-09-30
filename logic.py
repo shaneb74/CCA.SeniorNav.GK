@@ -1,13 +1,13 @@
 import streamlit as st
 
 def show_question_header(title: str, info_bullets: list[str] | None = None):
-    cols = st.columns([1, 0.06])
+    cols = st.columns([1, 0.08])
     with cols[0]:
         st.markdown(f"**{title}**")
     if info_bullets:
         with cols[1]:
             try:
-                with st.popover("ℹ️"):
+                with st.popover("i", use_container_width=False):
                     for i, bullet in enumerate(info_bullets, start=1):
                         st.markdown(f"{i}. {bullet}")
             except Exception:
@@ -22,23 +22,23 @@ QUESTIONS = [
          "Somewhat confident means choices are possible with budgeting.",
          "Not confident means cost will strongly shape options.",
          "On Medicaid routes to Medicaid resources."]),
-    ("cognition_level", "How would you rate your memory or cognitive function?",
-        ["Sharp", "Lapses", "Noticeable problems", "Serious confusion"],
-        ["We combine this with meds and safety to gauge supervision needs."]),
-    ("adl_need", "How independent are you with daily tasks such as bathing, dressing, and preparing meals?",
-        ["Independent", "Light reminders", "Regular help", "Full-time help"],
-        ["Daily tasks include meals, bathing, dressing, chores."]),
-    ("meds_complexity", "Do you take medications, and how complex is the routine?",
-        ["None", "Few/simple", "Several/complex", "Not sure"],
-        ["We use this with cognition to spot missed-meds risk."]),
-    ("independence_level", "Overall, how independent are you with day-to-day life?",
-        ["Independent", "Some help", "A lot of help"],
+    ("cognition_level", "How would you rate your memory and thinking in daily life?",
+        ["Sharp", "Sometimes forgetful", "Frequent memory issues", "Serious confusion"],
+        ["We'll pair this with medications and safety to gauge supervision needs."]),
+    ("adl_need", "How independent are you with daily tasks like bathing, cooking, and chores?",
+        ["Independent", "Occasional reminders", "Regular help", "Full-time help"],
+        ["ADLs are 'activities of daily living' such as meals, bathing, dressing, and household chores."]),
+    ("meds_complexity", "Do you take medications, and how manageable is the routine?",
+        ["None", "A few, easy to manage", "Several, harder to manage", "Not sure"],
+        ["This helps us understand missed-med risk when combined with cognition."]),
+    ("independence_level", "Overall, how much help do you need day-to-day?",
+        ["Independent", "Some help", "Significant help", "Full-time help"],
         None),
-    ("mobility", "How would you describe your mobility?",
-        ["No assistance", "Cane", "Walker", "Wheelchair"],
-        ["We're asking about typical movement around the home."]),
-    ("social_isolation", "How often do you engage in social activities or interact with others?",
-        ["Frequent contact", "Sometimes", "Often alone"],
+    ("mobility", "How do you usually get around?",
+        ["I walk easily", "I use a cane", "I use a walker", "I use a wheelchair"],
+        ["We mean typical movement at home and outside."]),
+    ("social_isolation", "How often do you connect with friends, family, or activities?",
+        ["Frequent contact", "Occasional contact", "Rarely see others", "Often alone"],
         None),
     ("geographic_access", "How accessible are services like pharmacies, grocery stores, and doctors from your home?",
         ["Very easy", "Somewhat easy", "Difficult"],
@@ -47,14 +47,14 @@ QUESTIONS = [
         ["Diabetes","Hypertension","Dementia","Parkinson's","Stroke","CHF","COPD","Arthritis"],
         ["Select all that apply. Dementia strongly influences recommendations."]),
     ("home_setup_safety", "How safe and manageable is your home for daily living as you age?",
-        ["Ready", "Needs a few fixes", "Risky"],
-        ["Think stairs, bathrooms, lighting, grab bars, trip hazards."]),
+        ["Well-prepared", "Mostly safe", "Needs modifications", "Not suitable"],
+        ["Think stairs, bathrooms, lighting, grab bars, and trip hazards. We'll suggest an in-home safety assessment if needed."]),
     ("recent_fall", "Has there been a fall in the last 6 months?",
         ["Yes","No","Not sure"],
         ["Recent falls increase the need for supervision or home changes."]),
-    ("move_willingness", "How open are you to changing where care happens if it's recommended?",
-        ["Prefer home", "Open if advised", "Open to either", "Comfortable moving"],
-        ["This tunes how we present options. It doesn't override safety."]),
+    ("move_willingness", "If care is recommended, how open are you to changing where care happens?",
+        ["I prefer to stay home", "I'd rather stay home but open if needed", "I'm comfortable either way", "I'm comfortable moving"],
+        ["This helps us frame recommendations. It doesn't override safety."]),
 ]
 
 def _display_guided_header():
@@ -72,18 +72,22 @@ def _derive_after_answers():
     derived = ctx.setdefault("derived", {})
 
     safety = flags.get("home_setup_safety")
-    if safety == "Ready":
+    if safety == "Well-prepared":
         derived["prep_checklist_trigger"] = False
         derived["home_mod_priority"] = "low"
         ctx["flags"]["home_setup_safety_value"] = "ready"
-    elif safety == "Needs a few fixes":
+    elif safety == "Mostly safe":
         derived["prep_checklist_trigger"] = True
         derived["home_mod_priority"] = "medium"
         ctx["flags"]["home_setup_safety_value"] = "minor_improvements"
-    elif safety == "Risky":
+    elif safety == "Needs modifications":
         derived["prep_checklist_trigger"] = True
         derived["home_mod_priority"] = "high"
-        ctx["flags"]["home_setup_safety_value"] = "unsafe"
+        ctx["flags"]["home_setup_safety_value"] = "major_mods"
+    elif safety == "Not suitable":
+        derived["prep_checklist_trigger"] = True
+        derived["home_mod_priority"] = "critical"
+        ctx["flags"]["home_setup_safety_value"] = "unsuitable"
 
     rf = flags.get("recent_fall")
     if rf == "Yes":
@@ -99,23 +103,23 @@ def _derive_after_answers():
     fall_risk = False
     if ctx["flags"].get("recent_fall_bool") is True:
         fall_risk = True
-    if flags.get("mobility") in ["Walker","Wheelchair"]:
+    if flags.get("mobility") in ["I use a walker","I use a wheelchair"]:
         fall_risk = True
-    if ctx["flags"].get("home_setup_safety_value") in ["minor_improvements","unsafe"]:
+    if ctx["flags"].get("home_setup_safety_value") in ["minor_improvements","major_mods","unsuitable"]:
         fall_risk = True
     derived["fall_risk"] = "high" if fall_risk else "low"
 
     mw = flags.get("move_willingness")
-    if mw == "Prefer home":
+    if mw == "I prefer to stay home":
         derived["placement_resistance"] = "high"
         ctx["flags"]["move_willingness_value"] = "resistant"
-    elif mw == "Open if advised":
+    elif mw == "I'd rather stay home but open if needed":
         derived["placement_resistance"] = "medium"
         ctx["flags"]["move_willingness_value"] = "reluctant_flexible"
-    elif mw == "Open to either":
+    elif mw == "I'm comfortable either way":
         derived["placement_resistance"] = "low"
         ctx["flags"]["move_willingness_value"] = "neutral"
-    elif mw == "Comfortable moving":
+    elif mw == "I'm comfortable moving":
         derived["placement_resistance"] = "low"
         ctx["flags"]["move_willingness_value"] = "willing"
 
@@ -144,10 +148,10 @@ def _render_recommendation():
             reasons.append("Home is possible only with reliable 24/7 support and safety upgrades")
         if funding == "Very confident" and willingness in ["resistant","reluctant_flexible"]:
             reasons.append("Resources make full-time in-home care feasible, but coverage must be round-the-clock")
-        if home_safety_val in ["minor_improvements","unsafe"] or fall_risk == "high":
+        if home_safety_val in ["minor_improvements","major_mods","unsuitable"] or fall_risk == "high":
             reasons.append("Current home risks suggest a supervised setting is safer")
     else:
-        if fall_risk == "high" or home_safety_val in ["minor_improvements","unsafe"]:
+        if fall_risk == "high" or home_safety_val in ["minor_improvements","major_mods","unsuitable"]:
             recommendation = "Assisted Living (consider)"
             reasons.append("Safety and mobility needs suggest regular supervision")
         else:
@@ -164,7 +168,7 @@ def _render_recommendation():
         st.markdown("**Engine preview (flags & derived):**")
         st.json({"flags": flags, "chronic_conditions": list(chronic), "derived": derived})
 
-    if st.button("Start over"):
+    if st.button("Start over", type="secondary"):
         st.session_state.planner_step = 0
         st.rerun()
 
@@ -189,7 +193,7 @@ def run_flow():
             care_context["person_a_name"] = st.text_input("Person A name")
             care_context["person_b_name"] = st.text_input("Person B name (if applicable)") if who == "Two" else None
 
-        if st.button("Next"):
+        if st.button("Next", type="primary"):
             st.session_state.planner_step = 1
             st.rerun()
         return
@@ -209,12 +213,12 @@ def run_flow():
 
         cols = st.columns(2)
         with cols[0]:
-            if st.button("Back"):
+            if st.button("Back", type="secondary"):
                 st.session_state.planner_step = max(0, step-1)
                 st.rerun()
         with cols[1]:
             next_disabled = False if key == "chronic_conditions" else care_context["flags"].get(key) is None
-            if st.button("Next", disabled=next_disabled):
+            if st.button("Next", disabled=next_disabled, type="primary"):
                 st.session_state.planner_step = step + 1
                 st.rerun()
         return
