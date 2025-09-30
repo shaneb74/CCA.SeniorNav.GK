@@ -28,10 +28,7 @@ STYLES = """
 
 html, body, [data-testid="stAppViewContainer"] * { box-sizing:border-box; }
 
-.block-container {
-  max-width:1360px;
-  padding-top:16px;
-}
+.block-container{max-width:1100px;padding-top:8px;}
 header[data-testid="stHeader"] { background:transparent; }
 footer { visibility:hidden; }
 
@@ -43,14 +40,7 @@ h3 { font-size:20px; margin:.5rem 0 .25rem 0; color:var(--ink); }
 small, .stCaption { font-size:14px!important; color:var(--muted); }
 
 /* Cards */
-.card-hook-container {
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:24px;
-  box-shadow:0 6px 18px rgba(13, 23, 63, .06);
-  margin:6px 0 22px 0;
-}
+.card-hook-container{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 2px 8px rgba(13,23,63,.04);margin:8px 0 16px 0;}
 .card-hook { display:none; }
 
 /* Chips */

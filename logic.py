@@ -112,8 +112,8 @@ def _nav_row(next_label, next_disabled, next_action, back_label, back_disabled, 
 
 def render_audiencing():
     with st.container():
-        st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-        st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+        st.markdown("", unsafe_allow_html=True)
+        st.markdown("", unsafe_allow_html=True)
         st.markdown("<h2>Step 1: Who are you planning for?</h2>", unsafe_allow_html=True)
         audience_options = {
             "1": "Planning for one person",
@@ -136,14 +136,13 @@ def render_audiencing():
                 if sub_type:
                     care_context["professional_role"] = sub_type
             st.session_state.care_context = care_context
-            st.write(f"Planning for: {care_context.get('audience_type', 'not specified yet')} as {care_context.get('professional_role', 'self')}")
         _nav_row("Next", not audience_type, lambda: st.session_state.update(audiencing_step=2) or st.rerun(), "Go Back", True, lambda: None, "audiencing_1")
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("", unsafe_allow_html=True)
 
     if st.session_state.audiencing_step == 2:
         with st.container():
-            st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-            st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+            st.markdown("", unsafe_allow_html=True)
+            st.markdown("", unsafe_allow_html=True)
             st.markdown("<h2>Step 2: Tell us who's getting this care</h2>", unsafe_allow_html=True)
             if care_context["audience_type"] == "Planning for one person":
                 name = st.text_input("", key="person_name")
@@ -201,8 +200,8 @@ def render_audiencing():
 
 def render_planner():
     with st.container():
-        st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-        st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+        st.markdown("", unsafe_allow_html=True)
+        st.markdown("", unsafe_allow_html=True)
         if "planner_step" not in st.session_state:
             st.session_state.planner_step = 1
 
@@ -235,8 +234,8 @@ def render_planner():
         # Step 2: Cognition
         elif st.session_state.planner_step == 2:
             with st.container():
-                st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
                 st.markdown("<h2>Step 2: How’s your memory and thinking been lately?</h2>", unsafe_allow_html=True)
                 st.write("Now, let’s talk about your memory and focus.")
                 cognition_options = {
@@ -261,8 +260,8 @@ def render_planner():
         # Step 3: Caregiver Support
         elif st.session_state.planner_step == 3:
             with st.container():
-                st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
                 st.markdown("<h2>Step 3: Who helps you with daily needs?</h2>", unsafe_allow_html=True)
                 st.write("It’s good to know who’s there for you.")
                 cog = care_context["care_flags"].get("cognitive_function", "")
@@ -296,8 +295,8 @@ def render_planner():
         # Step 4: Medication Management
         elif st.session_state.planner_step == 4:
             with st.container():
-                st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
                 st.markdown("<h2>Step 4: How do you manage your medications?</h2>", unsafe_allow_html=True)
                 st.write("Let’s talk about your daily meds.")
                 takes_meds = st.radio("", ["No", "Yes"], index=0, key="takes_meds_select")
@@ -329,8 +328,8 @@ def render_planner():
         # Step 5: Daily Independence
         elif st.session_state.planner_step == 5:
             with st.container():
-                st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
                 st.markdown("<h2>Step 5: How much support do you need daily?</h2>", unsafe_allow_html=True)
                 st.write("Let’s talk about your day-to-day routine.")
                 independence_options = {
@@ -355,8 +354,8 @@ def render_planner():
         # Step 6: Mobility
         elif st.session_state.planner_step == 6:
             with st.container():
-                st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
                 st.markdown("<h2>Step 6: How’s your mobility these days?</h2>", unsafe_allow_html=True)
                 st.write("How’s getting around been for you lately?")
                 mobility_options = {
@@ -383,8 +382,8 @@ def render_planner():
         # Step 7: Your World
         elif st.session_state.planner_step == 7:
             with st.container():
-                st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
                 if "world_step" not in st.session_state:
                     st.session_state.world_step = 1
                 container = st.empty()
@@ -464,8 +463,8 @@ def render_planner():
         # Step 8: Home Preference
         elif st.session_state.planner_step == 8:
             with st.container():
-                st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
                 st.markdown("<h2>Step 8: How much does staying home matter to you?</h2>", unsafe_allow_html=True)
                 st.write("Lastly, how do you feel about staying in your current home?")
                 goal_options = {
@@ -489,8 +488,8 @@ def render_planner():
         # Step 9: Recommendation
         elif st.session_state.planner_step == 9:
             with st.container():
-                st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
+                st.markdown("", unsafe_allow_html=True)
                 st.markdown("<h2>Step 9: What’s our recommendation?</h2>", unsafe_allow_html=True)
                 st.write("Based on your answers, here’s our suggestion.")
                 flags = []
@@ -651,8 +650,8 @@ def render_planner():
 def render_step(step):
     if step == "intro":
         with st.container():
-            st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
-            st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
+            st.markdown("", unsafe_allow_html=True)
+            st.markdown("", unsafe_allow_html=True)
             st.title("Senior Navigator")
             st.write("Welcome! Start by exploring your care options.")
             if st.button("Get Started"):
