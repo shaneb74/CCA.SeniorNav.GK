@@ -3,7 +3,7 @@ import logic
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# ===== Global CSS (v10 palette + mobile button-row fix) =====
+# ===== Global CSS (palette + pills + progress + mobile tweaks + link trigger) =====
 st.markdown("""
 <style>
 :root{
@@ -30,7 +30,7 @@ st.markdown("""
   --helper-fg:#334155;
 }
 
-/* Radio group grid */
+/* Radio grid */
 [data-testid="stRadio"] > div{ gap: var(--pill-gap) !important; }
 [data-testid="stRadio"] div[role="radiogroup"]{
   display:grid; gap:var(--pill-gap);
@@ -77,6 +77,7 @@ st.markdown("""
 }
 
 /* Buttons */
+.stButton > button { padding:.6rem 1rem; }
 button[kind="primary"]{
   background:var(--btn-primary) !important; color:#fff !important;
   border-radius:12px !important; border:0 !important;
@@ -88,27 +89,25 @@ button[kind="secondary"]{
   border:1px solid var(--btn-secondary-brd) !important; border-radius:12px !important;
 }
 
-/* Helper note style (if you use it) */
-.helper-note{
-  background:var(--helper-bg); color:var(--helper-fg);
-  padding:.6rem .8rem; border-radius:10px; font-size:13px;
-}
-
 /* Progress rail */
 .progress-rail{ display:flex; gap:.5rem; margin:.25rem 0 1rem 0; }
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
 
-/* ---------- Mobile tweaks ---------- */
+/* Link-style popover trigger (we'll label it "Why we ask") */
+a.why-link{
+  color:#2E6EFF; text-decoration:underline; cursor:pointer;
+  font-size:14px; display:inline-block; padding:.25rem .5rem;
+}
+.why-wrap{ text-align:center; margin:.25rem 0 .5rem 0; }
+
+/* Mobile tweaks: keep Back/Next horizontal + full-width inside columns */
 @media (max-width: 480px){
-  /* Keep 2-button row horizontal and full-width buttons */
   .block-container div[data-testid="stHorizontalBlock"] { gap:.5rem !important; }
   .block-container div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{
     min-width:0 !important; width:50% !important; flex:1 1 50% !important;
   }
   .stButton > button{ width:100% !important; }
-
-  /* Slightly tighter page padding on mobile for better fit */
   .block-container{ padding-left:1rem !important; padding-right:1rem !important; }
 }
 </style>
@@ -147,7 +146,7 @@ if 1 <= step <= total_steps:
     ) + '</div>'
     st.markdown(rail, unsafe_allow_html=True)
 
-# Delegate main flow
+# Delegate main flow (renders questions, pills, and buttons)
 logic.run_flow()
 
 # QA drawer
