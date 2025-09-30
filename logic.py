@@ -64,42 +64,35 @@ def _nav_row(next_label, next_disabled, next_action, back_label, back_disabled, 
 
 def render_audiencing():
     st.markdown("<div class='section-card'>", unsafe_allow_html=True)
-    st.subheader("Who Are We Planning For?")
-    st.write("Let’s start by understanding your planning needs.")
-    if "audiencing_step" not in st.session_state:
-        st.session_state.audiencing_step = 1
-
-    if st.session_state.audiencing_step == 1:
-        st.subheader("Step 1: Who Are You Planning For?")
-        audience_options = {
-            "1": "Planning for one person",
-            "2": "Planning for two people",
-            "3": "Planning as a professional"
-        }
-        audience_options_list = list(audience_options.values())
-        audience_type = st.radio("Who are you planning for?", audience_options_list, key="audience_type_select")
-        if audience_type:
-            care_context["audience_type"] = audience_type
-            care_context["professional_role"] = None
-            care_context["relation"] = None
-            if audience_type == "Planning as a professional":
-                professional_sub_options = {
-                    "1": "Discharge planner",
-                    "2": "Making a referral"
-                }
-                professional_sub_options_list = list(professional_sub_options.values())
-                sub_type = st.radio("What’s your role?", professional_sub_options_list, key="professional_sub_type")
-                if sub_type:
-                    care_context["professional_role"] = sub_type
-            st.session_state.care_context = care_context
-            st.write(f"Planning for: {care_context.get('audience_type', 'not specified yet')} as {care_context.get('professional_role', 'self')}")
-        _nav_row("Next", not audience_type, lambda: st.session_state.update(audiencing_step=2) or st.rerun(), "Go Back", True, lambda: None)
+    st.markdown("<h2>Step 1: Who are you planning for?</h2>")
+    audience_options = {
+        "1": "Planning for one person",
+        "2": "Planning for two people",
+        "3": "Planning as a professional"
+    }
+    audience_options_list = list(audience_options.values())
+    audience_type = st.radio("", audience_options_list, key="audience_type_select")
+    if audience_type:
+        care_context["audience_type"] = audience_type
+        care_context["professional_role"] = None
+        care_context["relation"] = None
+        if audience_type == "Planning as a professional":
+            professional_sub_options = {
+                "1": "Discharge planner",
+                "2": "Making a referral"
+            }
+            professional_sub_options_list = list(professional_sub_options.values())
+            sub_type = st.radio("", professional_sub_options_list, key="professional_sub_type")
+            if sub_type:
+                care_context["professional_role"] = sub_type
+        st.session_state.care_context = care_context
+        st.write(f"Planning for: {care_context.get('audience_type', 'not specified yet')} as {care_context.get('professional_role', 'self')}")
+    _nav_row("Next", not audience_type, lambda: st.session_state.update(audiencing_step=2) or st.rerun(), "Go Back", True, lambda: None)
 
     if st.session_state.audiencing_step == 2:
-        st.subheader("Step 2: Name and Relation")
-        st.write("Great—let’s make it personal. Who are we helping?")
+        st.markdown("<h2>Step 2: Tell us who's getting this care</h2>")
         if care_context["audience_type"] == "Planning for one person":
-            name = st.text_input("What’s their name? (First and last, e.g., John Doe)", key="person_name")
+            name = st.text_input("", key="person_name")
             relation_options = {
                 "1": "Myself",
                 "2": "Parent",
@@ -108,14 +101,14 @@ def render_audiencing():
                 "5": "Friend"
             }
             relation_options_list = list(relation_options.values())
-            relation = st.radio("Who is this person to you?", relation_options_list, key="relation_select")
+            relation = st.radio("", relation_options_list, key="relation_select")
             if name and relation:
                 care_context["people"] = [name]
                 care_context["relation"] = relation
                 st.session_state.care_context = care_context
                 st.write(f"Okay—we’re building this for {name}, who is your {relation.lower()}.")
         elif care_context["audience_type"] == "Planning for two people":
-            name1 = st.text_input("What’s the first person’s name? (e.g., Mary Smith)", key="person_name1")
+            name1 = st.text_input("", key="person_name1")
             relation1_options = {
                 "1": "Myself",
                 "2": "Parent",
@@ -124,8 +117,8 @@ def render_audiencing():
                 "5": "Friend"
             }
             relation1_options_list = list(relation1_options.values())
-            relation1 = st.radio("Who is the first person to you?", relation1_options_list, key="relation1_select")
-            name2 = st.text_input("What’s the second person’s name? (e.g., Tom Smith)", key="person_name2")
+            relation1 = st.radio("", relation1_options_list, key="relation1_select")
+            name2 = st.text_input("", key="person_name2")
             relation2_options = {
                 "1": "Parent",
                 "2": "Spouse",
@@ -133,14 +126,14 @@ def render_audiencing():
                 "4": "Friend"
             }
             relation2_options_list = list(relation2_options.values())
-            relation2 = st.radio("Who is the second person to you?", relation2_options_list, key="relation2_select")
+            relation2 = st.radio("", relation2_options_list, key="relation2_select")
             if name1 and name2 and relation1 and relation2:
                 care_context["people"] = [name1, name2]
                 care_context["relation"] = f"{relation1.lower()} and {relation2.lower()}"
                 st.session_state.care_context = care_context
                 st.write(f"Okay—we’re building this for {name1} and {name2}, who are your {care_context['relation']}.")
         elif care_context["audience_type"] == "Planning as a professional":
-            client_name = st.text_input("Client name (optional, e.g., Jane Doe)", key="client_name")
+            client_name = st.text_input("", key="client_name")
             if client_name:
                 care_context["people"] = [client_name]
             else:
@@ -159,8 +152,8 @@ def render_planner():
 
     # Step 1: Funding
     if st.session_state.planner_step == 1:
-        st.subheader("Your Financial Confidence")
-        st.write("Let’s start with something personal—how do you feel about your finances?")
+        st.markdown("<h2>Step 1: How do you feel about your finances?</h2>")
+        st.write("Let’s start with something personal.")
         funding_options = {
             "1": "Not worried—I can afford any care I need",
             "2": "Somewhat worried—I’d need to budget carefully",
@@ -168,11 +161,7 @@ def render_planner():
             "4": "I am on Medicaid"
         }
         funding_options_list = list(funding_options.values())
-        funding_confidence = st.radio(
-            "How confident are you that your savings will cover long-term care?",
-            funding_options_list,
-            key="funding_confidence_select"
-        )
+        funding_confidence = st.radio("", funding_options_list, key="funding_confidence_select")
         if funding_confidence == "I am on Medicaid":
             st.write("That’s great—we can help you find Medicaid-friendly options. Interested?")
             if st.button("Yes, Show Me", key="medicaid_options"):
@@ -188,8 +177,8 @@ def render_planner():
 
     # Step 2: Cognition
     elif st.session_state.planner_step == 2:
-        st.subheader("Your Cognition")
-        st.write("Now, let’s talk about your memory and thinking—how’s it been for you lately?")
+        st.markdown("<h2>Step 2: How’s your memory and thinking been lately?</h2>")
+        st.write("Now, let’s talk about your memory and focus.")
         cognition_options = {
             "1": "My memory feels sharp—no real issues",
             "2": "Occasional lapses—like forgetting what I was saying",
@@ -197,11 +186,7 @@ def render_planner():
             "4": "Serious confusion—like losing track of time, place, or familiar faces"
         }
         cognition_options_list = list(cognition_options.values())
-        cognition = st.radio(
-            "How would you describe your memory and focus these days?",
-            cognition_options_list,
-            key="cognition_select"
-        )
+        cognition = st.radio("", cognition_options_list, key="cognition_select")
         if cognition:
             care_context["care_flags"]["cognitive_function"] = cognition
             st.session_state.care_context = care_context
@@ -214,7 +199,8 @@ def render_planner():
 
     # Step 3: Caregiver Support
     elif st.session_state.planner_step == 3:
-        st.subheader("Your Caregiver Support")
+        st.markdown("<h2>Step 3: Who helps you with daily needs?</h2>")
+        st.write("It’s good to know who’s there for you.")
         cog = care_context["care_flags"].get("cognitive_function", "")
         funding = care_context["care_flags"].get("funding_confidence", "")
         if "lapses" in cog.lower() or "problems" in cog.lower() or "confusion" in cog.lower():
@@ -223,7 +209,7 @@ def render_planner():
             else:
                 st.write(f"Since you mentioned {cog.lower()}, who steps in when memory gets tricky?")
         else:
-            st.write("It’s good to know who’s there for you—how often does someone help with daily needs?")
+            st.write("How often does someone help with daily needs?")
         caregiver_options = {
             "1": "Someone’s with me all the time",
             "2": "Support most days",
@@ -231,11 +217,7 @@ def render_planner():
             "4": "No regular support"
         }
         caregiver_options_list = list(caregiver_options.values())
-        caregiver = st.radio(
-            "How often do you have someone to lean on for help?",
-            caregiver_options_list,
-            key="caregiver_select"
-        )
+        caregiver = st.radio("", caregiver_options_list, key="caregiver_select")
         if caregiver:
             care_context["care_flags"]["caregiver_support"] = caregiver
             st.session_state.care_context = care_context
@@ -248,13 +230,9 @@ def render_planner():
 
     # Step 4: Medication Management
     elif st.session_state.planner_step == 4:
-        st.subheader("Your Medication Management")
-        takes_meds = st.radio(
-            "Do you take any daily meds, like for your heart, mood, or memory?",
-            ["No", "Yes"],
-            index=0,
-            key="takes_meds_select"
-        )
+        st.markdown("<h2>Step 4: How do you manage your medications?</h2>")
+        st.write("Let’s talk about your daily meds.")
+        takes_meds = st.radio("", ["No", "Yes"], index=0, key="takes_meds_select")
         if takes_meds == "Yes":
             cog = care_context["care_flags"].get("cognitive_function", "")
             if "lapses" in cog.lower() or "problems" in cog.lower() or "confusion" in cog.lower():
@@ -268,11 +246,7 @@ def render_planner():
                 "4": "I can’t count on myself"
             }
             med_options_list = list(med_options.values())
-            med_confidence = st.radio(
-                "How do you feel about staying on top of your medications?",
-                med_options_list,
-                key="med_confidence_select"
-            )
+            med_confidence = st.radio("", med_options_list, key="med_confidence_select")
             if med_confidence:
                 care_context["care_flags"]["med_adherence"] = med_confidence
                 st.session_state.care_context = care_context
@@ -285,8 +259,8 @@ def render_planner():
 
     # Step 5: Daily Independence
     elif st.session_state.planner_step == 5:
-        st.subheader("Your Daily Independence")
-        st.write("Let’s talk about your day-to-day—how are you managing?")
+        st.markdown("<h2>Step 5: How much support do you need daily?</h2>")
+        st.write("Let’s talk about your day-to-day routine.")
         independence_options = {
             "1": "I’m fully independent and handle all tasks on my own",
             "2": "I occasionally need reminders or light assistance",
@@ -294,11 +268,7 @@ def render_planner():
             "4": "I rely on someone else for most daily tasks"
         }
         independence_options_list = list(independence_options.values())
-        independence = st.radio(
-            "How much support do you need with things like bathing, dressing, or meals?",
-            independence_options_list,
-            key="independence_select"
-        )
+        independence = st.radio("", independence_options_list, key="independence_select")
         if independence:
             care_context["care_flags"]["independence_level"] = independence
             st.session_state.care_context = care_context
@@ -311,7 +281,7 @@ def render_planner():
 
     # Step 6: Mobility
     elif st.session_state.planner_step == 6:
-        st.subheader("Your Mobility")
+        st.markdown("<h2>Step 6: How’s your mobility these days?</h2>")
         st.write("How’s getting around been for you lately?")
         mobility_options = {
             "1": "I walk easily without any support",
@@ -320,11 +290,7 @@ def render_planner():
             "4": "I am mostly immobile or need a wheelchair"
         }
         mobility_options_list = list(mobility_options.values())
-        mobility = st.radio(
-            "How would you describe how you move around these days?",
-            mobility_options_list,
-            key="mobility_select"
-        )
+        mobility = st.radio("", mobility_options_list, key="mobility_select")
         if mobility:
             care_context["care_flags"]["mobility_issue"] = mobility != mobility_options_list[0]
             if mobility != mobility_options_list[0]:
@@ -339,80 +305,90 @@ def render_planner():
 
     # Step 7: Your World
     elif st.session_state.planner_step == 7:
-        st.subheader("Your World")
-        st.write("So, tell me—what’s home like for you these days?")
-        social = st.radio(
-            "How often do you connect with family, friends, or neighbors?",
-            ["Daily visits or calls", "Weekly check-ins", "Monthly calls", "Mostly alone"],
-            key="social_select"
-        )
-        if social:
-            care_context["care_flags"]["social_connection"] = social
-            st.session_state.care_context = care_context
-            if "mostly alone" in social.lower():
-                st.write("That can feel isolating. Do family or neighbors check in at all?")
-            else:
-                st.write(f"That’s nice—{social.lower()} keeps things connected.")
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+        if "world_step" not in st.session_state:
+            st.session_state.world_step = 1
+        container = st.empty()
 
-        st.write("What about getting out—how easy is it to reach doctors or stores?")
-        geography = st.radio(
-            "How accessible are healthcare and services for you?",
-            ["Easy—I can walk or drive", "Needs a ride, but manageable", "Pretty hard without help", "Impossible alone"],
-            key="geography_select"
-        )
-        if geography:
-            care_context["care_flags"]["geographic_access"] = geography
-            st.session_state.care_context = care_context
-            if "hard" in geography.lower() or "impossible" in geography.lower():
-                st.write("That sounds tough. Is transportation the main hurdle?")
-            else:
-                st.write(f"Good to know—{geography.lower()} works for you.")
+        if st.session_state.world_step == 1:
+            with container.container():
+                st.markdown("<h2>Step 7: How connected are you at home?</h2>")
+                social = st.radio("", ["Daily visits or calls", "Weekly check-ins", "Monthly calls", "Mostly alone"], key="social_select")
+                if social:
+                    care_context["care_flags"]["social_connection"] = social
+                    st.session_state.care_context = care_context
+                    if "mostly alone" in social.lower():
+                        st.write("That can feel isolating. Do family or neighbors check in at all?")
+                    else:
+                        st.write(f"That’s nice—{social.lower()} keeps things connected.")
+                    if st.button("→", key="next_world_1"):
+                        st.session_state.world_step = 2
+                        st.rerun()
 
-        st.write("Any little things make you worry about safety at home?")
-        safety = st.radio(
-            "How safe do you feel with falls or emergencies?",
-            ["Very safe—I have everything I need", "Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"],
-            key="safety_select"
-        )
-        if safety:
-            care_context["care_flags"]["falls_risk"] = safety in ["Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"]
-            st.session_state.care_context = care_context
-            if "unsafe" in safety.lower() or "concerns" in safety.lower():
-                st.write("That’s worth a closer look. Anything specific, like stairs or lighting?")
-            else:
-                st.write(f"Glad to hear—{safety.lower()} sounds reassuring.")
+        elif st.session_state.world_step == 2:
+            with container.container():
+                st.markdown("<h2>Step 7: How easy is it to get out?</h2>")
+                geography = st.radio("", ["Easy—I can walk or drive", "Needs a ride, but manageable", "Pretty hard without help", "Impossible alone"], key="geography_select")
+                if geography:
+                    care_context["care_flags"]["geographic_access"] = geography
+                    st.session_state.care_context = care_context
+                    if "hard" in geography.lower() or "impossible" in geography.lower():
+                        st.write("That sounds tough. Is transportation the main hurdle?")
+                    else:
+                        st.write(f"Good to know—{geography.lower()} works for you.")
+                    if st.button("→", key="next_world_2"):
+                        st.session_state.world_step = 3
+                        st.rerun()
 
-        st.write("Based on that, let’s check something quick—have you had any falls lately?")
-        fall_history = st.radio(
-            "Have you fallen in the last six months?",
-            ["Yes", "No", "Unsure"],
-            key="fall_history_select"
-        )
-        if fall_history:
-            care_context["derived_flags"]["recent_fall"] = fall_history == "Yes"
-            st.session_state.care_context = care_context
-            if fall_history == "Yes":
-                st.write("Thanks for letting me know. Was it a one-time thing or something recurring?")
-            else:
-                st.write(f"Good—{fall_history.lower()} is a positive sign.")
+        elif st.session_state.world_step == 3:
+            with container.container():
+                st.markdown("<h2>Step 7: How safe do you feel at home?</h2>")
+                safety = st.radio("", ["Very safe—I have everything I need", "Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"], key="safety_select")
+                if safety:
+                    care_context["care_flags"]["falls_risk"] = safety in ["Mostly safe, but a few concerns", "Sometimes I feel unsafe", "Often feel at risk"]
+                    st.session_state.care_context = care_context
+                    if "unsafe" in safety.lower() or "concerns" in safety.lower():
+                        st.write("That’s worth a closer look. Anything specific, like stairs or lighting?")
+                    else:
+                        st.write(f"Glad to hear—{safety.lower()} sounds reassuring.")
+                    if st.button("→", key="next_world_3"):
+                        st.session_state.world_step = 4
+                        st.rerun()
 
-        st.write("Any ongoing health issues we should know about?")
-        condition_options = ["Diabetes", "Hypertension", "Dementia", "Parkinson's", "COPD", "CHF", "Arthritis", "Stroke"]
-        conditions = st.multiselect("Which chronic conditions do you have?", condition_options, key="chronic_conditions_select")
-        if conditions:
-            care_context["care_flags"]["chronic_conditions"] = conditions
-            st.session_state.care_context = care_context
-            if len(conditions) > 1:
-                st.write(f"Got it—you’re managing {', '.join(conditions[:-1]) + ' and ' + conditions[-1]}. That’s a lot—any giving you trouble?")
-            else:
-                st.write(f"Noted—{', '.join(conditions)} is on our radar. How’s that been for you?")
-        _nav_row("Next", not (social and geography and safety and fall_history and conditions is not None), 
-                 lambda: st.session_state.update(planner_step=8) or st.rerun(), 
-                 "Go Back", False, lambda: st.session_state.update(planner_step=6) or st.rerun())
+        elif st.session_state.world_step == 4:
+            with container.container():
+                st.markdown("<h2>Step 7: Have you had any falls lately?</h2>")
+                fall_history = st.radio("", ["Yes", "No", "Unsure"], key="fall_history_select")
+                if fall_history:
+                    care_context["derived_flags"]["recent_fall"] = fall_history == "Yes"
+                    st.session_state.care_context = care_context
+                    if fall_history == "Yes":
+                        st.write("Thanks for letting me know. Was it a one-time thing or something recurring?")
+                    else:
+                        st.write(f"Good—{fall_history.lower()} is a positive sign.")
+                    if st.button("→", key="next_world_4"):
+                        st.session_state.world_step = 5
+                        st.rerun()
+
+        elif st.session_state.world_step == 5:
+            with container.container():
+                st.markdown("<h2>Step 7: Any ongoing health issues?</h2>")
+                condition_options = ["Diabetes", "Hypertension", "Dementia", "Parkinson's", "COPD", "CHF", "Arthritis", "Stroke"]
+                conditions = st.multiselect("", condition_options, key="chronic_conditions_select")
+                if conditions:
+                    care_context["care_flags"]["chronic_conditions"] = conditions
+                    st.session_state.care_context = care_context
+                    if len(conditions) > 1:
+                        st.write(f"Got it—you’re managing {', '.join(conditions[:-1]) + ' and ' + conditions[-1]}. That’s a lot—any giving you trouble?")
+                    else:
+                        st.write(f"Noted—{', '.join(conditions)} is on our radar. How’s that been for you?")
+                _nav_row("Next", not conditions, lambda: st.session_state.update(planner_step=8) or st.rerun(), 
+                         "Go Back", False, lambda: st.session_state.update(world_step=4) or st.rerun())
+        st.markdown("</div>", unsafe_allow_html=True)
 
     # Step 8: Home Preference
     elif st.session_state.planner_step == 8:
-        st.subheader("Your Home Preference")
+        st.markdown("<h2>Step 8: How much does staying home matter to you?</h2>")
         st.write("Lastly, how do you feel about staying in your current home?")
         goal_options = {
             "1": "Not important—I’m open to other options",
@@ -420,11 +396,7 @@ def render_planner():
             "3": "Very important—I strongly want to stay home"
         }
         goal_options_list = list(goal_options.values())
-        goal = st.radio(
-            "How much does staying home mean to you right now?",
-            goal_options_list,
-            key="goal_select"
-        )
+        goal = st.radio("", goal_options_list, key="goal_select")
         if goal:
             care_context["care_flags"]["living_goal"] = goal
             st.session_state.care_context = care_context
@@ -437,7 +409,7 @@ def render_planner():
 
     # Step 9: Recommendation
     elif st.session_state.planner_step == 9:
-        st.subheader("Care Recommendation")
+        st.markdown("<h2>Step 9: What’s our recommendation?</h2>")
         st.write("Based on your answers, here’s our suggestion.")
         flags = []
         # Financial
