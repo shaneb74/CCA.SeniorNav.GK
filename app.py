@@ -3,7 +3,7 @@ import logic
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# ===== Global CSS (palette + pills + progress + mobile tweaks + compact popover trigger) =====
+# ===== Global CSS (palette + pills + progress + mobile tweaks) =====
 st.markdown("""
 <style>
 :root{
@@ -90,9 +90,22 @@ button[kind="secondary"]{
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
 
-/* Compact popover trigger button */
+/* Popover trigger: make it look like a subtle link, centered */
 button[aria-expanded][role="button"]{
-  padding:.25rem .6rem !important; border-radius:8px !important;
+  background: transparent !important;
+  color: #2563eb !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-decoration: underline;
+  padding: .25rem 0 !important;
+  margin: 0 auto !important;
+  display: block;
+}
+button[aria-expanded][role="button"]:hover{
+  color:#1e40af !important;
+  text-decoration: underline;
 }
 
 /* Mobile tweaks: keep Back/Next horizontal + full-width inside columns */
