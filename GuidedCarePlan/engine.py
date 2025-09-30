@@ -198,21 +198,24 @@ def run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # Buttons row
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("Back", type="secondary"):
+        # a little breathing room before actions
+        st.markdown("<div style='height: 1.25rem'></div>", unsafe_allow_html=True)
+
+        # Centered Back/Next row
+        sp1, col_back, col_next, sp2 = st.columns([2, 1, 1, 2])
+        with col_back:
+            if st.button("Back", type="secondary", use_container_width=True):
                 st.session_state.planner_step = max(0, step - 1)
                 st.rerun()
-        with c2:
+        with col_next:
             next_disabled = False if key == "chronic_conditions" else care_context["flags"].get(key) is None
-            if st.button("Next", disabled=next_disabled, type="primary"):
+            if st.button("Next", disabled=next_disabled, type="primary", use_container_width=True):
                 st.session_state.planner_step = step + 1
                 st.rerun()
 
-        # Info popover below buttons
+        # Info popover well below buttons
         if bullets:
-            st.markdown("<div style='height:3rem'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:2.5rem'></div>", unsafe_allow_html=True)
             lower_row = st.container()
             with lower_row:
                 l, m, r = st.columns([1, 2, 1])

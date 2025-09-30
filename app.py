@@ -3,22 +3,33 @@ from GuidedCarePlan.view import render as render_careplan
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# ===== Global CSS (kept from your good-looking build) =====
+# ===== Global CSS (responsive, centered, polished) =====
 st.markdown("""
 <style>
 :root{
-  --pill-radius:14px; --pill-pad:.6rem 1rem; --pill-gap:.6rem;
+  --pill-radius:14px; --pill-pad:.65rem 1rem; --pill-gap:.65rem;
   --pill-text:#111827; --pill-bg:#F3F4F6; --pill-brd:#E5E7EB; --pill-hover:#E9EBF0;
   --pill-selected:#1F2937; --pill-selected-hover:#111827; --pill-shadow:0 2px 6px rgba(17,24,39,.08);
-  --pill-font:14px; --btn-primary:#2E6EFF; --btn-primary-hover:#1F5AE6;
+  --pill-font:15px; --btn-primary:#2E6EFF; --btn-primary-hover:#1F5AE6;
   --btn-secondary-bg:#EAF2FF; --btn-secondary-text:#2E6EFF; --btn-secondary-brd:#D6E4FF;
 }
+
+/* Make the radio groups grid-based, centered, and responsive */
 [data-testid="stRadio"] > div{ gap: var(--pill-gap) !important; }
 [data-testid="stRadio"] div[role="radiogroup"]{
-  display:grid; gap:var(--pill-gap);
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  align-items:stretch;
+  display:grid;
+  gap: var(--pill-gap);
+  grid-template-columns: 1fr;            /* mobile default: 1 column */
+  max-width: 720px;                      /* comfortable measure */
+  margin: 0 auto;                        /* center the whole group */
 }
+@media (min-width: 640px){               /* tablet and up */
+  [data-testid="stRadio"] div[role="radiogroup"]{
+    grid-template-columns: 1fr 1fr;      /* 2 columns */
+  }
+}
+
+/* Hide default bullets and make each label look like a pill button */
 [data-testid="stRadio"] div[role="radiogroup"] > label{ margin:0 !important; padding:0 !important; display:block; position:relative; }
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child{ display:none !important; }
 [data-testid="stRadio"] input[type="radio"]{
@@ -33,6 +44,7 @@ st.markdown("""
   cursor:pointer; transition:all .12s ease-in-out;
   font-size:var(--pill-font); line-height:1.3; white-space:nowrap;
   user-select:none; text-align:center; font-weight:500;
+  min-height: 48px; width: 100%;
 }
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:last-child:hover{ background:var(--pill-hover); }
 [data-testid="stRadio"] input[type="radio"]:checked + div{
@@ -46,6 +58,8 @@ st.markdown("""
 [data-testid="stRadio"] input[type="radio"]:focus-visible + div{
   outline:3px solid rgba(46,110,255,.35); outline-offset:2px;
 }
+
+/* Buttons */
 .stButton > button { padding:.6rem 1rem; }
 button[kind="primary"]{
   background:var(--btn-primary) !important; color:#fff !important;
@@ -57,9 +71,13 @@ button[kind="secondary"]{
   background:var(--btn-secondary-bg) !important; color:var(--btn-secondary-text) !important;
   border:1px solid var(--btn-secondary-brd) !important; border-radius:12px !important;
 }
+
+/* Progress rail */
 .progress-rail{ display:flex; gap:.5rem; margin:.25rem 0 1rem 0; }
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
+
+/* Link-style popover trigger */
 button[aria-expanded][role="button"]{
   background: transparent !important; color: #2563eb !important;
   font-size: 14px !important; font-weight: 500 !important;
@@ -68,12 +86,9 @@ button[aria-expanded][role="button"]{
   margin: 0 auto !important; display: block;
 }
 button[aria-expanded][role="button"]:hover{ color:#1e40af !important; text-decoration: underline; }
+
+/* Tighten mobile padding a bit */
 @media (max-width: 480px){
-  .block-container div[data-testid="stHorizontalBlock"] { gap:.5rem !important; }
-  .block-container div[data-testid="stHorizontalBlock"] > div[data-testid="column"]{
-    min-width:0 !important; width:50% !important; flex:1 1 50% !important;
-  }
-  .stButton > button{ width:100% !important; }
   .block-container{ padding-left:1rem !important; padding-right:1rem !important; }
 }
 </style>
