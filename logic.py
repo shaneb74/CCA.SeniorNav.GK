@@ -225,8 +225,7 @@ def render_planner():
             elif funding_confidence:
                 care_context["care_flags"]["funding_confidence"] = funding_confidence
                 st.session_state.care_context = care_context
-                st.write(f"I hear you—it sounds like you feel {care_context['care_flags']['funding_confidence'].lower()}. That’s a good starting point.")
-            _nav_row("Next", not funding_confidence or funding_confidence == "I am on Medicaid", 
+_nav_row("Next", not funding_confidence or funding_confidence == "I am on Medicaid", 
                      lambda: st.session_state.update(planner_step=2) or st.rerun(), 
                      "Go Back", True, lambda: None, "planner_1")
             st.markdown("</div>", unsafe_allow_html=True)
@@ -439,8 +438,7 @@ def render_planner():
                             if fall_history == "Yes":
                                 st.write("Thanks for letting me know.")
                             else:
-                                st.write("Noted.")
-                            _nav_row("Next →", not fall_history, lambda: st.session_state.update(world_step=5) or st.rerun(),
+_nav_row("Next →", not fall_history, lambda: st.session_state.update(world_step=5) or st.rerun(),
                                      "← Back", False, lambda: st.session_state.update(world_step=3) or st.rerun(), "world_4")
 
                 elif st.session_state.world_step == 5:

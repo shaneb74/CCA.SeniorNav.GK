@@ -32,9 +32,13 @@ html, body, [data-testid="stAppViewContainer"] * { box-sizing:border-box; }
 header[data-testid="stHeader"] { background:transparent; }
 footer { visibility:hidden; }
 
+/* Sidebar polish */
+section[data-testid="stSidebar"]>div{padding:12px;}
+section[data-testid="stSidebar"]{background:#f8fafc;border-right:1px solid var(--border);}
+
 /* Typography */
 p, .stMarkdown { font-size:18px!important; line-height:1.6; color:var(--ink)!important; }
-h1 { font-size:42px; letter-spacing:-.02em; margin:.25rem 0 .5rem 0; color:var(--ink); }
+h1{font-size:42px;letter-spacing:-.02em;margin:.25rem 0 .25rem 0;color:var(--ink);}
 h2 { font-size:28px!important; line-height:1.25; margin:.75rem 0 .35rem 0; color:var(--ink); }
 h3 { font-size:20px; margin:.5rem 0 .25rem 0; color:var(--ink); }
 small, .stCaption { font-size:14px!important; color:var(--muted); }
@@ -51,14 +55,14 @@ small, .stCaption { font-size:14px!important; color:var(--muted); }
 }
 
 /* Progress chips in sidebar */
-.progress-bar { display:flex; flex-wrap:wrap; gap:6px; }
-.progress-chip {
-  border:1px solid var(--border); border-radius:999px; padding:.25rem .6rem;
-  font-size:12px; color:#334155; background:#fff;
-}
-.progress-chip.active { background:var(--brand); color:var(--brand-ink); border-color:var(--brand); }
+.progress-bar{display:flex;flex-direction:column;gap:8px;}
+.progress-chip{border:1px solid var(--border);border-radius:10px;padding:.4rem .6rem;font-size:13px;color:#1f2937;background:#fff;}
+.progress-chip.active{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:600;}
 
 /* Inputs */
+/* Radio polish */
+[data-testid="stRadio"] div[role="radiogroup"] > div{padding:.25rem .25rem;border-radius:10px;}
+[data-testid="stRadio"] div[role="radiogroup"] > div:hover{background:#f8fafc;}
 [data-testid="stRadio"] [data-testid="stWidgetLabel"], .stSelectbox label, .stTextInput label {
   font-size:18px!important; font-weight:600; color:#111827; margin:.25rem 0 .35rem 0; display:block;
 }
@@ -77,17 +81,18 @@ small, .stCaption { font-size:14px!important; color:var(--muted); }
   border-radius:12px; padding:.6rem 1rem; border:1px solid var(--border);
   box-shadow:0 1px 2px rgba(16,24,40,.05);
 }
-.stButton > button { background:#fff; color:#111827; }
+.stButton > button{background:#fff;color:#111827;}
 .stButton > button:hover { border-color:#d0d5dd; }
 /* Primary look when we mark as 'primary' */
 button[kind="primary"] { background:var(--brand)!important; color:var(--brand-ink)!important; border-color:var(--brand)!important; }
 
 /* Nav row layout */
-.nav-row { display:flex; justify-content:space-between; gap:12px; margin-top:12px; }
+.nav-row{display:flex;justify-content:space-between;gap:12px;margin-top:12px;}
 .nav-row .left, .nav-row .right { display:flex; gap:8px; }
 
 /* Make default Streamlit elements breathe */
 [data-testid="stVerticalBlock"] > div { margin-bottom:12px; }
+.content-max{max-width:820px;margin-left:auto;margin-right:auto;}
 </style>
 """
 st.markdown(STYLES, unsafe_allow_html=True)
@@ -115,6 +120,7 @@ if st.session_state.step == "planner":
 
 # ---- Header + content ----
 with st.container():
+    st.markdown("<div class='content-max'>", unsafe_allow_html=True)
     st.markdown("<div class='card-hook'></div>", unsafe_allow_html=True)
     st.markdown("<div class='card-hook-container'>", unsafe_allow_html=True)
 
@@ -125,6 +131,7 @@ with st.container():
     # Delegate the actual step UI to logic.py
     logic.render_step(st.session_state.step)
 
+    st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ---- Footer ----
