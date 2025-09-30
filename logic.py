@@ -414,8 +414,6 @@ def render_planner():
                 score += 5
             if "no_support" in flags:
                 score += 7
-            if "limited_support" in flags:
-                score += 4
             if "adequate_support" in flags:  # Apply deduction for any support level, before threshold
                 score -= 5
             if "high_risk" in flags:
