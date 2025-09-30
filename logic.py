@@ -8,14 +8,6 @@ def _q_header(title: str):
     """Question title."""
     st.markdown(f"**{title}**")
 
-def _q_info_below(bullets: list[str] | None):
-    """Compact info block placed below the options for better mobile ergonomics."""
-    if not bullets:
-        return
-    with st.expander("Learn why we ask this"):
-        for i, b in enumerate(bullets, start=1):
-            st.markdown(f"{i}. {b}")
-
 def _guided_header():
     st.markdown("### Guided Care Plan")
 
@@ -125,7 +117,7 @@ QUESTIONS = [
     # -----------------------------------------------------
     ("chronic_conditions",
      "Do you have any ongoing health conditions? Select all that apply.",
-     ["Diabetes", "Hypertension", "Dementia", "Parkinson's", "Stroke", "CHF", "COPD", "Arthritis"],
+     ["Diabetes","Hypertension","Dementia","Parkinson's","Stroke","CHF","COPD","Arthritis"],
      ["Select all that apply. Dementia strongly influences recommendations."]),
 
     # -----------------------------------------------------
@@ -135,8 +127,7 @@ QUESTIONS = [
     ("home_setup_safety",
      "How safe and manageable is your home for daily living as you age?",
      ["Well-prepared", "Mostly safe", "Needs modifications", "Not suitable"],
-     ["Think stairs, bathrooms, lighting, grab bars, and trip hazards. "
-      "We'll suggest an in-home safety assessment if needed."]),
+     ["Think stairs, bathrooms, lighting, grab bars, and trip hazards. We'll suggest an in-home safety assessment if needed."]),
 
     # -----------------------------------------------------
     # Step 11 – Recent fall (6-month window)
@@ -144,7 +135,7 @@ QUESTIONS = [
     # -----------------------------------------------------
     ("recent_fall",
      "Has there been a fall in the last 6 months?",
-     ["Yes", "No", "Not sure"],
+     ["Yes","No","Not sure"],
      ["Recent falls increase the need for supervision or home changes."]),
 
     # -----------------------------------------------------
@@ -153,10 +144,7 @@ QUESTIONS = [
     # -----------------------------------------------------
     ("move_willingness",
      "If care is recommended, how open are you to changing where care happens?",
-     ["I prefer to stay home",
-      "I'd rather stay home but open if needed",
-      "I'm comfortable either way",
-      "I'm comfortable moving"],
+     ["I prefer to stay home", "I'd rather stay home but open if needed", "I'm comfortable either way", "I'm comfortable moving"],
      ["This helps us frame recommendations. It doesn't override safety."]),
 ]
 
@@ -226,7 +214,7 @@ def _derive_after_answers():
         derived["placement_resistance"] = "low"
         ctx["flags"]["move_willingness_value"] = "willing"
 
-    # --- Normalize ADLs and caregiver support to stable buckets (useful downstream)
+    # --- Normalize ADLs and caregiver support to stable buckets
     adl = flags.get("adl_dependency")
     if adl == "Independent":
         ctx["flags"]["adl_bucket"] = "independent"
@@ -347,17 +335,17 @@ def run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # Info as a centered link that opens a popover
+        # Info as a centered popover placed BELOW the options (no fake link)
         if bullets:
-            st.markdown("<div style='height:.25rem'></div>", unsafe_allow_html=True)
-            c1, c2, c3 = st.columns([1,2,1])
-            with c2:
-                st.markdown("<div class='why-wrap'><a class='why-link'>Why we ask</a></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:.5rem'></div>", unsafe_allow_html=True)
+            left, mid, right = st.columns([1, 2, 1])
+            with mid:
                 with st.popover("Why we ask", use_container_width=True):
                     for i, bullet in enumerate(bullets, start=1):
                         st.markdown(f"{i}. {bullet}")
+            st.markdown("<div style='height:.25rem'></div>", unsafe_allow_html=True)
 
-        # Buttons (you can keep these side-by-side with a small CSS tweak in app.py; see note below)
+        # Buttons (kept side-by-side; CSS in app.py ensures horizontal layout on mobile)
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Back", type="secondary"):
