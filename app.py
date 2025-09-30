@@ -63,7 +63,7 @@ with col:
     st.markdown("<p>Let’s walk through your care needs—one friendly step at a time.</p>", unsafe_allow_html=True)
     labels = ["Funding","Cognition","Caregiver","Meds","Independence","Mobility","Your World","Home Preference","Recommendation"]
     active_idx = max(1, min(st.session_state.get("planner_step", 1), len(labels))) - 1
-    chips = "".join(f'<span class=\"progress-chip {\"active\" if i == active_idx else \"\"}\">{i+1}. {txt}</span>' for i, txt in enumerate(labels))
+    chips = "".join(f'<span class="progress-chip {"active" if i == active_idx else ""}">{i+1}. {txt}</span>' for i, txt in enumerate(labels))
     st.markdown(f'<div class=\"progress-bar\">{chips}</div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
