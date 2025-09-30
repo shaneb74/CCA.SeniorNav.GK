@@ -196,7 +196,7 @@ def run_tests():
         care_context["care_flags"]["chronic_conditions"] = case["chronic"]
         care_context["care_flags"]["living_goal"] = case["preference"]
 
-        # Score calculation (simplified from recommendation block)
+        # Score calculation
         flags = []
         if care_context["care_flags"]["funding_confidence"] in ["Very worried—cost is a big concern for me", "Somewhat worried—I’d need to budget carefully"]:
             flags.append("needs_financial_assistance")
@@ -252,11 +252,6 @@ def run_tests():
         if care_context["derived_flags"]["recent_fall"]:
             flags.append("high_safety_concern")
 
-        conditions = care_context["care_flags"]["chronic_conditions"]
-        if "CHF" in conditions or "COPD" in conditions:
-            if "high_mobility_dependence" in flags or "high_safety_concern" in flags:
-                flags.append("chronic_health_risk")
-
         score = 0
         if "severe_cognitive_risk" in flags and "adequate_support" in flags:
             score += 10
@@ -275,7 +270,7 @@ def run_tests():
         if "limited_support" in flags:
             pass  # No penalty for borderline support
         if "adequate_support" in flags:
-            score -= 5
+            score -= 3  # Reduced from 5 to balance
         if "high_risk" in flags:
             score += 6
         if "moderate_risk" in flags:
@@ -290,6 +285,9 @@ def run_tests():
             score += 8
         if "chronic_health_risk" in flags:
             score += 7
+
+        # Floor score at 0
+        score = max(0, score)
 
         # Determine recommendation
         recommendation = "No Care Needed at This Time"
@@ -332,7 +330,7 @@ def render_planner():
 
     with st.container():
         if st.session_state.planner_step == 1:
-            st.subheader("Your Financial Confidence")
+            st.markdown("<p style='font-size:18px;'>Your Financial Confidence</p>", unsafe_allow_html=True)
             st.write("First, let’s talk about your finances.")
             funding_options = {
                 "1": "Not worried—I can afford any care I need",
@@ -362,7 +360,7 @@ def render_planner():
                 pass
 
         elif st.session_state.planner_step == 2:
-            st.subheader("Your Cognition")
+            st.markdown("<p style='font-size:18px;'>Your Cognition</p>", unsafe_allow_html=True)
             st.write("Next, let’s talk about your memory and thinking.")
             cognition_options = {
                 "1": "My memory feels sharp—no real issues",
@@ -388,7 +386,7 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 3:
-            st.subheader("Your Caregiver Support")
+            st.markdown("<p style='font-size:18px;'>Your Caregiver Support</p>", unsafe_allow_html=True)
             cog = care_context["care_flags"].get("cognitive_function", "")
             funding = care_context["care_flags"].get("funding_confidence", "")
             if "Occasional lapses" in cog or "Noticeable problems" in cog or "Serious confusion" in cog:
@@ -422,7 +420,7 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 4:
-            st.subheader("Your Medication Management")
+            st.markdown("<p style='font-size:18px;'>Your Medication Management</p>", unsafe_allow_html=True)
             takes_meds = st.radio(
                 "Do you take any daily prescription meds (e.g., for heart, mood, or memory)?",
                 ["No", "Yes"],
@@ -459,7 +457,7 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 5:
-            st.subheader("Your Daily Independence")
+            st.markdown("<p style='font-size:18px;'>Your Daily Independence</p>", unsafe_allow_html=True)
             st.write("Now, let’s look at your daily routine.")
             independence_options = {
                 "1": "I’m fully independent and handle all tasks on my own",
@@ -485,7 +483,7 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 6:
-            st.subheader("Your Mobility")
+            st.markdown("<p style='font-size:18px;'>Your Mobility</p>", unsafe_allow_html=True)
             st.write("Let’s talk about getting around.")
             mobility_options = {
                 "1": "I walk easily without any support",
@@ -513,10 +511,10 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 7:
-            st.subheader("Your World")
+            st.markdown("<p style='font-size:18px;'>Your World</p>", unsafe_allow_html=True)
             st.write("Finally, let’s look at your living situation.")
 
-            st.subheader("Social Connection")
+            st.markdown("<p style='font-size:18px;'>Social Connection</p>", unsafe_allow_html=True)
             st.write("How connected are you with family, friends, or neighbors?")
             social_options = {
                 "1": "Daily visits or calls",
@@ -535,7 +533,7 @@ def render_planner():
                 st.session_state.care_context = care_context
                 st.write(f"Social: {care_context['care_flags']['social_connection']}")
 
-            st.subheader("Geography & Access")
+            st.markdown("<p style='font-size:18px;'>Geography & Access</p>", unsafe_allow_html=True)
             chronic_conditions = care_context["care_flags"].get("chronic_conditions", [])
             if chronic_conditions:
                 st.write(f"With conditions like {', '.join(chronic_conditions)}, how easy is it to reach doctors?")
@@ -558,7 +556,7 @@ def render_planner():
                 st.session_state.care_context = care_context
                 st.write(f"Access: {care_context['care_flags']['geographic_access']}")
 
-            st.subheader("Home Safety")
+            st.markdown("<p style='font-size:18px;'>Home Safety</p>", unsafe_allow_html=True)
             st.write("How safe do you feel at home?")
             safety_options = {
                 "1": "Very safe—I have everything I need",
@@ -577,7 +575,7 @@ def render_planner():
                 st.session_state.care_context = care_context
                 st.write(f"Safety: {care_context['care_flags']['falls_risk']}")
 
-            st.subheader("Fall History")
+            st.markdown("<p style='font-size:18px;'>Fall History</p>", unsafe_allow_html=True)
             st.write("Based on your safety answer, let’s check this.")
             fall_options = {"1": "Yes", "2": "No", "3": "Unsure"}
             fall_options_list = list(fall_options.values())
@@ -587,7 +585,7 @@ def render_planner():
                 st.session_state.care_context = care_context
                 st.write(f"Fall history: {care_context['derived_flags'].get('recent_fall', 'Not set')}")
 
-            st.subheader("Chronic Conditions")
+            st.markdown("<p style='font-size:18px;'>Chronic Conditions</p>", unsafe_allow_html=True)
             st.write("Any ongoing health issues?")
             condition_options = ["Diabetes", "Hypertension", "Dementia", "Parkinson's", "COPD", "CHF", "Arthritis", "Stroke"]
             conditions = st.multiselect("Which chronic conditions do you have?", condition_options, key="chronic_conditions_select")
@@ -604,7 +602,7 @@ def render_planner():
                 st.rerun()
 
         elif st.session_state.planner_step == 8:
-            st.subheader("Your Home Preference")
+            st.markdown("<p style='font-size:18px;'>Your Home Preference</p>", unsafe_allow_html=True)
             st.write("Lastly, how do you feel about staying home?")
             goal_options = {
                 "1": "Not important—I’m open to other options",
@@ -698,7 +696,7 @@ def render_planner():
             if care_context["derived_flags"].get("recent_fall", False):
                 flags.append("high_safety_concern")
 
-            # Chronic Conditions
+            # Chronic Conditions (removed automatic +7 unless high risk)
             conditions = care_context["care_flags"].get("chronic_conditions", [])
             if "CHF" in conditions or "COPD" in conditions:
                 if "high_mobility_dependence" in flags or "high_safety_concern" in flags:
@@ -723,7 +721,7 @@ def render_planner():
             if "limited_support" in flags:
                 pass  # No penalty for borderline support
             if "adequate_support" in flags:
-                score -= 5
+                score -= 3  # Reduced to balance no-care threshold
             if "high_risk" in flags:
                 score += 6
             if "moderate_risk" in flags:
@@ -738,6 +736,9 @@ def render_planner():
                 score += 8
             if "chronic_health_risk" in flags:
                 score += 7
+
+            # Floor score at 0
+            score = max(0, score)
 
             # Recommendation
             if ("severe_cognitive_risk" in flags and "no_support" in flags) or score >= 25:
