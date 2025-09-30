@@ -94,7 +94,7 @@ button[aria-expanded][role="button"]{
 button[aria-expanded][role="button"]:hover{ color:#1e40af !important; text-decoration: underline; }
 
 /* Our custom question title style (used in engine.py) */
-.q-title{ font-size: 1.15rem; font-weight: 700; color:#111827; margin:.25rem 0 .5rem; }
+.q-title{ font-size: 1.15rem; font-weight: 600; color:#111827; margin:.25rem 0 .5rem; }
 /* Larger prompt line (e.g., Step 0 "Who are you planning care for today?") */
 .q-prompt{ font-size: 20px; font-weight: 700; color:#111827; margin:.35rem 0 .65rem; display:block; }
 
