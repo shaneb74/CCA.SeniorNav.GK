@@ -13,6 +13,17 @@ if "care_context" not in st.session_state:
 care_context = st.session_state.care_context
 
 
+def _nav_row(next_label, next_disabled, next_action, back_label, back_disabled, back_action):
+    """Render Next/Back horizontally aligned using columns."""
+    c1, c2 = st.columns([1,1])
+    with c1:
+        if st.button(next_label, disabled=next_disabled):
+            next_action()
+    with c2:
+        if st.button(back_label, disabled=back_disabled):
+            back_action()
+
+
 def render_planner():
     if "planner_step" not in st.session_state:
         st.session_state.planner_step = 1
@@ -45,16 +56,21 @@ def render_planner():
             care_context["care_flags"]["funding_confidence"] = funding_confidence
             st.session_state.care_context = care_context
             st.caption(f"You feel: {care_context['care_flags']['funding_confidence']}")
-        if st.button(
-            "Next",
-            key="planner_next_1",
-            disabled=not funding_confidence
-            or funding_confidence == "I am on Medicaid",
-        ):
+
+        def go_next():
             st.session_state.planner_step = 2
             st.rerun()
-        if st.button("Go Back", key="planner_back_1", disabled=True):
+        def go_back():
             pass
+
+        _nav_row(
+            "Next",
+            not funding_confidence or funding_confidence == "I am on Medicaid",
+            go_next,
+            "Go Back",
+            True,
+            go_back,
+        )
 
     # Step 2: Cognition
     elif st.session_state.planner_step == 2:
@@ -76,12 +92,15 @@ def render_planner():
             care_context["care_flags"]["cognitive_function"] = cognition
             st.session_state.care_context = care_context
             st.caption(f"You noted: {care_context['care_flags']['cognitive_function']}")
-        if st.button("Next", key="planner_next_2", disabled=not cognition):
+
+        def go_next():
             st.session_state.planner_step = 3
             st.rerun()
-        if st.button("Go Back", key="planner_back_2"):
+        def go_back():
             st.session_state.planner_step = 1
             st.rerun()
+
+        _nav_row("Next", not cognition, go_next, "Go Back", False, go_back)
 
     # Step 3: Caregiver Support
     elif st.session_state.planner_step == 3:
@@ -111,12 +130,15 @@ def render_planner():
             care_context["care_flags"]["caregiver_support"] = caregiver
             st.session_state.care_context = care_context
             st.caption(f"Support level: {care_context['care_flags']['caregiver_support']}")
-        if st.button("Next", key="planner_next_3", disabled=not caregiver):
+
+        def go_next():
             st.session_state.planner_step = 4
             st.rerun()
-        if st.button("Go Back", key="planner_back_3"):
+        def go_back():
             st.session_state.planner_step = 2
             st.rerun()
+
+        _nav_row("Next", not caregiver, go_next, "Go Back", False, go_back)
 
     # Step 4: Medication Management
     elif st.session_state.planner_step == 4:
@@ -150,12 +172,15 @@ def render_planner():
                 care_context["care_flags"]["med_adherence"] = med_confidence
                 st.session_state.care_context = care_context
                 st.caption(f"Med management: {care_context['care_flags']['med_adherence']}")
-        if st.button("Next", key="planner_next_4", disabled=(takes_meds != "No" and not med_confidence)):
+
+        def go_next():
             st.session_state.planner_step = 5
             st.rerun()
-        if st.button("Go Back", key="planner_back_4"):
+        def go_back():
             st.session_state.planner_step = 3
             st.rerun()
+
+        _nav_row("Next", (takes_meds != "No" and not med_confidence), go_next, "Go Back", False, go_back)
 
     # Step 5: Daily Independence
     elif st.session_state.planner_step == 5:
@@ -177,12 +202,15 @@ def render_planner():
             care_context["care_flags"]["independence_level"] = independence
             st.session_state.care_context = care_context
             st.caption(f"Independence: {care_context['care_flags']['independence_level']}")
-        if st.button("Next", key="planner_next_5", disabled=not independence):
+
+        def go_next():
             st.session_state.planner_step = 6
             st.rerun()
-        if st.button("Go Back", key="planner_back_5"):
+        def go_back():
             st.session_state.planner_step = 4
             st.rerun()
+
+        _nav_row("Next", not independence, go_next, "Go Back", False, go_back)
 
     # Step 6: Mobility
     elif st.session_state.planner_step == 6:
@@ -206,12 +234,15 @@ def render_planner():
                 care_context["derived_flags"]["inferred_mobility_aid"] = mobility
             st.session_state.care_context = care_context
             st.caption(f"Mobility: {care_context['care_flags']['mobility_issue']}")
-        if st.button("Next", key="planner_next_6", disabled=not mobility):
+
+        def go_next():
             st.session_state.planner_step = 7
             st.rerun()
-        if st.button("Go Back", key="planner_back_6"):
+        def go_back():
             st.session_state.planner_step = 5
             st.rerun()
+
+        _nav_row("Next", not mobility, go_next, "Go Back", False, go_back)
 
     # Step 7: Your World
     elif st.session_state.planner_step == 7:
@@ -313,16 +344,21 @@ def render_planner():
             st.session_state.care_context = care_context
             st.caption(f"Chronic conditions: {', '.join(care_context['care_flags']['chronic_conditions'])}")
 
-        if st.button(
-            "Next",
-            key="planner_next_7",
-            disabled=not (social and geography and safety and conditions is not None),
-        ):
+        def go_next():
             st.session_state.planner_step = 8
             st.rerun()
-        if st.button("Go Back", key="planner_back_7"):
+        def go_back():
             st.session_state.planner_step = 6
             st.rerun()
+
+        _nav_row(
+            "Next",
+            not (social and geography and safety and conditions is not None),
+            go_next,
+            "Go Back",
+            False,
+            go_back,
+        )
 
     # Step 8: Home Preference
     elif st.session_state.planner_step == 8:
@@ -343,12 +379,15 @@ def render_planner():
             care_context["care_flags"]["living_goal"] = goal
             st.session_state.care_context = care_context
             st.caption(f"Preference: {care_context['care_flags']['living_goal']}")
-        if st.button("Get Recommendation", key="planner_next_8", disabled=not goal):
+
+        def go_next():
             st.session_state.planner_step = 9
             st.rerun()
-        if st.button("Go Back", key="planner_back_8"):
+        def go_back():
             st.session_state.planner_step = 7
             st.rerun()
+
+        _nav_row("Get Recommendation", not goal, go_next, "Go Back", False, go_back)
 
     # Step 9: Recommendation
     elif st.session_state.planner_step == 9:
@@ -464,7 +503,7 @@ def render_planner():
         if "chronic_health_risk" in flags:
             score += 7
 
-        # Recommendation Logic
+        # Recommendation Logic (strings cleaned to ASCII inside the lists)
         if ("severe_cognitive_risk" in flags and "no_support" in flags) or score >= 25:
             issues = [
                 random.choice(["facing serious memory challenges", "having significant cognitive concerns", "dealing with severe memory issues"]) if "severe_cognitive_risk" in flags else "",
