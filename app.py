@@ -3,7 +3,7 @@ import logic
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# --- Global CSS: Outline pill radios (match designer mock) ---
+# --- Global CSS: Outline pill radios (designer-style) ---
 st.markdown("""
 <style>
 :root{
@@ -24,9 +24,10 @@ st.markdown("""
 [data-testid="stRadio"] div[role="radiogroup"] > label{
   margin:0 !important; padding:0 !important; display:block; position:relative;
 }
-[data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child{
-  display:none !important;
-}
+/* hide the default radio dot */
+[data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child{ display:none !important; }
+
+/* visually hide input but keep a11y */
 [data-testid="stRadio"] input[type="radio"]{
   position:absolute !important; opacity:0 !important; width:1px; height:1px;
   overflow:hidden; clip:rect(0 0 0 0); clip-path: inset(50%);
@@ -52,10 +53,6 @@ st.markdown("""
 }
 [data-testid="stRadio"] input[type="radio"]:focus-visible + div{
   outline:3px solid rgba(11,92,216,.25); outline-offset:2px;
-}
-[data-testid="stRadio"] div[role="radiogroup"] > label::selection,
-[data-testid="stRadio"] div[role="radiogroup"] > label *::selection{
-  background:transparent; color:inherit;
 }
 
 /* Info icon alignment */
