@@ -23,11 +23,13 @@ def run_flow():
             st.rerun()
         return
 
-    # Step 1..n simplified
+    # Steps 1..n (sample)
     if 1 <= step <= len(QUESTIONS):
         key, prompt, options, bullets = QUESTIONS[step - 1]
         _q_header(f"Step {step}: {prompt}")
-        st.radio("", options, key=f"q_{key}")
-        if st.button("Next", type="primary"):
+        sel = st.radio("", options, key=f"q_{key}", index=None)
+        if sel is not None:
+            st.session_state.care_context.setdefault("flags", {})[key] = sel
+        if st.button("Next", type="primary", disabled=sel is None):
             st.session_state.planner_step = step + 1
             st.rerun()

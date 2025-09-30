@@ -3,7 +3,7 @@ from GuidedCarePlan.view import render as render_careplan
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
-# ===== Global CSS with unified typography =====
+# ===== Global CSS with unified typography + pill radios =====
 st.markdown("""
 <style>
 :root{
@@ -55,7 +55,9 @@ h1, .stMarkdown h1, .stApp h1 {
   margin: .5rem 0 .75rem;
 }
 
-/* Pills */
+/* === Restore pill-style radios === */
+
+/* Grid layout for options */
 [data-testid="stRadio"] > div{ gap: var(--pill-gap) !important; }
 [data-testid="stRadio"] div[role="radiogroup"]{
   display:grid;
@@ -64,9 +66,57 @@ h1, .stMarkdown h1, .stApp h1 {
   max-width: 960px;
   margin: 0 auto;
 }
+
+/* Make each option label behave like a full-width button */
+[data-testid="stRadio"] div[role="radiogroup"] > label{
+  margin:0 !important; padding:0 !important; display:block; position:relative; width:100%;
+}
+
+/* Hide the native radio dot */
+[data-testid="stRadio"] div[role="radiogroup"] > label > div:first-child{ 
+  display:none !important; 
+}
+[data-testid="stRadio"] input[type="radio"]{
+  position:absolute !important; opacity:0 !important; width:1px; height:1px;
+  overflow:hidden; clip:rect(0 0 0 0); clip-path: inset(50%);
+}
+
+/* Style the visible “pill” */
 [data-testid="stRadio"] div[role="radiogroup"] > label > div:last-child{
-  font-size: var(--pill-font);
-  font-weight: 600;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--pill-bg); color:var(--pill-text);
+  border:1.5px solid var(--pill-brd); border-radius:var(--pill-radius);
+  padding:var(--pill-pad); box-shadow:var(--pill-shadow);
+  cursor:pointer; transition:all .12s ease-in-out;
+  font-size:var(--pill-font); line-height:1.3; font-weight:600;
+  user-select:none; text-align:center; width:100%;
+  min-height:56px;
+}
+[data-testid="stRadio"] div[role="radiogroup"] > label > div:last-child:hover{ 
+  background:var(--pill-hover); 
+}
+
+/* Selected state */
+[data-testid="stRadio"] input[type="radio"]:checked + div{
+  background:var(--pill-selected) !important; color:#FFFFFF !important;
+  border-color:var(--pill-selected) !important;
+  box-shadow:0 3px 12px rgba(31,41,55,.25); font-weight:700;
+}
+[data-testid="stRadio"] input[type="radio"]:checked + div:hover{
+  background:var(--pill-selected-hover) !important; border-color:var(--pill-selected-hover) !important;
+}
+
+/* Focus ring for keyboard users */
+[data-testid="stRadio"] input[type="radio"]:focus-visible + div{
+  outline:3px solid rgba(46,110,255,.35); outline-offset:2px;
+}
+
+/* Radio label (rarely used) – match our scale */
+[data-testid="stRadio"] > label{
+  font-size: var(--q-title-size) !important;
+  font-weight: var(--q-title-weight) !important;
+  color:#111827 !important;
+  margin-bottom:.5rem !important;
 }
 
 /* Popover */
@@ -97,7 +147,7 @@ button[kind="secondary"]{
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
 
-/* Mobile */
+/* Mobile tweaks */
 @media (max-width: 480px){
   :root{
     --h1-size: 1.875rem;    /* 30px */
