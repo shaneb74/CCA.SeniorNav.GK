@@ -1,5 +1,5 @@
 import streamlit as st
-from . import logic
+import logic  # business logic only
 
 st.set_page_config(
     page_title="Senior Navigator",
