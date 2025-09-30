@@ -4,23 +4,45 @@ import random
 # Lock fonts early-no helpers, no overrides
 st.markdown(
     '''<style>
-    .stMarkdown {
-        font-size: 22px !important;
+    /* Layout: keep lines short so humans actually read */
+    .block-container { max-width: 860px; padding-top: 0.5rem; }
+
+    /* Base copy */
+    :root { --body: 18px; --radio-q: 20px; --radio-opt: 20px; }
+    p, .stMarkdown { font-size: var(--body) !important; line-height: 1.6; color: #222; }
+
+    /* Headings */
+    h1, h2, h3 { letter-spacing: -0.01em; color: #1c1c1c; }
+    h1 { margin-bottom: 0.25rem; }
+    h2 { margin-top: 0.75rem; margin-bottom: 0.25rem; }
+
+    /* Radio: question label */
+    div[role="radiogroup"] > label {
+        font-size: var(--radio-q) !important;
+        font-weight: 600;
+        margin: 0.35rem 0 0.2rem 0;
+        color: #222;
     }
-    .stRadio > div > label span {
-        font-size: 24px !important;
+
+    /* Radio: options */
+    div[role="radiogroup"] > div > label { 
+        display: flex; align-items: center;
+        line-height: 1.5; padding: 2px 0; margin: 4px 0;
     }
-    .stRadio > div > label {
-        line-height: 1.5;
-        margin: 6px 0;
+    div[role="radiogroup"] > div > label span {
+        font-size: var(--radio-opt) !important;
     }
+
+    /* Buttons */
     .stButton > button {
-        background-color: #3498db;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        font-size: 16px;
+        background-color: #3498db; color: #fff;
+        border: none; border-radius: 8px;
+        padding: 12px 18px; font-size: 18px;
     }
+    .stButton > button:disabled { opacity: 0.5; }
+
+    /* Subtle helper text spacing */
+    .stCaption, .st-emotion-cache-1wbqy5l { margin-top: 0.25rem; }
     </style>''',
     unsafe_allow_html=True
 )
