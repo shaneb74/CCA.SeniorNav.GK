@@ -1,8 +1,9 @@
 import streamlit as st
-from careplan.view import render as render_careplan
+from GuidedCarePlan.view import render as render_careplan
 
 st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 
+# ===== Global CSS (kept from your good-looking build) =====
 st.markdown("""
 <style>
 :root{
@@ -83,6 +84,7 @@ with st.sidebar:
 
 st.title("Senior Care Navigator")
 
+# Simple progress rail for steps 1..12
 total_steps = 12
 step = st.session_state.get("planner_step", 0)
 if 1 <= step <= total_steps:
@@ -91,8 +93,10 @@ if 1 <= step <= total_steps:
     ) + '</div>'
     st.markdown(rail, unsafe_allow_html=True)
 
+# Mount the Guided Care Plan
 render_careplan()
 
+# QA drawer
 if st.session_state.get("qa_mode"):
     st.markdown("---")
     st.subheader("QA Data")
