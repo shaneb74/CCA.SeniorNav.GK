@@ -67,7 +67,7 @@ st.markdown("""
   outline:3px solid rgba(46,110,255,.35); outline-offset:2px;
 }
 
-/* ---- Buttons ---- */
+/* ---- Buttons base ---- */
 .stButton > button { padding:.7rem 1.1rem; }
 button[kind="primary"]{
   background:var(--btn-primary) !important; color:#fff !important;
@@ -85,20 +85,36 @@ button[kind="secondary"]{
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
 
-/* ---- Nav row: keep Back/Next horizontal until really tiny ---- */
-.scn-nav-row{
-  display: flex !important;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 1rem;
+/* ---- Nav row WITHOUT Streamlit columns (stays horizontal on mobile) ---- */
+.scn-nav-inline{
+  max-width: 960px;
+  margin: 1rem auto 0 auto;
+  display: flex; gap: .75rem; justify-content: space-between;
 }
-.scn-nav-row > div{ flex: 1; }
+.scn-nav-inline .stButton{
+  display: inline-block !important;
+  width: 50% !important;
+  margin: 0 !important; padding: 0 !important;
+}
+.scn-nav-inline .stButton > button{
+  width: 100% !important;
+}
 @media (max-width: 420px){
-  .scn-nav-row{ flex-direction: column; }
+  .scn-nav-inline{
+    flex-direction: column;
+  }
+  .scn-nav-inline .stButton{
+    width: 100% !important;
+  }
 }
 
 /* ---- "Why we ask" expander spacing below buttons ---- */
 .scn-why-wrap{ max-width:960px; margin: .75rem auto 0 auto; }
+
+/* Tighten mobile padding slightly */
+@media (max-width: 480px){
+  .block-container{ padding-left:1rem !important; padding-right:1rem !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
