@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from .questions import QUESTIONS
 
 def _ensure_state():
@@ -19,14 +20,14 @@ def _info_below(bullets):
             st.markdown(f"{i}. {b}")
 
 def _intro_block():
-    # Force a centered wrapper, then constrain paragraph width
-    st.markdown(
+    # Use components.html to avoid Streamlit markdown wrappers
+    components.html(
         """
-        <div class="landing-wrap" style="max-width:960px; margin:0 auto;">
+        <div style="max-width:960px; margin:0 auto;">
           <h2 style="margin:0 0 .5rem 0; font-size:1.5rem; font-weight:700; letter-spacing:-.01em;">
             Welcome to Senior Care Navigator
           </h2>
-          <div class="landing-hero" style="max-width:64ch; margin:0 auto; text-align:left;">
+          <div style="max-width:64ch; margin:0 auto; text-align:left;">
             <p style="margin:.25rem 0; padding:0; line-height:1.55; font-size:16.5px; color:#374151;">
               We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options,
               backed by expert guidance — always free for families.
@@ -34,7 +35,7 @@ def _intro_block():
           </div>
         </div>
         """,
-        unsafe_allow_html=True,
+        height=140,
     )
 
 def _audience_screen():
