@@ -231,16 +231,13 @@ def _run_flow():
             care_context["person_a_name"] = st.text_input("Person A name", value=care_context.get("person_a_name", ""))
             care_context["person_b_name"] = st.text_input("Person B name (if applicable)", value=care_context.get("person_b_name", "")) if who == "Two" else None
 
-        # Nav row (Next only)
-        st.markdown('<div class="scn-nav-row">', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            pass
-        with col2:
-            if st.button("Next", type="primary"):
-                st.session_state.planner_step = 1
-                st.rerun()
+        # Nav row (Next only) — NO COLUMNS
+        st.markdown('<div class="scn-nav-inline">', unsafe_allow_html=True)
+        next_clicked = st.button("Next", type="primary", key="next_0")
         st.markdown('</div>', unsafe_allow_html=True)
+        if next_clicked:
+            st.session_state.planner_step = 1
+            st.rerun()
         return
 
     # Steps 1..N
@@ -258,19 +255,19 @@ def _run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # Nav row (Back + Next)
-        st.markdown('<div class="scn-nav-row">', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Back", type="secondary"):
-                st.session_state.planner_step = max(0, step - 1)
-                st.rerun()
-        with col2:
-            next_disabled = False if key == "chronic_conditions" else care_context["flags"].get(key) is None
-            if st.button("Next", disabled=next_disabled, type="primary"):
-                st.session_state.planner_step = step + 1
-                st.rerun()
+        # Nav row (Back + Next) — NO COLUMNS
+        st.markdown('<div class="scn-nav-inline">', unsafe_allow_html=True)
+        back_clicked = st.button("Back", type="secondary", key=f"back_{step}")
+        next_disabled = False if key == "chronic_conditions" else care_context["flags"].get(key) is None
+        next_clicked = st.button("Next", type="primary", disabled=next_disabled, key=f"next_{step}")
         st.markdown('</div>', unsafe_allow_html=True)
+
+        if back_clicked:
+            st.session_state.planner_step = max(0, step - 1)
+            st.rerun()
+        if next_clicked:
+            st.session_state.planner_step = step + 1
+            st.rerun()
 
         # Why we ask (below nav)
         _q_info_below(bullets)
