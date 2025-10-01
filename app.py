@@ -21,27 +21,24 @@ st.markdown("""
 /* Title */
 h1, .stApp h1 { font-size: var(--h1-size) !important; font-weight: var(--h1-weight) !important; letter-spacing:-.01em; }
 
-/* Intro block: centered column */
-.intro-wrap    { max-width: 960px; margin: 0 auto 1rem; }
-.intro-head    { font-size: var(--intro-h-size); font-weight: var(--intro-h-weight); margin:.25rem 0 .5rem;
-                 max-width: var(--intro-max); margin-left:auto; margin-right:auto; }
-.intro-body    { font-size: var(--intro-b-size); font-weight: var(--intro-b-weight); color:#374151; max-width:var(--intro-max);
-                 line-height:1.55; margin-left:auto; margin-right:auto; text-align:left; }
-.align-intro   { max-width: var(--intro-max); margin-left:auto; margin-right:auto; }
+/* Intro wrapper: header + paragraph share the SAME centered container, left-aligned */
+.intro-wrap { max-width: 960px; margin: 0 auto 1.25rem; }
+.intro-wrap h2{
+  font-size: var(--intro-h-size); font-weight: var(--intro-h-weight);
+  margin: .25rem 0 .5rem; letter-spacing:-.01em;
+}
+.intro-wrap p{
+  font-size: var(--intro-b-size); font-weight: var(--intro-b-weight);
+  color:#374151; line-height:1.55;
+  /* readable width but left-aligned with the same wrapper */
+  max-width: var(--intro-max);
+  margin: 0;               /* kill stray margins that shift it */
+  padding: 0 !important;   /* nuke surprise padding */
+  text-align: left;
+}
 
 /* Question titles */
 .q-title, .q-prompt { font-size: var(--q-title-size); font-weight: var(--q-title-weight); color:#111827; margin:.75rem 0 1rem; }
-
-/* --- Hard-center the welcome blurb and neutralize stray padding --- */
-.intro-block{ max-width:720px; margin:0 auto 1.25rem; }
-.intro-block h2{ font-size:1.5rem; font-weight:700; margin:.25rem 0 .5rem; letter-spacing:-.01em; }
-.intro-block p{
-  max-width:60ch; margin:0 auto; padding:0 !important;
-  text-align:left; line-height:1.55; color:#374151;
-}
-
-/* In case a Streamlit wrapper adds padding to this element container */
-.element-container:has(.intro-block){ padding-left:0 !important; }
 
 /* Pill-style radios */
 [data-testid="stRadio"] > div{ gap: var(--pill-gap) !important; }
