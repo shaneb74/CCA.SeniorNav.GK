@@ -64,13 +64,30 @@ div[data-testid="stRadio"] div[role="radiogroup"] > label > div:last-child{
 div[data-testid="stRadio"] div[role="radiogroup"] > label > div:last-child:hover{
   background:var(--pill-hover) !important;
 }
-div[data-testid="stRadio"] input[type="radio"]:checked + div{
-  background:var(--pill-selected) !important; color:#FFFFFF !important;
-  border-color:var(--pill-selected) !important;
-  box-shadow:0 3px 12px rgba(31,41,55,.25) !important; font-weight:700 !important;
+/* Selected state (robust): chosen pill = black bg + white text */
+:root { --pill-selected:#111827; } /* near-black, keep your var */
+
+div[data-testid="stRadio"] div[role="radiogroup"] > label:has(input[type="radio"]:checked) > div:last-child {
+  background: var(--pill-selected) !important;
+  color: #FFFFFF !important;
+  border-color: var(--pill-selected) !important;
+  box-shadow: 0 3px 12px rgba(17,24,39,.25) !important;
+  font-weight: 700 !important;
 }
-div[data-testid="stRadio"] input[type="radio"]:checked + div:hover{
-  background:var(--pill-selected-hover) !important;
+div[data-testid="stRadio"] div[role="radiogroup"] > label:has(input[type="radio"]:checked) > div:last-child:hover{
+  background: var(--pill-selected-hover) !important;
+}
+
+/* Fallback path if Streamlit sets aria-checked on a wrapper */
+div[data-testid="stRadio"] div[role="radiogroup"] [role="radio"][aria-checked="true"] > label > div:last-child {
+  background: var(--pill-selected) !important;
+  color: #FFFFFF !important;
+  border-color: var(--pill-selected) !important;
+  box-shadow: 0 3px 12px rgba(17,24,39,.25) !important;
+  font-weight: 700 !important;
+}
+div[data-testid="stRadio"] div[role="radiogroup"] [role="radio"][aria-checked="true"] > label > div:last-child:hover{
+  background: var(--pill-selected-hover) !important;
 }
 
 /* ------- NAV: keep Back/Next horizontal even on mobile ------- */
