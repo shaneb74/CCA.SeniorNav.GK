@@ -20,13 +20,13 @@ def _info_below(bullets):
 
 def _audience_screen():
     st.markdown(
-        "<div class='intro-wrap'>"
-        "<div class='intro-head'>Welcome to Senior Care Navigator</div>"
-        "<div class='intro-body'>We make navigating senior care simple. "
-        "Answer a few quick questions and we’ll connect you with the best options, "
-        "backed by expert guidance — always free for families.</div>"
-        "</div>",
-        unsafe_allow_html=True
+        """
+    <div class='intro-block'>
+    <h2>Welcome to Senior Care Navigator</h2>
+    <p>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
     )
     st.markdown("<div class='q-prompt align-intro'>Who are you planning care for today?</div>", unsafe_allow_html=True)
 
