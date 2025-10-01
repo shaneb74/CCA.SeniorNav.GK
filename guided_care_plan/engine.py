@@ -72,13 +72,13 @@ def _derive_flags():
 
     acc = st.session_state.care_context.get("flags", {}).get("geographic_access")
     if acc == "Very easy":
-    st.session_state.care_context["derived"]["access_bucket"] = "very_easy"
+        st.session_state.care_context["derived"]["access_bucket"] = "very_easy"
     elif acc == "Fairly easy":
-    st.session_state.care_context["derived"]["access_bucket"] = "moderate"
+        st.session_state.care_context["derived"]["access_bucket"] = "moderate"
     elif acc == "Somewhat difficult":
-    st.session_state.care_context["derived"]["access_bucket"] = "difficult"
+        st.session_state.care_context["derived"]["access_bucket"] = "difficult"
     elif acc == "Very difficult":
-    st.session_state.care_context["derived"]["access_bucket"] = "severe"
+        st.session_state.care_context["derived"]["access_bucket"] = "severe"
 
     rf = flags.get("recent_fall")
     if rf == "Yes":
