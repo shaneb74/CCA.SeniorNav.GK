@@ -42,8 +42,8 @@ QUESTIONS = [
 
     ("geographic_access",
      "How accessible are services like pharmacies, grocery stores, and doctors from your home?",
-     ["Very easy", "Somewhat easy", "Difficult"],
-     None),
+     ["Very easy", "Fairly easy", "Somewhat difficult", "Very difficult"],
+     ["Think drive time, transit availability, and how quickly you can get prescriptions or appointments."]),
 
     ("chronic_conditions",
      "Do you have any ongoing health conditions? Select all that apply.",
