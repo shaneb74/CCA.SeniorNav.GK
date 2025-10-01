@@ -33,17 +33,13 @@ st.markdown("""
 /* ---- Radio pill grid ---- */
 [data-testid="stRadio"] > div{ gap: var(--pill-gap) !important; }
 [data-testid="stRadio"] div[role="radiogroup"]{
-  display:grid;
-  gap: var(--pill-gap);
+  display:grid; gap: var(--pill-gap);
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  max-width: 960px;
-  margin: 0 auto;
+  max-width: 960px; margin: 0 auto;
 }
 [data-testid="stRadio"] > label{
-  font-size: 1.05rem !important;
-  font-weight: 600 !important;
-  color:#111827 !important;
-  margin-bottom:.5rem !important;
+  font-size: 1.05rem !important; font-weight: 600 !important;
+  color:#111827 !important; margin-bottom:.5rem !important;
 }
 [data-testid="stRadio"] div[role="radiogroup"] > label{ 
   margin:0 !important; padding:0 !important; display:block; position:relative; width:100%;
@@ -100,27 +96,30 @@ with st.sidebar:
 
 st.title("Senior Care Navigator")
 
-# Hero paragraph only (no duplicate welcome headline)
-st.markdown(
-    """
-    <div class="scn-hero">
-      <p>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</p>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-# Simple progress rail
-total_steps = 12
+# Show hero ONLY on step 0
 step = st.session_state.get("planner_step", 0)
+if step == 0:
+    st.markdown(
+        """
+        <div class="scn-hero">
+          <p>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# Progress rail for steps 1..12
+total_steps = 12
 if 1 <= step <= total_steps:
     rail = '<div class="progress-rail">' + ''.join(
         f'<div class="seg{" active" if i < step else ""}"></div>' for i in range(total_steps)
     ) + '</div>'
     st.markdown(rail, unsafe_allow_html=True)
 
+# Mount the Care Plan flow
 render_careplan()
 
+# QA drawer
 if st.session_state.get("qa_mode"):
     st.markdown("---")
     st.subheader("QA Data")
