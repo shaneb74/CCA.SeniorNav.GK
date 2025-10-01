@@ -40,7 +40,7 @@ QUESTIONS = [
      ["Frequent contact", "Occasional contact", "Rarely see others", "Often alone"],
      None),
 
-    ("geographic_access",
+     ("geographic_access",
      "How accessible are services like pharmacies, grocery stores, and doctors from your home?",
      ["Very easy", "Fairly easy", "Somewhat difficult", "Very difficult"],
      ["Think drive time, transit availability, and how quickly you can get prescriptions or appointments."]),
