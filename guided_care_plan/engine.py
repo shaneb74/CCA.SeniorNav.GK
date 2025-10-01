@@ -11,7 +11,8 @@ def _q_title(title: str):
     st.markdown(f"<div class='q-title'>{title}</div>", unsafe_allow_html=True)
 
 def _info_below(bullets):
-    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
+    # spacer so the expander never crowds Back/Next
+    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
     if not bullets:
         return
     with st.expander("Why we ask"):
@@ -19,16 +20,18 @@ def _info_below(bullets):
             st.markdown(f"{i}. {b}")
 
 def _audience_screen():
+    # Header + paragraph share the same centered wrapper, both left-aligned
     st.markdown(
         """
-    <div class='intro-block'>
-    <h2>Welcome to Senior Care Navigator</h2>
-    <p>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</p>
-    </div>
-    """,
-    unsafe_allow_html=True
+        <div class='intro-wrap'>
+          <h2>Welcome to Senior Care Navigator</h2>
+          <p>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-    st.markdown("<div class='q-prompt align-intro'>Who are you planning care for today?</div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='q-prompt'>Who are you planning care for today?</div>", unsafe_allow_html=True)
 
     care = st.session_state.care_context
     who = st.radio("", ["One person", "Two people", "Professional"], index=0, key="audience_choice")
