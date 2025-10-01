@@ -18,27 +18,27 @@ def _info_below(bullets):
         for i, b in enumerate(bullets, start=1):
             st.markdown(f"{i}. {b}")
 
-def _intro_centered():
-    # 1fr / 7fr / 1fr centers the middle column across all widths
-    left, mid, right = st.columns([1, 7, 1])
-    with mid:
-        # Constrain readable width inside the center column (no left drift)
-        with st.container():
-            st.markdown(
-                "<h2 style='margin:0 0 .5rem 0; font-size:1.5rem; font-weight:700; letter-spacing:-.01em;'>"
-                "Welcome to Senior Care Navigator</h2>",
-                unsafe_allow_html=True
-            )
-            st.markdown(
-                "<div style='max-width:64ch; line-height:1.55; color:#374151;'>"
-                "We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, "
-                "backed by expert guidance — always free for families."
-                "</div>",
-                unsafe_allow_html=True
-            )
+def _intro_block():
+    # Force a centered wrapper, then constrain paragraph width
+    st.markdown(
+        """
+        <div class="landing-wrap" style="max-width:960px; margin:0 auto;">
+          <h2 style="margin:0 0 .5rem 0; font-size:1.5rem; font-weight:700; letter-spacing:-.01em;">
+            Welcome to Senior Care Navigator
+          </h2>
+          <div class="landing-hero" style="max-width:64ch; margin:0 auto; text-align:left;">
+            <p style="margin:.25rem 0; padding:0; line-height:1.55; font-size:16.5px; color:#374151;">
+              We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options,
+              backed by expert guidance — always free for families.
+            </p>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 def _audience_screen():
-    _intro_centered()
+    _intro_block()
 
     st.markdown("<div class='q-prompt'>Who are you planning care for today?</div>", unsafe_allow_html=True)
 
