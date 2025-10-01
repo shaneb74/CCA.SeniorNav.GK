@@ -11,7 +11,6 @@ def _q_title(title: str):
     st.markdown(f"<div class='q-title'>{title}</div>", unsafe_allow_html=True)
 
 def _info_below(bullets):
-    # spacer so the expander never crowds Back/Next
     st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
     if not bullets:
         return
@@ -19,17 +18,27 @@ def _info_below(bullets):
         for i, b in enumerate(bullets, start=1):
             st.markdown(f"{i}. {b}")
 
+def _intro_centered():
+    # 1fr / 7fr / 1fr centers the middle column across all widths
+    left, mid, right = st.columns([1, 7, 1])
+    with mid:
+        # Constrain readable width inside the center column (no left drift)
+        with st.container():
+            st.markdown(
+                "<h2 style='margin:0 0 .5rem 0; font-size:1.5rem; font-weight:700; letter-spacing:-.01em;'>"
+                "Welcome to Senior Care Navigator</h2>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                "<div style='max-width:64ch; line-height:1.55; color:#374151;'>"
+                "We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, "
+                "backed by expert guidance — always free for families."
+                "</div>",
+                unsafe_allow_html=True
+            )
+
 def _audience_screen():
-    # Header + paragraph share the same centered wrapper, both left-aligned
-    st.markdown(
-        """
-        <div class='intro-wrap'>
-          <h2>Welcome to Senior Care Navigator</h2>
-          <p>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    _intro_centered()
 
     st.markdown("<div class='q-prompt'>Who are you planning care for today?</div>", unsafe_allow_html=True)
 
@@ -60,33 +69,30 @@ def _derive_flags():
     flags = ctx.get("flags", {})
     derived = ctx.setdefault("derived", {})
 
+    # Home safety bucket
     safety = flags.get("home_setup_safety")
-    if safety == "Well-prepared":
-        derived["home_mod_priority"] = "low"
-    elif safety == "Mostly safe":
-        derived["home_mod_priority"] = "medium"
-    elif safety == "Needs modifications":
-        derived["home_mod_priority"] = "high"
-    elif safety == "Not suitable":
-        derived["home_mod_priority"] = "critical"
+    derived["home_mod_priority"] = {
+        "Well-prepared": "low",
+        "Mostly safe": "medium",
+        "Needs modifications": "high",
+        "Not suitable": "critical",
+    }.get(safety)
 
-    acc = st.session_state.care_context.get("flags", {}).get("geographic_access")
-    if acc == "Very easy":
-        st.session_state.care_context["derived"]["access_bucket"] = "very_easy"
-    elif acc == "Fairly easy":
-        st.session_state.care_context["derived"]["access_bucket"] = "moderate"
-    elif acc == "Somewhat difficult":
-        st.session_state.care_context["derived"]["access_bucket"] = "difficult"
-    elif acc == "Very difficult":
-        st.session_state.care_context["derived"]["access_bucket"] = "severe"
-
+    # Fall signal
     rf = flags.get("recent_fall")
-    if rf == "Yes":
-        derived["recent_fall_bool"] = True
-    elif rf == "No":
-        derived["recent_fall_bool"] = False
-    else:
-        derived["recent_fall_bool"] = "unknown"
+    derived["recent_fall_bool"] = {"Yes": True, "No": False}.get(rf, "unknown")
+
+    # Geographic access bucket if you adopt the 4-option version
+    acc = flags.get("geographic_access")
+    if acc:
+        derived["access_bucket"] = {
+            "Very easy": "very_easy",
+            "Fairly easy": "moderate",
+            "Somewhat difficult": "difficult",
+            "Very difficult": "severe",
+            "Somewhat easy": "moderate",   # fallback if old options are present
+            "Difficult": "severe",
+        }.get(acc)
 
 def _recommendation():
     st.subheader("Recommendation (preview)")
