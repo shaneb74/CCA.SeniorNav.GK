@@ -7,35 +7,22 @@ st.set_page_config(page_title="Senior Care Navigator", layout="centered")
 st.markdown("""
 <style>
 :root{
+  --rail-active:#2E6EFF; --rail-bg:#E5E7EB;
+
   --pill-radius:14px; --pill-pad:.70rem 1rem; --pill-gap:.70rem;
   --pill-text:#111827; --pill-bg:#F3F4F6; --pill-brd:#E5E7EB; --pill-hover:#E9EBF0;
   --pill-selected:#1F2937; --pill-selected-hover:#111827; --pill-shadow:0 2px 6px rgba(17,24,39,.08);
-  --pill-font:16px; --btn-primary:#2E6EFF; --btn-primary-hover:#1F5AE6;
+  --pill-font:16px;
+
+  --btn-primary:#2E6EFF; --btn-primary-hover:#1F5AE6;
   --btn-secondary-bg:#EAF2FF; --btn-secondary-text:#2E6EFF; --btn-secondary-brd:#D6E4FF;
+
   --h1-size: 2.125rem; --h1-weight: 800;
-  --intro-h-size: 1.5rem; --intro-h-weight: 700;
-  --intro-b-size: 1rem; --intro-b-weight: 500; --intro-max: 64ch;
   --q-title-size: 1.125rem; --q-title-weight: 700;
 }
 
 /* Title */
 h1, .stApp h1 { font-size: var(--h1-size) !important; font-weight: var(--h1-weight) !important; letter-spacing:-.01em; }
-
-/* Intro wrapper: header + paragraph share the SAME centered container, left-aligned */
-.intro-wrap { max-width: 960px; margin: 0 auto 1.25rem; }
-.intro-wrap h2{
-  font-size: var(--intro-h-size); font-weight: var(--intro-h-weight);
-  margin: .25rem 0 .5rem; letter-spacing:-.01em;
-}
-.intro-wrap p{
-  font-size: var(--intro-b-size); font-weight: var(--intro-b-weight);
-  color:#374151; line-height:1.55;
-  /* readable width but left-aligned with the same wrapper */
-  max-width: var(--intro-max);
-  margin: 0;               /* kill stray margins that shift it */
-  padding: 0 !important;   /* nuke surprise padding */
-  text-align: left;
-}
 
 /* Question titles */
 .q-title, .q-prompt { font-size: var(--q-title-size); font-weight: var(--q-title-weight); color:#111827; margin:.75rem 0 1rem; }
@@ -65,14 +52,16 @@ h1, .stApp h1 { font-size: var(--h1-size) !important; font-weight: var(--h1-weig
 
 /* Buttons */
 .stButton > button{ padding:.7rem 1.1rem; }
-button[kind="primary"]{ background:var(--btn-primary) !important; color:#fff !important; border-radius:12px !important; border:0 !important; box-shadow:0 2px 8px rgba(46,110,255,.25) !important; }
+button[kind="primary"]{ background:var(--btn-primary) !important; color:#fff !important;
+  border-radius:12px !important; border:0 !important; box-shadow:0 2px 8px rgba(46,110,255,.25) !important; }
 button[kind="primary"]:hover{ background:var(--btn-primary-hover) !important; }
-button[kind="secondary"]{ background:var(--btn-secondary-bg) !important; color:#2E6EFF !important; border:1px solid var(--btn-secondary-brd) !important; border-radius:12px !important; }
+button[kind="secondary"]{ background:var(--btn-secondary-bg) !important; color:#2E6EFF !important;
+  border:1px solid var(--btn-secondary-brd) !important; border-radius:12px !important; }
 
 /* Progress rail */
 .progress-rail{ display:flex; gap:.5rem; margin:.25rem 0 1rem 0; }
-.progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
-.progress-rail .seg.active{ background:var(--btn-primary); }
+.progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:var(--rail-bg); }
+.progress-rail .seg.active{ background:var(--rail-active); }
 
 /* Keep Back/Next horizontal on mobile */
 @media (max-width: 480px){
