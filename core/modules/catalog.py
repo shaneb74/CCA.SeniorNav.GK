@@ -9,7 +9,7 @@ class ModuleDef:
     id: str
     title: str
     subtitle: str
-    icon: str  # emoji or name; decorative only
+    icon: str
     applies_to: AppliesTo
     selectable: bool = True
     order: int = 100
