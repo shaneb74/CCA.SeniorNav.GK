@@ -14,17 +14,12 @@ st.markdown("""
   --btn-secondary-bg:#EAF2FF; --btn-secondary-text:#2E6EFF; --btn-secondary-brd:#D6E4FF;
 }
 
-/* ---- HERO paragraph (shown only on step 0 via app.py) ---- */
+/* ---- HERO paragraph on step 0 ---- */
 .scn-hero{
-  max-width: 720px;
-  margin: 0 auto 2rem auto;
-  text-align: center;
+  max-width: 720px; margin: 0 auto 2rem auto; text-align: center;
 }
 .scn-hero [data-testid="stMarkdownContainer"]{ text-align: center !important; }
-.scn-hero p{
-  margin: 0 auto .5rem auto !important;
-  line-height: 1.55; color: #374151; font-size: 1.05rem;
-}
+.scn-hero p{ margin: 0 auto .5rem auto !important; line-height: 1.55; color: #374151; font-size: 1.05rem; }
 
 /* ---- Radio pill grid ---- */
 [data-testid="stRadio"] > div{ gap: var(--pill-gap) !important; }
@@ -85,30 +80,26 @@ button[kind="secondary"]{
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
 
-/* ---- Nav row WITHOUT Streamlit columns (stays horizontal on mobile) ---- */
+/* ---- Nav row WITHOUT Streamlit columns (stays horizontal) ---- */
 .scn-nav-inline{
   max-width: 960px;
   margin: 1rem auto 0 auto;
-  display: flex; gap: .75rem; justify-content: space-between;
+  display: flex; gap: .75rem; justify-content: space-between; align-items: stretch;
 }
-.scn-nav-inline .stButton{
-  display: inline-block !important;
-  width: 50% !important;
-  margin: 0 !important; padding: 0 !important;
+/* immediate children are the streamlit element containers */
+.scn-nav-inline > div{
+  flex: 1 1 0 !important;
+  margin: 0 !important;
 }
-.scn-nav-inline .stButton > button{
-  width: 100% !important;
-}
+.scn-nav-inline > div .stButton{ width: 100% !important; margin: 0 !important; }
+.scn-nav-inline > div .stButton > button{ width: 100% !important; }
+
 @media (max-width: 420px){
-  .scn-nav-inline{
-    flex-direction: column;
-  }
-  .scn-nav-inline .stButton{
-    width: 100% !important;
-  }
+  .scn-nav-inline{ flex-direction: column; }
+  .scn-nav-inline > div{ width: 100% !important; }
 }
 
-/* ---- "Why we ask" expander spacing below buttons ---- */
+/* ---- "Why we ask" below buttons ---- */
 .scn-why-wrap{ max-width:960px; margin: .75rem auto 0 auto; }
 
 /* Tighten mobile padding slightly */
@@ -143,10 +134,9 @@ if 1 <= step <= total_steps:
     ) + '</div>'
     st.markdown(rail, unsafe_allow_html=True)
 
-# Mount Care Plan flow
+# Mount flow
 render_careplan()
 
-# QA drawer
 if st.session_state.get("qa_mode"):
     st.markdown("---")
     st.subheader("QA Data")
