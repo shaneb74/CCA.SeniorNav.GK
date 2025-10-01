@@ -24,9 +24,11 @@ st.title("Senior Care Navigator")
 total_steps = 12
 step = st.session_state.get("planner_step", 0)
 if 1 <= step <= total_steps:
-    rail = '<div class="progress-rail">' + ''.join(
-        f'<div class="seg{" + '" active" if i < step else ""' + '}></div>' for i in range(total_steps)
-    ) + '</div>'
+    segs = ''.join(
+        f'<div class="seg{" active" if i < step else ""}"></div>'
+        for i in range(total_steps)
+    )
+    rail = f'<div class="progress-rail">{segs}</div>'
     st.markdown(rail, unsafe_allow_html=True)
 
 # Hand off to Guided Care Plan
