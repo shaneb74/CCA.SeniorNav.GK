@@ -14,20 +14,20 @@ st.markdown("""
   --btn-secondary-bg:#EAF2FF; --btn-secondary-text:#2E6EFF; --btn-secondary-brd:#D6E4FF;
 }
 
-/* ---- HERO: center the welcome copy robustly ---- */
+/* ---- HERO paragraph centered under main title ---- */
 .scn-hero{
-  max-width: 760px;
-  margin: 0 auto 1.1rem auto;
+  max-width: 720px;
+  margin: 0 auto 2rem auto;
   text-align: center;
 }
 .scn-hero [data-testid="stMarkdownContainer"]{
   text-align: center !important;
 }
 .scn-hero p{
-  margin: 0 auto .65rem auto !important;
+  margin: 0 auto .5rem auto !important;
   line-height: 1.55;
   color: #374151;
-  font-size: 1.02rem;
+  font-size: 1.05rem;
 }
 
 /* ---- Radio pill grid ---- */
@@ -75,7 +75,7 @@ st.markdown("""
   outline:3px solid rgba(46,110,255,.35); outline-offset:2px;
 }
 
-/* ---- Buttons & controls ---- */
+/* ---- Buttons ---- */
 .stButton > button { padding:.7rem 1.1rem; }
 button[kind="primary"]{
   background:var(--btn-primary) !important; color:#fff !important;
@@ -92,14 +92,6 @@ button[kind="secondary"]{
 .progress-rail{ display:flex; gap:.5rem; margin:.25rem 0 1rem 0; }
 .progress-rail .seg{ height:4px; flex:1; border-radius:999px; background:#E5E7EB; }
 .progress-rail .seg.active{ background:var(--btn-primary); }
-
-/* ---- "Why we ask" expander spacing below buttons ---- */
-.scn-why-wrap{ max-width:960px; margin: .75rem auto 0 auto; }
-
-/* Mobile padding */
-@media (max-width: 480px){
-  .block-container{ padding-left:1rem !important; padding-right:1rem !important; }
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -108,7 +100,17 @@ with st.sidebar:
 
 st.title("Senior Care Navigator")
 
-# Simple progress rail for steps 1..12
+# Hero paragraph only (no duplicate welcome headline)
+st.markdown(
+    """
+    <div class="scn-hero">
+      <p>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+# Simple progress rail
 total_steps = 12
 step = st.session_state.get("planner_step", 0)
 if 1 <= step <= total_steps:
@@ -117,10 +119,8 @@ if 1 <= step <= total_steps:
     ) + '</div>'
     st.markdown(rail, unsafe_allow_html=True)
 
-# Mount the Guided Care Plan
 render_careplan()
 
-# QA drawer
 if st.session_state.get("qa_mode"):
     st.markdown("---")
     st.subheader("QA Data")
