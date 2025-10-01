@@ -1,20 +1,6 @@
 import streamlit as st
 
 # ------------------------------------------------------------------------------
-# Welcome hero (centered paragraph fix lives here)
-# ------------------------------------------------------------------------------
-def render_welcome_hero():
-    st.markdown(
-        """
-        <div class="scn-hero">
-          <h2>Welcome to Senior Care Navigator</h2>
-          <p>We make navigating senior care simple. Answer a few quick questions and we’ll connect you with the best options, backed by expert guidance — always free for families.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-# ------------------------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------------------------
 def _q_header(title: str):
@@ -223,10 +209,8 @@ def _run_flow():
     care_context = st.session_state.care_context
     step = st.session_state.planner_step
 
-    # Step 0 – Audiencing + centered hero
+    # Step 0 – Audiencing (hero is handled in app.py)
     if step == 0:
-        render_welcome_hero()
-
         st.subheader("Who are you planning care for today?")
         audience = st.radio(
             "",
@@ -267,7 +251,7 @@ def _run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # Navigation controls
+        # Nav
         c1, c2 = st.columns(2)
         with c1:
             if st.button("Back", type="secondary"):
@@ -279,7 +263,7 @@ def _run_flow():
                 st.session_state.planner_step = step + 1
                 st.rerun()
 
-        # Why we ask (below buttons)
+        # Why we ask (below)
         _q_info_below(bullets)
         return
 
