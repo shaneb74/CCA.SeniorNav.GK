@@ -209,7 +209,7 @@ def _run_flow():
     care_context = st.session_state.care_context
     step = st.session_state.planner_step
 
-    # Step 0 – Audiencing (hero is handled in app.py)
+    # Step 0 – Audiencing (hero handled in app.py)
     if step == 0:
         st.subheader("Who are you planning care for today?")
         audience = st.radio(
@@ -231,9 +231,16 @@ def _run_flow():
             care_context["person_a_name"] = st.text_input("Person A name", value=care_context.get("person_a_name", ""))
             care_context["person_b_name"] = st.text_input("Person B name (if applicable)", value=care_context.get("person_b_name", "")) if who == "Two" else None
 
-        if st.button("Next", type="primary"):
-            st.session_state.planner_step = 1
-            st.rerun()
+        # Nav row (Next only)
+        st.markdown('<div class="scn-nav-row">', unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            pass
+        with col2:
+            if st.button("Next", type="primary"):
+                st.session_state.planner_step = 1
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
         return
 
     # Steps 1..N
@@ -251,19 +258,21 @@ def _run_flow():
             if sel is not None:
                 care_context["flags"][key] = sel
 
-        # Nav
-        c1, c2 = st.columns(2)
-        with c1:
+        # Nav row (Back + Next)
+        st.markdown('<div class="scn-nav-row">', unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
             if st.button("Back", type="secondary"):
                 st.session_state.planner_step = max(0, step - 1)
                 st.rerun()
-        with c2:
+        with col2:
             next_disabled = False if key == "chronic_conditions" else care_context["flags"].get(key) is None
             if st.button("Next", disabled=next_disabled, type="primary"):
                 st.session_state.planner_step = step + 1
                 st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        # Why we ask (below)
+        # Why we ask (below nav)
         _q_info_below(bullets)
         return
 
