@@ -24,6 +24,21 @@ st.markdown("""
 /* Title */
 h1, .stApp h1 { font-size: var(--h1-size) !important; font-weight: var(--h1-weight) !important; letter-spacing:-.01em; }
 
+/* Landing intro block */
+.landing-wrap{ max-width:960px; margin:0 auto !important; }
+.landing-hero{ max-width:64ch; margin:0 auto !important; text-align:left; }
+.landing-hero p{
+  margin:.25rem 0 !important;
+  padding:0 !important;
+  line-height:1.55;
+  font-size:16.5px;
+  color:#374151;
+}
+.landing-hero [data-testid="stMarkdownContainer"]{
+  padding:0 !important;
+  margin:0 !important;
+}
+
 /* Question titles */
 .q-title, .q-prompt { font-size: var(--q-title-size); font-weight: var(--q-title-weight); color:#111827; margin:.75rem 0 1rem; }
 
